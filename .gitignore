@@ -1,0 +1,53 @@
+# IDE and Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# PHP
+vendor/
+composer.lock
+*.php~
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Storage
+storage/logs/*
+storage/cache/*
+storage/uploads/*
+!storage/logs/.gitkeep
+!storage/cache/.gitkeep
+!storage/uploads/.gitkeep
+
+# Testing
+tests/reports/
+coverage/
+phpunit.xml.dist
+
+# github
+.github/
+.phpunit.cache/
+
+# Build/Dist
+dist/
+build/
+node_modules/
+public/assets/js/main.min.js
+public/assets/css/main.min.css
+
+# OS
+.DS_Store
+Thumbs.db
+*.log
+
+# Temporary
+*.tmp
+*.bak
+*.backup
+.~*

@@ -1,0 +1,56 @@
+{
+    "name": "desnky/desnkygroup-website",
+    "description": "Desnky Global Resources Ltd - Corporate Website with CMS and Ecommerce",
+    "type": "project",
+    "license": "proprietary",
+    "authors": [
+        {
+            "name": "Development Team",
+            "email": "dev@desnkygroup.com"
+        }
+    ],
+    "require": {
+        "php": "^8.1",
+        "vlucas/phpdotenv": "^5.5",
+        "phpmailer/phpmailer": "^6.9",
+        "predis/predis": "^2.2",
+        "monolog/monolog": "^3.4",
+        "guzzlehttp/guzzle": "^7.7"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^10.5",
+        "phpstan/phpstan": "^1.10",
+        "squizlabs/php_codesniffer": "^3.8",
+        "mockery/mockery": "^1.6"
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "app/",
+            "Database\\": "database/"
+        },
+        "files": [
+            "config/app.php",
+            "app/Helpers.php"
+        ]
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "test": "phpunit",
+        "test-coverage": "phpunit --coverage-html coverage",
+        "analysis": "phpstan analyze app --level 5",
+        "lint": "phpcs --standard=PSR12 -n app",
+        "lint-fix": "phpcbf --standard=PSR12 app",
+        "migrate": "php scripts/migrate.php",
+        "migrate-rollback": "php scripts/migrate.php --rollback",
+        "seed": "php scripts/seed.php"
+    },
+    "config": {
+        "allow-plugins": {
+            "composer/installers": true
+        }
+    }
+}
