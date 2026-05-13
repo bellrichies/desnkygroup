@@ -15,6 +15,7 @@ $router->get('/services', 'Frontend\ServiceController@index');
 $router->get('/services/{slug}', 'Frontend\ServiceController@show');
 $router->get('/contact', 'Frontend\ContactController@show');
 $router->post('/contact/submit', 'Frontend\ContactController@submit')->middleware(['csrf']);
+$router->post('/api/contact', 'Frontend\ContactController@submit')->middleware(['csrf']);
 
 // Future-phase public routes are intentionally stubbed during Phase 1.
 $router->get('/shop', 'Frontend\StubController@notImplemented');

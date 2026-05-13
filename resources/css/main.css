@@ -1,0 +1,55 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-brand-navy: #0f2742;
+  --color-brand-blue: #1769aa;
+  --color-brand-gold: #d9a441;
+  --color-brand-green: #207a4c;
+  --color-brand-surface: #f6f8fb;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-white font-sans text-desnky-ink antialiased;
+  }
+
+  a {
+    @apply transition-colors;
+  }
+}
+
+@layer components {
+  .container-page {
+    @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8;
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center rounded-md bg-desnky-blue px-5 py-3 text-sm font-semibold text-white shadow-sm hover:bg-desnky-navy focus:outline-none focus:ring-2 focus:ring-desnky-blue focus:ring-offset-2;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center rounded-md border border-desnky-navy px-5 py-3 text-sm font-semibold text-desnky-navy hover:bg-desnky-navy hover:text-white focus:outline-none focus:ring-2 focus:ring-desnky-navy focus:ring-offset-2;
+  }
+
+  .form-field {
+    @apply block w-full rounded-md border-gray-300 text-desnky-ink shadow-sm focus:border-desnky-blue focus:ring-desnky-blue;
+  }
+
+  .form-label {
+    @apply mb-2 block text-sm font-semibold text-desnky-ink;
+  }
+
+  .form-error {
+    @apply mt-2 text-sm text-red-700;
+  }
+
+  .section-band {
+    @apply py-16 sm:py-20;
+  }
+}

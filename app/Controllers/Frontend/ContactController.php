@@ -3,6 +3,7 @@
 namespace App\Controllers\Frontend;
 
 use App\Controllers\BaseController;
+use App\Validators\ContactValidator;
 
 /**
  * ContactController - Handles contact form submissions
@@ -24,6 +25,7 @@ class ContactController extends BaseController
         return $this->view('frontend/pages/contact', [
             'title' => 'Contact Us',
             'meta_description' => 'Get in touch with Desnky Global Resources',
+            'active' => 'contact',
             'csrf_token' => $_SESSION['csrf_token'],
         ]);
     }
@@ -42,14 +44,24 @@ class ContactController extends BaseController
             ], 419);
         }
 
-        // Validate input
-        $data = $this->validate($_POST, [
-            'full_name' => 'required|min:2|max:150',
-            'email' => 'required|email',
-            'phone' => 'required|min:10',
-            'subject' => 'required|min:5|max:255',
-            'message' => 'required|min:10|max:5000',
-        ]);
+        $validator = new ContactValidator();
+
+        if (!$validator->validate($_POST)) {
+            return $this->json([
+                'success' => false,
+                'message' => 'Please correct the highlighted fields.',
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+
+        $data = [
+            'full_name' => trim((string) ($_POST['full_name'] ?? '')),
+            'email' => trim((string) ($_POST['email'] ?? '')),
+            'phone' => trim((string) ($_POST['phone'] ?? '')),
+            'company' => trim((string) ($_POST['company'] ?? '')),
+            'subject' => trim((string) ($_POST['subject'] ?? '')),
+            'message' => trim((string) ($_POST['message'] ?? '')),
+        ];
 
         // In Phase 2+, would save to database and send email
         // For now, return success response
@@ -58,7 +70,7 @@ class ContactController extends BaseController
             'success' => true,
             'message' => 'Thank you for contacting us! We will get back to you soon.',
             'data' => [
-                'email' => $data['email'] ?? 'unknown',
+                'email' => $data['email'],
                 'received_at' => date('Y-m-d H:i:s'),
             ],
         ], 200);
