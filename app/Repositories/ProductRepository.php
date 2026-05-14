@@ -71,6 +71,22 @@ class ProductRepository extends BaseRepository
     }
 
     /**
+     * Get ordered gallery images for a product.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    public function imagesForProduct(int $productId): array
+    {
+        return $this->connection->query(
+            "SELECT id, product_id, path, alt_text, sort_order
+             FROM product_images
+             WHERE product_id = ?
+             ORDER BY sort_order ASC, id ASC",
+            [$productId]
+        );
+    }
+
+    /**
      * Find product by ID
      *
      * @param int $id Product ID

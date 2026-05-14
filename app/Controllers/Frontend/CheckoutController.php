@@ -18,18 +18,13 @@ class CheckoutController extends BaseController
 {
     public function index(): string
     {
+        $content = ShopController::contentService()->checkoutContent($_SESSION['cart'] ?? []);
+
         return $this->view('frontend/pages/shop/checkout', [
-            'title' => 'Checkout',
+            'title' => $content['title'],
             'active' => 'shop',
-            'items' => $this->cartItems(),
-            'totals' => $this->totals(),
             'csrf_token' => $this->csrf(),
-            'seo' => [
-                'title' => 'Checkout | Desnky Shop',
-                'description' => 'Complete your Desnky Global Resources order with delivery details and payment preference.',
-                'canonical' => 'https://www.desnkygroup.com/shop/checkout',
-            ],
-        ]);
+        ] + $content);
     }
 
     public function store(): string
@@ -65,7 +60,10 @@ class CheckoutController extends BaseController
 
         try {
             $productService = new ProductService(new ProductRepository(DatabaseFactory::make()));
-            foreach ($this->cartItems() as $item) {
+            $items = $this->cartItems();
+            $totals = ShopController::contentService()->totals($items);
+
+            foreach ($items as $item) {
                 if (!empty($item['id'])) {
                     $product = $productService->find((int) $item['id']);
                     if ($product === null || (int) $product['quantity_in_stock'] < (int) $item['quantity']) {
@@ -79,10 +77,10 @@ class CheckoutController extends BaseController
 
             $order = (new OrderService(new OrderRepository(DatabaseFactory::make())))->createFromCheckout(
                 $_POST,
-                $this->cartItems(),
-                $this->totals()
+                $items,
+                $totals
             );
-            foreach ($this->cartItems() as $item) {
+            foreach ($items as $item) {
                 if (!empty($item['id'])) {
                     $productService->reserveInventory((int) $item['id'], (int) $item['quantity'], $order['order_number']);
                 }
@@ -116,35 +114,6 @@ class CheckoutController extends BaseController
      */
     private function cartItems(): array
     {
-        $items = [];
-
-        foreach ($_SESSION['cart'] ?? [] as $slug => $quantity) {
-            $product = ShopController::products()[$slug] ?? null;
-
-            if ($product === null) {
-                continue;
-            }
-
-            $product['quantity'] = (int) $quantity;
-            $product['subtotal'] = $product['quantity'] * $product['price'];
-            $items[] = $product;
-        }
-
-        return $items;
-    }
-
-    /**
-     * @return array<string, int>
-     */
-    private function totals(): array
-    {
-        $subtotal = array_sum(array_map(fn ($item) => $item['subtotal'], $this->cartItems()));
-        $shipping = $subtotal > 0 ? 5000 : 0;
-
-        return [
-            'subtotal' => $subtotal,
-            'shipping' => $shipping,
-            'total' => $subtotal + $shipping,
-        ];
+        return ShopController::contentService()->cartItems($_SESSION['cart'] ?? []);
     }
 }

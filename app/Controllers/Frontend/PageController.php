@@ -4,16 +4,22 @@ namespace App\Controllers\Frontend;
 
 use App\Controllers\BaseController;
 use App\Helpers\SeoHelper;
+use App\Repositories\PageRepository;
+use App\Repositories\PageSectionRepository;
 use App\Repositories\ProjectRepository;
-use App\Services\ProjectService;
+use App\Repositories\SiteSettingRepository;
+use App\Services\ProjectPageContentService;
 use App\Support\DatabaseFactory;
-use Throwable;
 
 /**
  * PageController - Handles static pages
  */
 class PageController extends BaseController
 {
+    public function __construct(private ?ProjectPageContentService $projectContent = null)
+    {
+    }
+
     public function redirectToServices(): void
     {
         $this->redirect('/services', 301);
@@ -80,31 +86,19 @@ class PageController extends BaseController
 
     public function projects(): string
     {
+        $content = $this->projectContent()->indexContent();
+
         return $this->view('frontend/pages/projects/index', [
-            'title' => 'Projects and Gallery',
+            'title' => $content['title'],
             'active' => 'projects',
-            'projects' => $this->loadProjects(),
-            'seo' => [
-                'title' => 'Projects and Gallery | Desnky Global Resources',
-                'description' => 'View representative project and gallery highlights from Desnky Global Resources across engineering, HSE, procurement and agro sectors.',
-                'keywords' => 'Desnky projects, engineering gallery Nigeria, procurement projects, HSE projects Nigeria',
-                'canonical' => 'https://www.desnkygroup.com/projects',
-                'schema' => [
-                    SeoHelper::organizationSchema(),
-                    SeoHelper::breadcrumbSchema([
-                        'Home' => 'https://www.desnkygroup.com/',
-                        'Projects' => 'https://www.desnkygroup.com/projects',
-                    ]),
-                ],
-            ],
-        ]);
+        ] + $content);
     }
 
     public function project(string $slug): string
     {
-        $project = $this->loadProject($slug);
+        $content = $this->projectContent()->showContent($slug);
 
-        if ($project === null) {
+        if ($content === null) {
             http_response_code(404);
 
             return $this->view('frontend/pages/show', [
@@ -119,103 +113,26 @@ class PageController extends BaseController
             ]);
         }
 
-        $title = (string) ($project['title'] ?? 'Project');
-        $summary = (string) ($project['summary'] ?? $project['description'] ?? '');
-        $image = (string) ($project['image'] ?? $project['featured_image'] ?? '');
-
-        return $this->view('frontend/pages/show', [
-            'title' => $title,
+        return $this->view('frontend/pages/projects/show', [
+            'title' => $content['title'],
             'active' => 'projects',
-            'content' => '<p>' . e($summary) . '</p>',
-            'seo' => [
-                'title' => ($project['meta_title'] ?? null) ?: $title . ' | Desnky Projects',
-                'description' => ($project['meta_description'] ?? null) ?: $summary,
-                'keywords' => ($project['meta_keywords'] ?? null) ?: $title . ', Desnky project, Nigeria',
-                'canonical' => 'https://www.desnkygroup.com/projects/' . $slug,
-                'image' => $image,
-                'schema' => [
-                    [
-                        '@context' => 'https://schema.org',
-                        '@type' => 'CreativeWork',
-                        'name' => $title,
-                        'description' => $summary,
-                        'image' => $image,
-                        'provider' => SeoHelper::organizationSchema(),
-                    ],
-                    SeoHelper::breadcrumbSchema([
-                        'Home' => 'https://www.desnkygroup.com/',
-                        'Projects' => 'https://www.desnkygroup.com/projects',
-                        $title => 'https://www.desnkygroup.com/projects/' . $slug,
-                    ]),
-                ],
-            ],
-        ]);
+        ] + $content);
     }
 
-    /**
-     * @return array<int, array>
-     */
-    private function loadProjects(): array
+    private function projectContent(): ProjectPageContentService
     {
-        try {
-            $projects = (new ProjectService(new ProjectRepository(DatabaseFactory::make())))->published();
-
-            if ($projects !== []) {
-                return $projects;
-            }
-        } catch (Throwable) {
+        if ($this->projectContent !== null) {
+            return $this->projectContent;
         }
 
-        return [
-            [
-                'title' => 'Industrial Engineering Support',
-                'category' => 'Engineering',
-                'summary' => 'Technical support and coordination for industrial equipment readiness.',
-                'image' => 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=900&q=80',
-            ],
-            [
-                'title' => 'Safety Materials Supply',
-                'category' => 'HSE',
-                'summary' => 'Supply support for protective equipment and worksite safety materials.',
-                'image' => 'https://images.unsplash.com/photo-1504917595217-d4dc5ebe6122?auto=format&fit=crop&w=900&q=80',
-            ],
-            [
-                'title' => 'Procurement Logistics',
-                'category' => 'Procurement',
-                'summary' => 'Vendor coordination and delivery follow-up for business-critical materials.',
-                'image' => 'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&w=900&q=80',
-            ],
-            [
-                'title' => 'Agro Supply Coordination',
-                'category' => 'Agro',
-                'summary' => 'Agro product sourcing and supply coordination for local value chains.',
-                'image' => 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=900&q=80',
-            ],
-        ];
-    }
+        $connection = DatabaseFactory::make();
 
-    private function loadProject(string $slug): ?array
-    {
-        try {
-            $project = (new ProjectService(new ProjectRepository(DatabaseFactory::make())))->getPublishedBySlug($slug);
-
-            if ($project !== null) {
-                $project['image'] = $project['featured_image'] ?? null;
-                return $project;
-            }
-        } catch (Throwable) {
-        }
-
-        foreach ($this->loadProjects() as $project) {
-            $candidate = strtolower(trim((string) preg_replace('/[^A-Za-z0-9-]+/', '-', $project['title'] ?? ''), '-'));
-
-            if ($candidate === $slug) {
-                $project['slug'] = $slug;
-                return $project;
-            }
-        }
-
-        return null;
+        return $this->projectContent = new ProjectPageContentService(
+            new PageRepository($connection),
+            new PageSectionRepository($connection),
+            new ProjectRepository($connection),
+            new SiteSettingRepository($connection)
+        );
     }
 
     /**
