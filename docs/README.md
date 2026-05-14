@@ -33,7 +33,7 @@ A full-stack rebuild of desnkygroup.com as a **CMS-powered corporate website wit
 
 ✓ Public-facing marketing website (7 service pages, gallery, blog-ready)  
 ✓ Ecommerce shop module (products, cart, checkout, orders)  
-✓ Content management system (pages, services, projects, media library)  
+✓ Content management system (pages, services, projects, blog, media library)  
 ✓ Admin dashboard with KPIs and analytics  
 ✓ Complete user management with role-based access control (RBAC)  
 ✓ Security hardening (CSRF, SQL injection prevention, XSS protection)  
@@ -74,7 +74,7 @@ A full-stack rebuild of desnkygroup.com as a **CMS-powered corporate website wit
 | 2 | 3-5 days | Frontend | Tailwind, components, forms |
 | 3 | 7-10 days | Public Pages | Homepage, services, contact |
 | 4 | 5-7 days | Admin Core | Auth, dashboard, navigation |
-| 5 | 8-10 days | CMS | Pages, media, SEO management |
+| 5 | 8-10 days | CMS | Pages, services, projects, blog, media, SEO management |
 | 6 | 10-12 days | Ecommerce | Products, cart, checkout, orders |
 | 7 | 6-8 days | Admin Users | RBAC, roles, permissions, audit logs |
 | 8 | 7-10 days | Security | Hardening, optimization, testing |

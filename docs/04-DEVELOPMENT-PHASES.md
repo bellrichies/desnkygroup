@@ -471,8 +471,11 @@ npx lighthouse https://localhost:8000
 - [x] Page management (CRUD)
 - [x] Service management (CRUD)
 - [x] Project management (CRUD)
+- [ ] Blog post management (CRUD)
+- [ ] Blog categories and tags
 - [x] Media library
 - [x] Content editor
+- [ ] TipTap WYSIWYG editor for blog content
 - [x] SEO metadata manager
 - [x] Publish/draft system
 - [x] Activity logging
@@ -526,9 +529,14 @@ npx lighthouse https://localhost:8000
 - [x] File browser
 - [x] Image optimization on upload
 - [x] WebP format support
+- [ ] Centralized media reuse across pages, services, projects, products, and blog posts
+- [ ] Store media dimensions, captions, focal point, usage references, and uploader metadata
+- [ ] Generate thumbnails/responsive derivatives
+- [ ] Enforce non-executable upload storage and signed/private admin access where needed
 
 #### 5.5 Content Editor
 - [x] Integrate rich text editor (TinyMCE or Summernote)
+- [ ] Integrate TipTap editor for blog posts
 - [x] Add formatting tools
 - [x] Add image insertion
 - [x] Add link insertion
@@ -536,8 +544,32 @@ npx lighthouse https://localhost:8000
 - [x] Add list support
 - [x] Add table support
 - [x] Add code block support
+- [ ] Store TipTap JSON document as source of truth and sanitized HTML for rendering
+- [ ] Restrict allowed nodes/marks to approved editorial schema
+- [ ] Add editor autosave, dirty-state warnings, and revision snapshots
 
-#### 5.6 SEO Management
+#### 5.6 Blog Management
+- [ ] Create posts table with title, slug, excerpt, TipTap JSON, sanitized HTML, featured image, author, reviewer, publisher, status, publish dates, SEO metadata, and reading time
+- [ ] Create post_categories table with hierarchy, slug, description, active status, sorting, image, and SEO metadata
+- [ ] Create post_tags table with slug, description, active status, and SEO metadata
+- [ ] Create post_tag many-to-many table
+- [ ] Create post_media table for featured, inline, Open Graph, and gallery media usage
+- [ ] Create post_revisions table for version history
+- [ ] Build PostRepository, PostCategoryRepository, PostTagRepository, and MediaRepository methods using prepared statements
+- [ ] Build PostService with slug generation, publish rules, status transitions, revision capture, reading-time calculation, and cache invalidation
+- [ ] Build PostCategoryService and PostTagService with duplicate prevention and safe delete checks
+- [ ] Build admin post list with search, status, category, tag, author, and date filters
+- [ ] Build admin create/edit forms with TipTap editor, media picker, category selector, tag selector, SEO preview, and publish controls
+- [ ] Build public blog index, category archive, tag archive, author archive, and post detail pages
+- [ ] Add public routes: `/blog`, `/blog/{slug}`, `/blog/category/{slug}`, `/blog/tag/{slug}`
+- [ ] Add admin routes protected by RBAC: `/admin/posts`, `/admin/post-categories`, `/admin/post-tags`
+- [ ] Add RSS feed route for published posts
+- [ ] Include published posts, categories, and tags in sitemap generation
+- [ ] Add BlogPosting, Article, BreadcrumbList, and ImageObject schema markup
+- [ ] Add related posts by category/tag and internal links to services where relevant
+- [ ] Log all post/category/tag/media editorial actions
+
+#### 5.7 SEO Management
 - [x] SEO title field (with character counter)
 - [x] Meta description (with character counter)
 - [x] Meta keywords field
@@ -546,24 +578,52 @@ npx lighthouse https://localhost:8000
 - [x] SEO preview display
 - [x] URL slug editor
 - [x] Meta tags validation
+- [ ] Blog post SEO title, description, canonical, robots, Open Graph image, Article schema, and social preview
+- [ ] Category/tag archive SEO metadata and canonical URLs
 
-#### 5.7 Publishing System
+#### 5.8 Publishing System
 - [x] Draft/published status toggle
 - [x] Schedule publish date (future)
 - [x] Preview page before publishing
 - [x] Revision history (optional)
 - [x] Auto-save draft
 - [x] Publish confirmation
+- [ ] Blog workflow: draft -> review -> scheduled/published -> archived
+- [ ] Role-gated publish permission separate from edit permission
+- [ ] Scheduled publishing via cron-compatible command
+- [ ] Preview unpublished posts through signed/admin-only preview links
+- [ ] Restore from post revision history
 
-#### 5.8 Activity Logging
+#### 5.9 Activity Logging
 - [x] Log page creates/updates/deletes
 - [x] Log service changes
 - [x] Log project changes
 - [x] Log media uploads
+- [ ] Log post creates/updates/status changes/deletes/restores
+- [ ] Log category and tag changes
+- [ ] Log media attachment/detachment to posts
 - [x] Store admin user who made change
 - [x] Store timestamp
 - [x] Store IP address
 - [x] Activity log viewer
+
+#### 5.10 Blog RBAC
+- [ ] `posts.view`
+- [ ] `posts.create`
+- [ ] `posts.edit`
+- [ ] `posts.delete`
+- [ ] `posts.publish`
+- [ ] `posts.schedule`
+- [ ] `posts.restore`
+- [ ] `post_categories.view`
+- [ ] `post_categories.create`
+- [ ] `post_categories.edit`
+- [ ] `post_categories.delete`
+- [ ] `post_tags.view`
+- [ ] `post_tags.create`
+- [ ] `post_tags.edit`
+- [ ] `post_tags.delete`
+- [ ] `media.attach`
 
 ### Testing
 

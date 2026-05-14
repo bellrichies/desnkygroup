@@ -221,12 +221,29 @@ Build a **production-ready, SEO-optimized corporate website with integrated CMS,
   - Client information
   - Description and testimonials
 
+- **Blog / Editorial Management**
+  - Create, edit, preview, publish, unpublish, archive, and delete blog posts
+  - Manage post categories with parent/child hierarchy, ordering, SEO metadata, and active/inactive status
+  - Manage reusable tags for topics, industries, keywords, and content series
+  - Assign one primary category and multiple tags to each post
+  - Use TipTap-powered WYSIWYG editing with structured JSON storage and sanitized HTML rendering
+  - Support draft, review, scheduled, published, archived, and deleted workflows
+  - Track author, reviewer, publisher, published date, scheduled publish date, and revision metadata
+  - Provide editorial preview links that require admin authorization before publish
+  - Display post excerpts, reading time, featured image, author attribution, related posts, and category/tag archive pages
+  - Support RSS feed and sitemap inclusion for published posts, categories, and tags
+
 #### Media Library
 - Centralized image management
 - Drag-and-drop upload
 - Image compression
 - Alt text management
 - Reusable across pages/products
+- Reusable across pages, services, projects, products, and blog posts
+- Image metadata including title, caption, alt text, focal point, dimensions, MIME type, file size, uploader, and usage references
+- Secure upload validation by extension, MIME type, file signature, file size, and image dimensions
+- Derivative generation for thumbnails, responsive sizes, and WebP where supported
+- Stored files must not be executable and should be addressable through controlled public paths only
 
 #### Settings Management
 - Site configuration
@@ -327,6 +344,9 @@ Build a **production-ready, SEO-optimized corporate website with integrated CMS,
 - Local business schema
 - Organization schema
 - Product schema
+- Article/BlogPosting schema
+- Blog category and tag archive metadata
+- RSS feed for published posts
 
 #### Performance Optimization
 - Image lazy loading

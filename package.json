@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "tailwindcss -i ./resources/css/main.css -o ./public/assets/css/main.css --watch",
     "build": "tailwindcss -i ./resources/css/main.css -o ./public/assets/css/main.css && tailwindcss -i ./resources/css/main.css -o ./public/assets/css/main.min.css --minify",
-    "audit": "npm audit --audit-level=moderate"
+    "audit": "npm audit --audit-level=moderate",
+    "qa:assets": "npm run build && npm run audit"
   },
   "devDependencies": {
     "@tailwindcss/forms": "^0.5.7",

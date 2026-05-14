@@ -41,6 +41,7 @@
     "scripts": {
         "test": "phpunit",
         "test-coverage": "phpunit --coverage-html coverage",
+        "qa": "phpunit && phpstan analyze app --level 5 && php scripts/qa_audit.php",
         "analysis": "phpstan analyze app --level 5",
         "lint": "phpcs --standard=PSR12 -n app",
         "lint-fix": "phpcbf --standard=PSR12 app",

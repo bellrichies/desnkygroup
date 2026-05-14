@@ -115,7 +115,7 @@ Your complete development planning package contains **6 comprehensive documents*
 **Key Takeaways:**
 - ✓ 6 service pages to create
 - ✓ Full ecommerce shop with orders
-- ✓ Admin CMS for content management
+- ✓ Admin CMS for content and blog management
 - ✓ Role-based access control required
 - ✓ Production-ready security needed
 
