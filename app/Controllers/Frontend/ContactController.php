@@ -55,7 +55,9 @@ class ContactController extends BaseController
 
         $validator = new ContactValidator();
 
-        if (!$validator->validate($_POST)) {
+        $payload = $validator->sanitize($_POST);
+
+        if (!$validator->validate($payload)) {
             return $this->json([
                 'success' => false,
                 'message' => 'Please correct the highlighted fields.',
@@ -64,13 +66,13 @@ class ContactController extends BaseController
         }
 
         $data = [
-            'full_name' => trim((string) ($_POST['full_name'] ?? '')),
-            'email' => trim((string) ($_POST['email'] ?? '')),
-            'phone' => trim((string) ($_POST['phone'] ?? '')),
-            'company' => trim((string) ($_POST['company'] ?? '')),
-            'service_interested' => trim((string) ($_POST['service_interested'] ?? '')),
-            'subject' => 'Service enquiry: ' . trim((string) ($_POST['service_interested'] ?? '')),
-            'message' => trim((string) ($_POST['message'] ?? '')),
+            'full_name' => (string) ($payload['full_name'] ?? ''),
+            'email' => (string) ($payload['email'] ?? ''),
+            'phone' => (string) ($payload['phone'] ?? ''),
+            'company' => (string) ($payload['company'] ?? ''),
+            'service_interested' => (string) ($payload['service_interested'] ?? ''),
+            'subject' => 'Service enquiry: ' . (string) ($payload['service_interested'] ?? ''),
+            'message' => (string) ($payload['message'] ?? ''),
         ];
 
         try {
