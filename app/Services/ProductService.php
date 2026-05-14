@@ -80,9 +80,33 @@ class ProductService extends BaseService
      */
     public function create(array $data): int
     {
+        $data = $this->prepare($data);
         $data['created_by'] = $data['created_by'] ?? 1;
 
         return $this->products->create($data);
+    }
+
+    /**
+     * @return array<int, array<string, mixed>>
+     */
+    public function all(array $filters = []): array
+    {
+        return $this->products->filterAdmin($filters);
+    }
+
+    public function find(int $id): ?array
+    {
+        return $this->products->find($id);
+    }
+
+    public function update(int $id, array $data): bool
+    {
+        return $this->products->update($id, $this->prepare($data));
+    }
+
+    public function delete(int $id): bool
+    {
+        return $this->products->softDelete($id);
     }
 
     /**
@@ -95,5 +119,66 @@ class ProductService extends BaseService
     public function updateInventory(int $id, int $quantity): bool
     {
         return $this->products->updateInventory($id, $quantity);
+    }
+
+    public function reserveInventory(int $id, int $quantity, string $reference): bool
+    {
+        return $this->products->decrementStock($id, $quantity, $reference);
+    }
+
+    /**
+     * @return array<int, array<string, mixed>>
+     */
+    public function inventoryHistory(int $productId): array
+    {
+        return $this->products->inventoryHistory($productId);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function prepare(array $data): array
+    {
+        $name = trim((string) ($data['name'] ?? ''));
+
+        if ($name === '') {
+            throw new \InvalidArgumentException('Product name is required.');
+        }
+
+        $price = (float) ($data['price'] ?? 0);
+        if ($price <= 0) {
+            throw new \InvalidArgumentException('Product price must be greater than zero.');
+        }
+
+        return [
+            'name' => $name,
+            'slug' => $this->slug((string) ($data['slug'] ?? $name)),
+            'description' => trim((string) ($data['description'] ?? '')),
+            'short_description' => trim((string) ($data['short_description'] ?? '')),
+            'price' => $price,
+            'discount_price' => (float) ($data['discount_price'] ?? 0),
+            'cost_price' => (float) ($data['cost_price'] ?? 0),
+            'quantity_in_stock' => max(0, (int) ($data['quantity_in_stock'] ?? 0)),
+            'reorder_level' => max(0, (int) ($data['reorder_level'] ?? 10)),
+            'sku' => trim((string) ($data['sku'] ?? '')),
+            'weight' => (float) ($data['weight'] ?? 0),
+            'category_id' => (int) ($data['category_id'] ?? 0) ?: null,
+            'featured_image' => trim((string) ($data['featured_image'] ?? '')),
+            'meta_title' => trim((string) ($data['meta_title'] ?? '')),
+            'meta_description' => trim((string) ($data['meta_description'] ?? '')),
+            'is_active' => isset($data['is_active']),
+            'status' => in_array(($data['status'] ?? 'active'), ['active', 'inactive', 'discontinued'], true)
+                ? $data['status']
+                : 'active',
+            'is_featured' => isset($data['is_featured']),
+            'created_by' => (int) ($data['created_by'] ?? 1),
+        ];
+    }
+
+    private function slug(string $value): string
+    {
+        $slug = strtolower(trim(preg_replace('/[^a-z0-9]+/i', '-', $value), '-'));
+
+        return $slug !== '' ? $slug : 'product-' . time();
     }
 }

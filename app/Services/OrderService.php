@@ -9,6 +9,8 @@ use App\Repositories\OrderRepository;
  */
 class OrderService extends BaseService
 {
+    private const STATUSES = ['pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled'];
+
     private OrderRepository $orders;
 
     public function __construct(OrderRepository $orders)
@@ -61,6 +63,53 @@ class OrderService extends BaseService
         $order['id'] = $this->orders->createWithItems($order, $items);
 
         return $order;
+    }
+
+    /**
+     * @return array<int, array<string, mixed>>
+     */
+    public function all(array $filters = []): array
+    {
+        return $this->orders->filter($filters);
+    }
+
+    public function findWithItems(int $id): ?array
+    {
+        $order = $this->orders->find($id);
+
+        if ($order === null) {
+            return null;
+        }
+
+        $order['items'] = $this->orders->items($id);
+
+        return $order;
+    }
+
+    public function updateStatus(int $id, string $status): bool
+    {
+        if (!in_array($status, self::STATUSES, true)) {
+            throw new \InvalidArgumentException('Invalid order status.');
+        }
+
+        return $this->orders->updateStatus($id, $status);
+    }
+
+    public function refund(int $id, string $notes): bool
+    {
+        if (trim($notes) === '') {
+            throw new \InvalidArgumentException('Refund notes are required.');
+        }
+
+        return $this->orders->markRefunded($id, trim($notes));
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    public function statuses(): array
+    {
+        return self::STATUSES;
     }
 
     /**
