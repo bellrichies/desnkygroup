@@ -15,7 +15,7 @@ class PageRepository extends BaseRepository
     public function all(): array
     {
         return $this->connection->query(
-            "SELECT * FROM pages ORDER BY created_at DESC"
+            "SELECT * FROM pages WHERE deleted_at IS NULL ORDER BY created_at DESC"
         );
     }
 
@@ -27,7 +27,7 @@ class PageRepository extends BaseRepository
     public function published(): array
     {
         return $this->connection->query(
-            "SELECT * FROM pages WHERE is_published = true ORDER BY created_at DESC"
+            "SELECT * FROM pages WHERE is_published = true AND deleted_at IS NULL ORDER BY created_at DESC"
         );
     }
 
@@ -40,7 +40,7 @@ class PageRepository extends BaseRepository
     public function find(int $id): ?array
     {
         $result = $this->connection->query(
-            "SELECT * FROM pages WHERE id = ?",
+            "SELECT * FROM pages WHERE id = ? AND deleted_at IS NULL",
             [$id]
         );
 
@@ -56,7 +56,7 @@ class PageRepository extends BaseRepository
     public function findBySlug(string $slug): ?array
     {
         $result = $this->connection->query(
-            "SELECT * FROM pages WHERE slug = ?",
+            "SELECT * FROM pages WHERE slug = ? AND deleted_at IS NULL",
             [$slug]
         );
 
@@ -72,7 +72,7 @@ class PageRepository extends BaseRepository
     public function findPublishedBySlug(string $slug): ?array
     {
         $result = $this->connection->query(
-            "SELECT * FROM pages WHERE slug = ? AND is_published = true",
+            "SELECT * FROM pages WHERE slug = ? AND is_published = true AND deleted_at IS NULL",
             [$slug]
         );
 
@@ -88,8 +88,10 @@ class PageRepository extends BaseRepository
     public function create(array $data): int
     {
         return $this->connection->insert(
-            "INSERT INTO pages (title, slug, content, excerpt, meta_title, meta_description, created_by) 
-             VALUES (?, ?, ?, ?, ?, ?, ?)",
+            "INSERT INTO pages
+                (title, slug, content, excerpt, meta_title, meta_description, meta_keywords,
+                 featured_image, is_published, published_at, created_by)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             [
                 $data['title'] ?? '',
                 $data['slug'] ?? '',
@@ -97,6 +99,10 @@ class PageRepository extends BaseRepository
                 $data['excerpt'] ?? null,
                 $data['meta_title'] ?? null,
                 $data['meta_description'] ?? null,
+                $data['meta_keywords'] ?? null,
+                $data['featured_image'] ?? null,
+                !empty($data['is_published']) ? 1 : 0,
+                !empty($data['is_published']) ? date('Y-m-d H:i:s') : null,
                 $data['created_by'] ?? 1,
             ]
         );
@@ -113,7 +119,9 @@ class PageRepository extends BaseRepository
     {
         $this->connection->update(
             "UPDATE pages
-             SET title = ?, slug = ?, content = ?, excerpt = ?, meta_title = ?, meta_description = ?
+             SET title = ?, slug = ?, content = ?, excerpt = ?, meta_title = ?, meta_description = ?,
+                 meta_keywords = ?, featured_image = ?, is_published = ?,
+                 published_at = CASE WHEN ? = 1 AND published_at IS NULL THEN NOW() ELSE published_at END
              WHERE id = ?",
             [
                 $data['title'] ?? '',
@@ -122,6 +130,10 @@ class PageRepository extends BaseRepository
                 $data['excerpt'] ?? null,
                 $data['meta_title'] ?? null,
                 $data['meta_description'] ?? null,
+                $data['meta_keywords'] ?? null,
+                $data['featured_image'] ?? null,
+                !empty($data['is_published']) ? 1 : 0,
+                !empty($data['is_published']) ? 1 : 0,
                 $id,
             ]
         );

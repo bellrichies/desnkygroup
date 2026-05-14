@@ -47,10 +47,33 @@ $router->group('/admin', function ($router) {
     $router->get('/', 'Admin\DashboardController@index')->middleware(['auth']);
     $router->get('/dashboard', 'Admin\DashboardController@index')->middleware(['auth']);
 
-    // Future-phase admin modules are stubbed until their implementation phases.
-    $router->get('/pages', 'Admin\DashboardController@notImplemented')->middleware(['auth']);
-    $router->get('/services', 'Admin\DashboardController@notImplemented')->middleware(['auth']);
-    $router->get('/projects', 'Admin\DashboardController@notImplemented')->middleware(['auth']);
+    // Phase 5 CMS modules
+    $router->get('/pages', 'Admin\PageController@index')->middleware(['auth']);
+    $router->get('/pages/create', 'Admin\PageController@create')->middleware(['auth']);
+    $router->post('/pages', 'Admin\PageController@store')->middleware(['auth', 'csrf']);
+    $router->get('/pages/{id}/edit', 'Admin\PageController@edit')->middleware(['auth']);
+    $router->post('/pages/{id}', 'Admin\PageController@update')->middleware(['auth', 'csrf']);
+    $router->post('/pages/{id}/delete', 'Admin\PageController@destroy')->middleware(['auth', 'csrf']);
+
+    $router->get('/services', 'Admin\ServiceController@index')->middleware(['auth']);
+    $router->get('/services/create', 'Admin\ServiceController@create')->middleware(['auth']);
+    $router->post('/services', 'Admin\ServiceController@store')->middleware(['auth', 'csrf']);
+    $router->get('/services/{id}/edit', 'Admin\ServiceController@edit')->middleware(['auth']);
+    $router->post('/services/{id}', 'Admin\ServiceController@update')->middleware(['auth', 'csrf']);
+    $router->post('/services/{id}/delete', 'Admin\ServiceController@destroy')->middleware(['auth', 'csrf']);
+
+    $router->get('/projects', 'Admin\ProjectController@index')->middleware(['auth']);
+    $router->get('/projects/create', 'Admin\ProjectController@create')->middleware(['auth']);
+    $router->post('/projects', 'Admin\ProjectController@store')->middleware(['auth', 'csrf']);
+    $router->get('/projects/{id}/edit', 'Admin\ProjectController@edit')->middleware(['auth']);
+    $router->post('/projects/{id}', 'Admin\ProjectController@update')->middleware(['auth', 'csrf']);
+    $router->post('/projects/{id}/delete', 'Admin\ProjectController@destroy')->middleware(['auth', 'csrf']);
+
+    $router->get('/media', 'Admin\MediaController@index')->middleware(['auth']);
+    $router->post('/media', 'Admin\MediaController@store')->middleware(['auth', 'csrf']);
+    $router->post('/media/{id}', 'Admin\MediaController@update')->middleware(['auth', 'csrf']);
+    $router->post('/media/{id}/delete', 'Admin\MediaController@destroy')->middleware(['auth', 'csrf']);
+
     $router->get('/products', 'Admin\DashboardController@notImplemented')->middleware(['auth']);
     $router->get('/product-categories', 'Admin\DashboardController@notImplemented')->middleware(['auth']);
     $router->get('/orders', 'Admin\DashboardController@notImplemented')->middleware(['auth']);

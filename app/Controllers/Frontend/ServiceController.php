@@ -4,18 +4,25 @@ namespace App\Controllers\Frontend;
 
 use App\Controllers\BaseController;
 use App\Helpers\SeoHelper;
+use App\Services\ServiceService;
 
 /**
  * Phase 1 service page placeholder.
  */
 class ServiceController extends BaseController
 {
+    public function __construct(private ServiceService $serviceService)
+    {
+    }
+
     public function index(): string
     {
+        $services = $this->publishedServices();
+
         return $this->view('frontend/pages/services/index', [
             'title' => 'Our Services',
             'active' => 'services',
-            'services' => self::services(),
+            'services' => $services,
             'seo' => [
                 'title' => 'Services | Desnky Global Resources Ltd',
                 'description' => 'Explore Desnky Global Resources services in engineering, energy, procurement, HSE, ICT and agro food processing across Nigeria.',
@@ -26,7 +33,7 @@ class ServiceController extends BaseController
 
     public function show(string $slug): string
     {
-        $services = self::services();
+        $services = $this->publishedServices();
         $service = $services[$slug] ?? null;
 
         if ($service === null) {
@@ -135,5 +142,43 @@ class ServiceController extends BaseController
                 'seo_description' => 'Agro products, food processing support and supply coordination from Desnky Global Resources Ltd.',
             ],
         ];
+    }
+
+    /**
+     * Get CMS services with a static fallback for fresh installations.
+     *
+     * @return array<string, array<string, mixed>>
+     */
+    private function publishedServices(): array
+    {
+        try {
+            $rows = $this->serviceService->published();
+        } catch (\Throwable) {
+            return self::services();
+        }
+
+        if (empty($rows)) {
+            return self::services();
+        }
+
+        $services = [];
+        foreach ($rows as $row) {
+            $slug = (string) $row['slug'];
+            $services[$slug] = [
+                'slug' => $slug,
+                'title' => (string) $row['title'],
+                'icon' => (string) ($row['icon'] ?? 'SR'),
+                'summary' => (string) ($row['summary'] ?? ''),
+                'image' => (string) ($row['featured_image'] ?? 'https://images.unsplash.com/photo-1581092335878-2d9ff86ca2bf?auto=format&fit=crop&w=1200&q=80'),
+                'features' => [],
+                'process' => [],
+                'benefits' => [],
+                'content' => (string) ($row['content'] ?? ''),
+                'seo_title' => (string) ($row['meta_title'] ?? $row['title']),
+                'seo_description' => (string) ($row['meta_description'] ?? $row['summary'] ?? ''),
+            ];
+        }
+
+        return $services;
     }
 }

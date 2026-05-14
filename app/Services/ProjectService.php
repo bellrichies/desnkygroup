@@ -31,4 +31,43 @@ class ProjectService extends BaseService
             return $project;
         }, $this->projects->published());
     }
+
+    /**
+     * @return array<int, array<string, mixed>>
+     */
+    public function all(): array
+    {
+        return $this->projects->all();
+    }
+
+    public function getById(int $id): ?array
+    {
+        return $this->projects->find($id);
+    }
+
+    public function create(array $data): int
+    {
+        $data['slug'] = $this->slug($data['slug'] ?? $data['title'] ?? '');
+
+        return $this->projects->create($data);
+    }
+
+    public function update(int $id, array $data): bool
+    {
+        $data['slug'] = $this->slug($data['slug'] ?? $data['title'] ?? '');
+
+        return $this->projects->update($id, $data);
+    }
+
+    public function delete(int $id): bool
+    {
+        return $this->projects->delete($id);
+    }
+
+    private function slug(string $value): string
+    {
+        $slug = strtolower(trim((string) preg_replace('/[^A-Za-z0-9-]+/', '-', $value), '-'));
+
+        return $slug !== '' ? $slug : 'project-' . time();
+    }
 }

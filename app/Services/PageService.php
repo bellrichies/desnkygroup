@@ -27,6 +27,16 @@ class PageService extends BaseService
     }
 
     /**
+     * Get all admin-visible pages.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    public function all(): array
+    {
+        return $this->pages->all();
+    }
+
+    /**
      * Get a published page by slug.
      *
      * @param string $slug Page slug.
@@ -57,6 +67,7 @@ class PageService extends BaseService
     public function create(array $data): int
     {
         $data['created_by'] = $data['created_by'] ?? 1;
+        $data['slug'] = $this->slug($data['slug'] ?? $data['title'] ?? '');
 
         return $this->pages->create($data);
     }
@@ -70,6 +81,8 @@ class PageService extends BaseService
      */
     public function update(int $id, array $data): bool
     {
+        $data['slug'] = $this->slug($data['slug'] ?? $data['title'] ?? '');
+
         return $this->pages->update($id, $data);
     }
 
@@ -93,5 +106,12 @@ class PageService extends BaseService
     public function publish(int $id): bool
     {
         return $this->pages->publish($id);
+    }
+
+    private function slug(string $value): string
+    {
+        $slug = strtolower(trim((string) preg_replace('/[^A-Za-z0-9-]+/', '-', $value), '-'));
+
+        return $slug !== '' ? $slug : 'page-' . time();
     }
 }
