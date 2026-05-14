@@ -48,4 +48,36 @@ class ActivityLogRepository extends BaseRepository
              LIMIT " . max(1, min(50, $limit))
         );
     }
+
+    /**
+     * @return array<int, array<string, mixed>>
+     */
+    public function filter(array $filters = []): array
+    {
+        $where = ['1 = 1'];
+        $params = [];
+
+        if (!empty($filters['module'])) {
+            $where[] = 'l.module = ?';
+            $params[] = $filters['module'];
+        }
+
+        if (!empty($filters['q'])) {
+            $where[] = '(l.action LIKE ? OR l.description LIKE ? OR u.full_name LIKE ?)';
+            $term = '%' . $filters['q'] . '%';
+            $params[] = $term;
+            $params[] = $term;
+            $params[] = $term;
+        }
+
+        return $this->connection->query(
+            "SELECT l.*, u.full_name AS user_name, u.email AS user_email
+             FROM admin_activity_logs l
+             LEFT JOIN admin_users u ON u.id = l.admin_user_id
+             WHERE " . implode(' AND ', $where) . "
+             ORDER BY l.created_at DESC
+             LIMIT 200",
+            $params
+        );
+    }
 }

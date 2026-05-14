@@ -5,22 +5,22 @@ $groups = [
         ['label' => 'Dashboard', 'url' => '/admin/dashboard', 'icon' => 'grid'],
     ],
     'Content' => [
-        ['label' => 'Pages', 'url' => '/admin/pages', 'icon' => 'file'],
-        ['label' => 'Services', 'url' => '/admin/services', 'icon' => 'briefcase'],
-        ['label' => 'Projects', 'url' => '/admin/projects', 'icon' => 'image'],
-        ['label' => 'Media Library', 'url' => '/admin/media', 'icon' => 'image'],
+        ['label' => 'Pages', 'url' => '/admin/pages', 'icon' => 'file', 'permission' => 'pages.view'],
+        ['label' => 'Services', 'url' => '/admin/services', 'icon' => 'briefcase', 'permission' => 'services.view'],
+        ['label' => 'Projects', 'url' => '/admin/projects', 'icon' => 'image', 'permission' => 'projects.view'],
+        ['label' => 'Media Library', 'url' => '/admin/media', 'icon' => 'image', 'permission' => 'media.view'],
     ],
     'Ecommerce' => [
-        ['label' => 'Products', 'url' => '/admin/products', 'icon' => 'box'],
-        ['label' => 'Categories', 'url' => '/admin/product-categories', 'icon' => 'tag'],
-        ['label' => 'Orders', 'url' => '/admin/orders', 'icon' => 'receipt'],
-        ['label' => 'Customers', 'url' => '/admin/customers', 'icon' => 'users'],
+        ['label' => 'Products', 'url' => '/admin/products', 'icon' => 'box', 'permission' => 'products.view'],
+        ['label' => 'Categories', 'url' => '/admin/product-categories', 'icon' => 'tag', 'permission' => 'products.view'],
+        ['label' => 'Orders', 'url' => '/admin/orders', 'icon' => 'receipt', 'permission' => 'orders.view'],
+        ['label' => 'Customers', 'url' => '/admin/customers', 'icon' => 'users', 'permission' => 'orders.view'],
     ],
     'Admin' => [
-        ['label' => 'Users', 'url' => '/admin/users', 'icon' => 'user'],
-        ['label' => 'Roles', 'url' => '/admin/roles', 'icon' => 'shield'],
-        ['label' => 'Permissions', 'url' => '/admin/permissions', 'icon' => 'key'],
-        ['label' => 'Activity Logs', 'url' => '/admin/activity-logs', 'icon' => 'clock'],
+        ['label' => 'Users', 'url' => '/admin/users', 'icon' => 'user', 'permission' => 'admins.view'],
+        ['label' => 'Roles', 'url' => '/admin/roles', 'icon' => 'shield', 'permission' => 'roles.view'],
+        ['label' => 'Permissions', 'url' => '/admin/permissions', 'icon' => 'key', 'permission' => 'permissions.view'],
+        ['label' => 'Activity Logs', 'url' => '/admin/activity-logs', 'icon' => 'clock', 'permission' => 'activity_logs.view'],
     ],
     'Settings' => [
         ['label' => 'Site Settings', 'url' => '/admin/settings', 'icon' => 'settings'],
@@ -49,6 +49,7 @@ $groups = [
                     </p>
                     <div class="mt-2 space-y-1">
                         <?php foreach ($items as $item) : ?>
+                            <?php if (!empty($item['permission']) && !$this->can($item['permission'])) { continue; } ?>
                             <?php $active = $currentPath === $item['url']; ?>
                             <a
                                 href="<?php echo $this->escape($item['url']); ?>"

@@ -3,6 +3,9 @@
 namespace App;
 
 use App\Exceptions\ApplicationException;
+use App\Repositories\AdminUserRepository;
+use App\Services\AuthorizationService;
+use App\Support\DatabaseFactory;
 
 /**
  * View - Template rendering engine
@@ -227,6 +230,28 @@ class View
     public function escapeJson($data): string
     {
         return json_encode($data, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP);
+    }
+
+    /**
+     * Check the current admin's permission for view-level controls.
+     *
+     * @param string $permission Permission slug.
+     * @return bool
+     */
+    public function can(string $permission): bool
+    {
+        $userId = (int) ($_SESSION['admin_user']['id'] ?? 0);
+
+        if ($userId <= 0) {
+            return false;
+        }
+
+        try {
+            return (new AuthorizationService(new AdminUserRepository(DatabaseFactory::make())))
+                ->hasPermission($userId, $permission);
+        } catch (\Throwable) {
+            return false;
+        }
     }
 
     /**
