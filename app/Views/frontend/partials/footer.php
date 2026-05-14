@@ -12,8 +12,10 @@
                 <h3 class="text-sm font-semibold uppercase tracking-wide text-gray-200">Company</h3>
                 <ul class="mt-4 space-y-3 text-sm text-gray-300">
                     <li><a href="/" class="hover:text-white">Home</a></li>
+                    <li><a href="/about" class="hover:text-white">About</a></li>
                     <li><a href="/services" class="hover:text-white">Services</a></li>
                     <li><a href="/projects" class="hover:text-white">Projects</a></li>
+                    <li><a href="/shop" class="hover:text-white">Shop</a></li>
                     <li><a href="/contact" class="hover:text-white">Contact</a></li>
                 </ul>
             </div>

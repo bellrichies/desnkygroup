@@ -13,13 +13,28 @@
 $router->get('/', 'Frontend\HomeController@index');
 $router->get('/services', 'Frontend\ServiceController@index');
 $router->get('/services/{slug}', 'Frontend\ServiceController@show');
+$router->get('/projects', 'Frontend\PageController@projects');
+$router->get('/about', 'Frontend\PageController@about');
+$router->get('/hse-policy', 'Frontend\PageController@hse');
 $router->get('/contact', 'Frontend\ContactController@show');
 $router->post('/contact/submit', 'Frontend\ContactController@submit')->middleware(['csrf']);
 $router->post('/api/contact', 'Frontend\ContactController@submit')->middleware(['csrf']);
+$router->post('/newsletter', 'Frontend\NewsletterController@subscribe')->middleware(['csrf']);
 
-// Future-phase public routes are intentionally stubbed during Phase 1.
-$router->get('/shop', 'Frontend\StubController@notImplemented');
-$router->get('/projects', 'Frontend\StubController@notImplemented');
+$router->get('/shop', 'Frontend\ShopController@index');
+$router->get('/shop/category/{slug}', 'Frontend\ShopController@category');
+$router->get('/shop/product/{slug}', 'Frontend\ShopController@show');
+$router->get('/shop/cart', 'Frontend\CartController@index');
+$router->post('/shop/cart/add', 'Frontend\CartController@add')->middleware(['csrf']);
+$router->post('/shop/cart/update', 'Frontend\CartController@update')->middleware(['csrf']);
+$router->post('/shop/cart/remove', 'Frontend\CartController@remove')->middleware(['csrf']);
+$router->get('/shop/checkout', 'Frontend\CheckoutController@index');
+$router->post('/shop/checkout', 'Frontend\CheckoutController@store')->middleware(['csrf']);
+
+$router->get('/services.html', 'Frontend\PageController@redirectToServices');
+$router->get('/contact.html', 'Frontend\PageController@redirectToContact');
+$router->get('/hse.html', 'Frontend\PageController@redirectToHse');
+$router->get('/gallery.html', 'Frontend\PageController@redirectToProjects');
 
 // Admin Routes
 $router->group('/admin', function ($router) {

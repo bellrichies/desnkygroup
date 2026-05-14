@@ -32,6 +32,41 @@ class ProductRepository extends BaseRepository
     }
 
     /**
+     * Get active products with category and primary image data.
+     *
+     * @return array
+     */
+    public function activeForShop(): array
+    {
+        return $this->connection->query(
+            "SELECT
+                p.*,
+                c.name AS category_name,
+                c.slug AS category_slug,
+                COALESCE(pi.path, p.featured_image) AS display_image
+             FROM products p
+             LEFT JOIN product_categories c ON c.id = p.category_id
+             LEFT JOIN product_images pi ON pi.product_id = p.id AND pi.sort_order = (
+                SELECT MIN(pi2.sort_order) FROM product_images pi2 WHERE pi2.product_id = p.id
+             )
+             WHERE p.is_active = 1 AND p.deleted_at IS NULL
+             ORDER BY p.name ASC"
+        );
+    }
+
+    /**
+     * Get active product categories.
+     *
+     * @return array
+     */
+    public function activeCategories(): array
+    {
+        return $this->connection->query(
+            'SELECT name, slug FROM product_categories WHERE is_active = 1 ORDER BY name ASC'
+        );
+    }
+
+    /**
      * Find product by ID
      *
      * @param int $id Product ID

@@ -118,9 +118,14 @@ class ExceptionHandler
             return "<h1>{$title}</h1><p>{$message}</p><pre>{$detail}</pre>";
         }
 
-        return (new View())->render('errors/error', [
+        return (new View())->setLayout('frontend/layouts/app')->render('errors/error', [
             'status' => $status,
             'message' => $this->publicMessage($exception, $status),
+            'title' => $status === 404 ? 'Page Not Found' : 'Website Error',
+            'seo' => [
+                'title' => $status === 404 ? 'Page Not Found | Desnky Global' : 'Website Error | Desnky Global',
+                'description' => 'The requested Desnky Global Resources page could not be loaded.',
+            ],
         ]);
     }
 

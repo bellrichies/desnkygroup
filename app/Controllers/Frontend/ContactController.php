@@ -3,7 +3,12 @@
 namespace App\Controllers\Frontend;
 
 use App\Controllers\BaseController;
+use App\Repositories\ContactRepository;
+use App\Services\ContactService;
+use App\Services\MailService;
+use App\Support\DatabaseFactory;
 use App\Validators\ContactValidator;
+use Throwable;
 
 /**
  * ContactController - Handles contact form submissions
@@ -24,9 +29,13 @@ class ContactController extends BaseController
 
         return $this->view('frontend/pages/contact', [
             'title' => 'Contact Us',
-            'meta_description' => 'Get in touch with Desnky Global Resources',
             'active' => 'contact',
             'csrf_token' => $_SESSION['csrf_token'],
+            'seo' => [
+                'title' => 'Contact Desnky Global Resources Ltd',
+                'description' => 'Contact Desnky Global Resources Ltd for engineering, energy, procurement, HSE, ICT and agro service enquiries in Nigeria.',
+                'canonical' => 'https://www.desnkygroup.com/contact',
+            ],
         ]);
     }
 
@@ -59,17 +68,28 @@ class ContactController extends BaseController
             'email' => trim((string) ($_POST['email'] ?? '')),
             'phone' => trim((string) ($_POST['phone'] ?? '')),
             'company' => trim((string) ($_POST['company'] ?? '')),
-            'subject' => trim((string) ($_POST['subject'] ?? '')),
+            'service_interested' => trim((string) ($_POST['service_interested'] ?? '')),
+            'subject' => 'Service enquiry: ' . trim((string) ($_POST['service_interested'] ?? '')),
             'message' => trim((string) ($_POST['message'] ?? '')),
         ];
 
-        // In Phase 2+, would save to database and send email
-        // For now, return success response
+        try {
+            $contactId = (new ContactService(new ContactRepository(DatabaseFactory::make())))->submit($data);
+            (new MailService())->sendContactNotification($data);
+        } catch (Throwable $exception) {
+            (new \App\Logger())->exception($exception);
+
+            return $this->json([
+                'success' => false,
+                'message' => 'We could not save your enquiry right now. Please try again shortly.',
+            ], 503);
+        }
 
         return $this->json([
             'success' => true,
             'message' => 'Thank you for contacting us! We will get back to you soon.',
             'data' => [
+                'id' => $contactId,
                 'email' => $data['email'],
                 'received_at' => date('Y-m-d H:i:s'),
             ],

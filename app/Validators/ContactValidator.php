@@ -20,7 +20,9 @@ class ContactValidator extends BaseValidator
             'full_name' => 'required|string|max:150',
             'email' => 'required|email',
             'phone' => ['required', 'regex:/^(\+234|0)[789][01]\d{8}$/'],
-            'subject' => 'required|string|max:255',
+            'company' => 'required|string|max:150',
+            'service_interested' => 'required|string|max:100',
+            'consent' => 'required',
             'message' => 'required|string|min:10|max:5000',
         ]);
     }

@@ -42,14 +42,14 @@ $form = \App\Helpers\FormHelper::class;
                 </div>
 
                 <div>
-                    <label for="company" class="form-label">Company</label>
-                    <?php echo $form::textInput('company', '', 'Company name'); ?>
+                    <label for="company" class="form-label">Company *</label>
+                    <?php echo $form::textInput('company', '', 'Company name', ['required' => true]); ?>
                 </div>
             </div>
 
             <div class="grid gap-6 sm:grid-cols-2">
                 <div>
-                    <label for="service_interested" class="form-label">Service Interest</label>
+                    <label for="service_interested" class="form-label">Service Interest *</label>
                     <?php echo $form::select('service_interested', [
                         '' => 'Select a service',
                         'engineering' => 'Engineering Services',
@@ -58,12 +58,12 @@ $form = \App\Helpers\FormHelper::class;
                         'hse' => 'HSE and Safety',
                         'ict' => 'ICT Solutions',
                         'agro' => 'Agro and Food Processing',
-                    ]); ?>
+                    ], '', ['required' => true]); ?>
                 </div>
 
                 <div>
-                    <label for="subject" class="form-label">Subject *</label>
-                    <?php echo $form::textInput('subject', '', 'How can we help?', ['required' => true]); ?>
+                    <label for="consent" class="form-label">Consent *</label>
+                    <?php echo $form::checkbox('consent', '1', false, 'I consent to being contacted about this enquiry.', ['required' => true]); ?>
                 </div>
             </div>
 
@@ -93,6 +93,7 @@ $form = \App\Helpers\FormHelper::class;
                 <p><strong class="text-white">Location:</strong><br>Lagos, Nigeria</p>
                 <p><strong class="text-white">Business Hours:</strong><br>Monday to Friday, 9:00 AM - 5:00 PM</p>
             </div>
+            <div class="mt-8 aspect-video bg-white/10" aria-label="Map placeholder for Desnky Global Resources Lagos office"></div>
         </aside>
     </div>
 </section>

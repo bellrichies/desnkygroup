@@ -66,7 +66,7 @@ class View
 
             // If layout is set, render with layout
             if ($this->layout) {
-                return $this->renderWithLayout($content);
+                return $this->renderWithLayout($content, $variables);
             }
 
             return $content;
@@ -94,7 +94,7 @@ class View
      * @param string $content Main content
      * @return string Rendered HTML
      */
-    private function renderWithLayout(string $content): string
+    private function renderWithLayout(string $content, array $data = []): string
     {
         $layoutPath = $this->getTemplatePath($this->layout);
 
@@ -103,7 +103,7 @@ class View
         }
 
         // Make content available to layout
-        $variables = array_merge($this->globalData, ['content' => $content]);
+        $variables = array_merge($this->globalData, $data, ['content' => $content]);
         extract($variables, EXTR_SKIP);
 
         ob_start();

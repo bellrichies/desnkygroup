@@ -1,8 +1,10 @@
 <?php
 $items = [
     ['label' => 'Home', 'href' => '/', 'key' => 'home'],
+    ['label' => 'About', 'href' => '/about', 'key' => 'about'],
     ['label' => 'Services', 'href' => '/services', 'key' => 'services'],
     ['label' => 'Projects', 'href' => '/projects', 'key' => 'projects'],
+    ['label' => 'Shop', 'href' => '/shop', 'key' => 'shop'],
     ['label' => 'Contact', 'href' => '/contact', 'key' => 'contact'],
 ];
 ?>

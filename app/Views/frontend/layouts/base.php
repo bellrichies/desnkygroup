@@ -3,12 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta
-        name="description"
-        content="<?php echo $this->escape($meta_description ?? 'Desnky Global Resources Ltd provides energy, engineering, procurement, safety, ICT and agro solutions in Nigeria.'); ?>"
-    >
     <meta name="theme-color" content="#0f2742">
-    <title><?php echo $this->escape($title ?? 'Desnky Global Resources Ltd'); ?></title>
+    <?php echo \App\Helpers\SeoHelper::render($seo ?? [
+        'title' => $title ?? 'Desnky Global Resources Ltd',
+        'description' => $meta_description ?? '',
+    ]); ?>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link

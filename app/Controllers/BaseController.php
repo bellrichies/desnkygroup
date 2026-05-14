@@ -68,7 +68,7 @@ class BaseController
     protected function abort(int $code = 404, string $message = ''): void
     {
         http_response_code($code);
-        echo $this->view("errors/{$code}", ['message' => $message]);
+        echo $this->view('errors/error', ['status' => $code, 'message' => $message]);
         exit;
     }
 

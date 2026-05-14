@@ -18,7 +18,9 @@ class ContactValidatorTest extends TestCase
             'full_name' => 'Ada Okafor',
             'email' => 'ada@example.com',
             'phone' => '08012345678',
-            'subject' => 'Engineering enquiry',
+            'company' => 'Okafor Engineering Ltd',
+            'service_interested' => 'engineering',
+            'consent' => '1',
             'message' => 'We need support with a facility engineering project.',
         ]);
 
@@ -34,7 +36,9 @@ class ContactValidatorTest extends TestCase
             'full_name' => '',
             'email' => 'not-an-email',
             'phone' => '123',
-            'subject' => '',
+            'company' => '',
+            'service_interested' => '',
+            'consent' => '',
             'message' => 'Short',
         ]);
 
@@ -42,7 +46,9 @@ class ContactValidatorTest extends TestCase
         $this->assertArrayHasKey('full_name', $validator->errors());
         $this->assertArrayHasKey('email', $validator->errors());
         $this->assertArrayHasKey('phone', $validator->errors());
-        $this->assertArrayHasKey('subject', $validator->errors());
+        $this->assertArrayHasKey('company', $validator->errors());
+        $this->assertArrayHasKey('service_interested', $validator->errors());
+        $this->assertArrayHasKey('consent', $validator->errors());
         $this->assertArrayHasKey('message', $validator->errors());
     }
 }
