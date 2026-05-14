@@ -24,7 +24,15 @@ class ShopController extends BaseController
             'seo' => [
                 'title' => 'Shop Safety, ICT and Industrial Products | Desnky',
                 'description' => 'Browse safety equipment, ICT devices, agro products and industrial supplies from Desnky Global Resources Ltd.',
+                'keywords' => 'safety equipment Nigeria, ICT devices Nigeria, industrial supplies Lagos, agro products Nigeria',
                 'canonical' => 'https://www.desnkygroup.com/shop',
+                'schema' => [
+                    SeoHelper::organizationSchema(),
+                    SeoHelper::breadcrumbSchema([
+                        'Home' => 'https://www.desnkygroup.com/',
+                        'Shop' => 'https://www.desnkygroup.com/shop',
+                    ]),
+                ],
             ],
         ]);
     }
@@ -43,6 +51,7 @@ class ShopController extends BaseController
             'seo' => [
                 'title' => $category . ' | Desnky Shop',
                 'description' => 'Browse ' . strtolower($category) . ' available through Desnky Global Resources Ltd.',
+                'keywords' => strtolower($category) . ', Desnky shop, Nigeria business supplies',
                 'canonical' => 'https://www.desnkygroup.com/shop/category/' . $slug,
             ],
         ]);
@@ -77,7 +86,16 @@ class ShopController extends BaseController
                 'canonical' => 'https://www.desnkygroup.com/shop/product/' . $slug,
                 'image' => $product['image'],
                 'type' => 'product',
-                'schema' => SeoHelper::productSchema($product),
+                'keywords' => $product['name'] . ', ' . $product['category'] . ', Desnky shop Nigeria',
+                'schema' => [
+                    SeoHelper::productSchema($product),
+                    SeoHelper::breadcrumbSchema([
+                        'Home' => 'https://www.desnkygroup.com/',
+                        'Shop' => 'https://www.desnkygroup.com/shop',
+                        $product['category'] => 'https://www.desnkygroup.com/shop/category/' . $product['category_slug'],
+                        $product['name'] => 'https://www.desnkygroup.com/shop/product/' . $slug,
+                    ]),
+                ],
             ],
         ]);
     }

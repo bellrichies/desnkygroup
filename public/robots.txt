@@ -1,4 +1,11 @@
 User-agent: *
 Allow: /
+Disallow: /admin
+Disallow: /storage
+Disallow: /vendor
+Disallow: /database
+Disallow: /config
+Disallow: /scripts
+Crawl-delay: 5
 
-Sitemap: /sitemap.xml
+Sitemap: https://www.desnkygroup.com/sitemap.xml

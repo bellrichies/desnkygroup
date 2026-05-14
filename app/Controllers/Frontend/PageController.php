@@ -3,6 +3,7 @@
 namespace App\Controllers\Frontend;
 
 use App\Controllers\BaseController;
+use App\Helpers\SeoHelper;
 use App\Repositories\ProjectRepository;
 use App\Services\ProjectService;
 use App\Support\DatabaseFactory;
@@ -42,7 +43,15 @@ class PageController extends BaseController
             'seo' => [
                 'title' => 'About Desnky Global Resources Ltd',
                 'description' => 'Learn about Desnky Global Resources Ltd, a Nigerian company providing engineering, energy, procurement, HSE, ICT and agro services.',
+                'keywords' => 'Desnky Global Resources, Nigerian engineering company, procurement company Lagos, energy services Nigeria',
                 'canonical' => 'https://www.desnkygroup.com/about',
+                'schema' => [
+                    SeoHelper::organizationSchema(),
+                    SeoHelper::breadcrumbSchema([
+                        'Home' => 'https://www.desnkygroup.com/',
+                        'About' => 'https://www.desnkygroup.com/about',
+                    ]),
+                ],
             ],
         ]);
     }
@@ -56,7 +65,15 @@ class PageController extends BaseController
             'seo' => [
                 'title' => 'HSE Policy | Desnky Global Resources Ltd',
                 'description' => 'Read the Desnky Global Resources Ltd health, safety and environment commitment for Nigerian business operations.',
+                'keywords' => 'HSE policy Nigeria, safety services Nigeria, health safety environment',
                 'canonical' => 'https://www.desnkygroup.com/hse-policy',
+                'schema' => [
+                    SeoHelper::organizationSchema(),
+                    SeoHelper::breadcrumbSchema([
+                        'Home' => 'https://www.desnkygroup.com/',
+                        'HSE Policy' => 'https://www.desnkygroup.com/hse-policy',
+                    ]),
+                ],
             ],
         ]);
     }
@@ -70,7 +87,67 @@ class PageController extends BaseController
             'seo' => [
                 'title' => 'Projects and Gallery | Desnky Global Resources',
                 'description' => 'View representative project and gallery highlights from Desnky Global Resources across engineering, HSE, procurement and agro sectors.',
+                'keywords' => 'Desnky projects, engineering gallery Nigeria, procurement projects, HSE projects Nigeria',
                 'canonical' => 'https://www.desnkygroup.com/projects',
+                'schema' => [
+                    SeoHelper::organizationSchema(),
+                    SeoHelper::breadcrumbSchema([
+                        'Home' => 'https://www.desnkygroup.com/',
+                        'Projects' => 'https://www.desnkygroup.com/projects',
+                    ]),
+                ],
+            ],
+        ]);
+    }
+
+    public function project(string $slug): string
+    {
+        $project = $this->loadProject($slug);
+
+        if ($project === null) {
+            http_response_code(404);
+
+            return $this->view('frontend/pages/show', [
+                'title' => 'Project Not Found',
+                'content' => '<p>The requested project page could not be found.</p>',
+                'active' => 'projects',
+                'seo' => [
+                    'title' => 'Project Not Found | Desnky Global Resources',
+                    'description' => 'The requested Desnky Global Resources project could not be found.',
+                    'robots' => 'noindex, follow',
+                ],
+            ]);
+        }
+
+        $title = (string) ($project['title'] ?? 'Project');
+        $summary = (string) ($project['summary'] ?? $project['description'] ?? '');
+        $image = (string) ($project['image'] ?? $project['featured_image'] ?? '');
+
+        return $this->view('frontend/pages/show', [
+            'title' => $title,
+            'active' => 'projects',
+            'content' => '<p>' . e($summary) . '</p>',
+            'seo' => [
+                'title' => ($project['meta_title'] ?? null) ?: $title . ' | Desnky Projects',
+                'description' => ($project['meta_description'] ?? null) ?: $summary,
+                'keywords' => ($project['meta_keywords'] ?? null) ?: $title . ', Desnky project, Nigeria',
+                'canonical' => 'https://www.desnkygroup.com/projects/' . $slug,
+                'image' => $image,
+                'schema' => [
+                    [
+                        '@context' => 'https://schema.org',
+                        '@type' => 'CreativeWork',
+                        'name' => $title,
+                        'description' => $summary,
+                        'image' => $image,
+                        'provider' => SeoHelper::organizationSchema(),
+                    ],
+                    SeoHelper::breadcrumbSchema([
+                        'Home' => 'https://www.desnkygroup.com/',
+                        'Projects' => 'https://www.desnkygroup.com/projects',
+                        $title => 'https://www.desnkygroup.com/projects/' . $slug,
+                    ]),
+                ],
             ],
         ]);
     }
@@ -115,6 +192,30 @@ class PageController extends BaseController
                 'image' => 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=900&q=80',
             ],
         ];
+    }
+
+    private function loadProject(string $slug): ?array
+    {
+        try {
+            $project = (new ProjectService(new ProjectRepository(DatabaseFactory::make())))->getPublishedBySlug($slug);
+
+            if ($project !== null) {
+                $project['image'] = $project['featured_image'] ?? null;
+                return $project;
+            }
+        } catch (Throwable) {
+        }
+
+        foreach ($this->loadProjects() as $project) {
+            $candidate = strtolower(trim((string) preg_replace('/[^A-Za-z0-9-]+/', '-', $project['title'] ?? ''), '-'));
+
+            if ($candidate === $slug) {
+                $project['slug'] = $slug;
+                return $project;
+            }
+        }
+
+        return null;
     }
 
     /**

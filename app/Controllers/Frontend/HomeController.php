@@ -3,6 +3,7 @@
 namespace App\Controllers\Frontend;
 
 use App\Controllers\BaseController;
+use App\Helpers\SeoHelper;
 
 /**
  * HomeController - Handles public home page
@@ -44,7 +45,13 @@ class HomeController extends BaseController
             'seo' => [
                 'title' => 'Desnky Global Resources Ltd | Integrated Nigerian Services',
                 'description' => 'Desnky Global Resources Ltd delivers energy, engineering, procurement, HSE, ICT and agro solutions for businesses in Nigeria.',
+                'keywords' => 'engineering company in Nigeria, energy services Nigeria, procurement company Lagos, HSE services Nigeria, ICT solutions Nigeria, agro products Nigeria',
                 'canonical' => 'https://www.desnkygroup.com/',
+                'schema' => [
+                    SeoHelper::organizationSchema(),
+                    SeoHelper::localBusinessSchema(),
+                    SeoHelper::websiteSchema(),
+                ],
             ],
         ]);
     }

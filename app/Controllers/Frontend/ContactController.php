@@ -3,6 +3,7 @@
 namespace App\Controllers\Frontend;
 
 use App\Controllers\BaseController;
+use App\Helpers\SeoHelper;
 use App\Repositories\ContactRepository;
 use App\Services\ContactService;
 use App\Services\MailService;
@@ -34,7 +35,17 @@ class ContactController extends BaseController
             'seo' => [
                 'title' => 'Contact Desnky Global Resources Ltd',
                 'description' => 'Contact Desnky Global Resources Ltd for engineering, energy, procurement, HSE, ICT and agro service enquiries in Nigeria.',
+                'keywords' => 'contact Desnky Global, engineering enquiries Nigeria, procurement enquiries Lagos, HSE services Nigeria',
                 'canonical' => 'https://www.desnkygroup.com/contact',
+                'schema' => [
+                    SeoHelper::organizationSchema(),
+                    SeoHelper::localBusinessSchema(),
+                    SeoHelper::contactPointSchema(),
+                    SeoHelper::breadcrumbSchema([
+                        'Home' => 'https://www.desnkygroup.com/',
+                        'Contact' => 'https://www.desnkygroup.com/contact',
+                    ]),
+                ],
             ],
         ]);
     }

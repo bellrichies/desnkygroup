@@ -2,11 +2,90 @@
 
 namespace App\Helpers;
 
+use App\Config;
+
 /**
  * Renders page-level SEO, social and schema metadata.
  */
 class SeoHelper
 {
+    private string $title;
+    private string $description;
+    private string $keywords = '';
+    private string $ogImage = '';
+    private string $canonical = '';
+
+    /**
+     * @var array<int, array<string, mixed>>
+     */
+    private array $schemas = [];
+
+    public function __construct()
+    {
+        $this->title = (string) Config::get('seo.default_title', 'Desnky Global Resources Ltd');
+        $this->description = (string) Config::get('seo.default_description', '');
+        $this->keywords = (string) Config::get('seo.default_keywords', '');
+        $this->ogImage = (string) Config::get('seo.default_image', '');
+        $this->canonical = self::currentUrl();
+    }
+
+    public function setTitle(string $title): self
+    {
+        $this->title = $title;
+
+        return $this;
+    }
+
+    public function setDescription(string $description): self
+    {
+        $this->description = $description;
+
+        return $this;
+    }
+
+    public function setKeywords(string $keywords): self
+    {
+        $this->keywords = $keywords;
+
+        return $this;
+    }
+
+    public function setOgImage(string $url): self
+    {
+        $this->ogImage = $url;
+
+        return $this;
+    }
+
+    public function setCanonical(string $url): self
+    {
+        $this->canonical = $url;
+
+        return $this;
+    }
+
+    /**
+     * @param array<string, mixed> $schema
+     */
+    public function addSchema(array $schema): self
+    {
+        $this->schemas[] = $schema;
+
+        return $this;
+    }
+
+    public function toHtml(): string
+    {
+        return self::render([
+            'title' => $this->title,
+            'description' => $this->description,
+            'keywords' => $this->keywords,
+            'image' => $this->ogImage,
+            'canonical' => $this->canonical,
+            'schema' => $this->schemas,
+        ]);
+    }
+
     /**
      * Render metadata tags for the frontend layout.
      *
@@ -15,25 +94,30 @@ class SeoHelper
      */
     public static function render(array $seo = []): string
     {
-        $title = self::value($seo, 'title', 'Desnky Global Resources Ltd');
+        $title = self::value($seo, 'title', (string) Config::get('seo.default_title', 'Desnky Global Resources Ltd'));
         $description = self::value(
             $seo,
             'description',
-            'Integrated energy, engineering, procurement, safety, ICT and agro solutions in Nigeria.'
+            (string) Config::get('seo.default_description', '')
         );
+        $keywords = self::value($seo, 'keywords', (string) Config::get('seo.default_keywords', ''));
         $canonical = self::value($seo, 'canonical', self::currentUrl());
         $image = self::value(
             $seo,
             'image',
-            'https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=1200&q=80'
+            (string) Config::get('seo.default_image', '')
         );
         $type = self::value($seo, 'type', 'website');
-        $schema = $seo['schema'] ?? self::organizationSchema();
+        $schema = self::normalizeSchemas($seo['schema'] ?? [self::organizationSchema(), self::websiteSchema()]);
+        $siteName = (string) Config::get('seo.site_name', 'Desnky Global Resources Ltd');
 
         $html = [
             '<title>' . self::escape($title) . '</title>',
             '<meta name="description" content="' . self::escape($description) . '">',
+            '<meta name="keywords" content="' . self::escape($keywords) . '">',
+            '<meta name="robots" content="' . self::escape($seo['robots'] ?? 'index, follow') . '">',
             '<link rel="canonical" href="' . self::escape($canonical) . '">',
+            '<meta property="og:site_name" content="' . self::escape($siteName) . '">',
             '<meta property="og:title" content="' . self::escape($title) . '">',
             '<meta property="og:description" content="' . self::escape($description) . '">',
             '<meta property="og:type" content="' . self::escape($type) . '">',
@@ -43,8 +127,20 @@ class SeoHelper
             '<meta name="twitter:title" content="' . self::escape($title) . '">',
             '<meta name="twitter:description" content="' . self::escape($description) . '">',
             '<meta name="twitter:image" content="' . self::escape($image) . '">',
-            '<script type="application/ld+json">' . self::schema($schema) . '</script>',
         ];
+
+        $googleVerification = (string) Config::get('seo.analytics.google_site_verification', '');
+        $bingVerification = (string) Config::get('seo.analytics.bing_site_verification', '');
+
+        if ($googleVerification !== '') {
+            $html[] = '<meta name="google-site-verification" content="' . self::escape($googleVerification) . '">';
+        }
+
+        if ($bingVerification !== '') {
+            $html[] = '<meta name="msvalidate.01" content="' . self::escape($bingVerification) . '">';
+        }
+
+        $html[] = '<script type="application/ld+json">' . self::schema($schema) . '</script>';
 
         return implode("\n    ", $html);
     }
@@ -61,13 +157,18 @@ class SeoHelper
             '@type' => 'Organization',
             'name' => 'Desnky Global Resources Ltd',
             'url' => self::baseUrl(),
-            'email' => 'info@desnkygroup.com',
+            'logo' => (string) Config::get('seo.logo', ''),
+            'email' => (string) Config::get('seo.contact.email', 'info@desnkygroup.com'),
+            'telephone' => (string) Config::get('seo.contact.phone', '+234'),
             'address' => [
                 '@type' => 'PostalAddress',
-                'addressLocality' => 'Lagos',
-                'addressCountry' => 'NG',
+                'streetAddress' => (string) Config::get('seo.address.street', 'Lagos, Nigeria'),
+                'addressLocality' => (string) Config::get('seo.address.locality', 'Lagos'),
+                'addressRegion' => (string) Config::get('seo.address.region', 'Lagos'),
+                'addressCountry' => (string) Config::get('seo.address.country', 'NG'),
             ],
             'areaServed' => 'Nigeria',
+            'sameAs' => (array) Config::get('seo.social_profiles', []),
             'knowsAbout' => [
                 'Engineering services',
                 'Energy solutions',
@@ -77,6 +178,39 @@ class SeoHelper
                 'Agro products and food processing',
             ],
         ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public static function websiteSchema(): array
+    {
+        return [
+            '@context' => 'https://schema.org',
+            '@type' => 'WebSite',
+            'name' => (string) Config::get('seo.site_name', 'Desnky Global Resources Ltd'),
+            'url' => self::baseUrl(),
+            'inLanguage' => 'en-NG',
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public static function localBusinessSchema(): array
+    {
+        return array_merge(self::organizationSchema(), [
+            '@type' => 'LocalBusiness',
+            'priceRange' => '$$',
+            'openingHoursSpecification' => [
+                [
+                    '@type' => 'OpeningHoursSpecification',
+                    'dayOfWeek' => ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
+                    'opens' => '08:00',
+                    'closes' => '17:00',
+                ],
+            ],
+        ]);
     }
 
     /**
@@ -98,6 +232,7 @@ class SeoHelper
                 'url' => self::baseUrl(),
             ],
             'areaServed' => 'Nigeria',
+            'serviceType' => $service['category'] ?? $service['title'] ?? 'Corporate services',
             'url' => self::baseUrl() . '/services/' . ($service['slug'] ?? ''),
         ];
     }
@@ -121,6 +256,7 @@ class SeoHelper
                 '@type' => 'Offer',
                 'priceCurrency' => 'NGN',
                 'price' => (string) ($product['price'] ?? '0'),
+                'url' => self::baseUrl() . '/shop/product/' . ($product['slug'] ?? ''),
                 'availability' => !empty($product['in_stock'])
                     ? 'https://schema.org/InStock'
                     : 'https://schema.org/OutOfStock',
@@ -155,6 +291,48 @@ class SeoHelper
         ];
     }
 
+    /**
+     * @param array<string, string> $questions Question => answer pairs.
+     * @return array<string, mixed>
+     */
+    public static function faqSchema(array $questions): array
+    {
+        $items = [];
+
+        foreach ($questions as $question => $answer) {
+            $items[] = [
+                '@type' => 'Question',
+                'name' => $question,
+                'acceptedAnswer' => [
+                    '@type' => 'Answer',
+                    'text' => $answer,
+                ],
+            ];
+        }
+
+        return [
+            '@context' => 'https://schema.org',
+            '@type' => 'FAQPage',
+            'mainEntity' => $items,
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public static function contactPointSchema(): array
+    {
+        return [
+            '@context' => 'https://schema.org',
+            '@type' => 'ContactPoint',
+            'telephone' => (string) Config::get('seo.contact.phone', '+234'),
+            'email' => (string) Config::get('seo.contact.email', 'info@desnkygroup.com'),
+            'contactType' => 'customer service',
+            'areaServed' => 'NG',
+            'availableLanguage' => ['English'],
+        ];
+    }
+
     private static function value(array $data, string $key, string $default): string
     {
         return isset($data[$key]) && is_string($data[$key]) && $data[$key] !== '' ? $data[$key] : $default;
@@ -165,6 +343,28 @@ class SeoHelper
         return (string) json_encode($schema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
     }
 
+    /**
+     * @param mixed $schema
+     * @return array<string, mixed>
+     */
+    private static function normalizeSchemas($schema): array
+    {
+        if (!is_array($schema)) {
+            return self::organizationSchema();
+        }
+
+        $isList = array_is_list($schema);
+
+        if (!$isList) {
+            return $schema;
+        }
+
+        return [
+            '@context' => 'https://schema.org',
+            '@graph' => array_values($schema),
+        ];
+    }
+
     private static function currentUrl(): string
     {
         return rtrim(self::baseUrl(), '/') . ($_SERVER['REQUEST_URI'] ?? '/');
@@ -172,7 +372,7 @@ class SeoHelper
 
     private static function baseUrl(): string
     {
-        return rtrim($_ENV['APP_URL'] ?? 'https://www.desnkygroup.com', '/');
+        return rtrim((string) Config::get('seo.base_url', 'https://www.desnkygroup.com'), '/');
     }
 
     private static function escape(string $value): string

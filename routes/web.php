@@ -14,6 +14,7 @@ $router->get('/', 'Frontend\HomeController@index');
 $router->get('/services', 'Frontend\ServiceController@index');
 $router->get('/services/{slug}', 'Frontend\ServiceController@show');
 $router->get('/projects', 'Frontend\PageController@projects');
+$router->get('/projects/{slug}', 'Frontend\PageController@project');
 $router->get('/about', 'Frontend\PageController@about');
 $router->get('/hse-policy', 'Frontend\PageController@hse');
 $router->get('/contact', 'Frontend\ContactController@show');
