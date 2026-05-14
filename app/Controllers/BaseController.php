@@ -29,7 +29,7 @@ class BaseController
         } elseif (strpos($template, 'admin') === 0 || strpos($template, 'admin/') === 0) {
             $view->setLayout('admin/layouts/app');
         }
-                return $view->render($template, $data);
+        return $view->render($template, $data);
     }
 
     /**
@@ -226,6 +226,8 @@ class BaseController
     protected function setUser(array $user): void
     {
         $_SESSION['admin_user'] = $user;
+        $_SESSION['admin_last_activity'] = time();
+        $_SESSION['admin_authenticated_at'] = time();
     }
 
     /**
@@ -235,6 +237,21 @@ class BaseController
      */
     protected function clearUser(): void
     {
-        unset($_SESSION['admin_user']);
+        unset($_SESSION['admin_user'], $_SESSION['admin_last_activity'], $_SESSION['admin_authenticated_at']);
+    }
+
+    /**
+     * Flash a one-time message into the session.
+     *
+     * @param string $type Message type.
+     * @param string $message Message body.
+     * @return void
+     */
+    protected function flash(string $type, string $message): void
+    {
+        $_SESSION['flash'][] = [
+            'type' => $type,
+            'message' => $message,
+        ];
     }
 }

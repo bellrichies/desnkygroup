@@ -123,7 +123,7 @@ class VerifyCsrfToken extends Middleware
      */
     protected function matches(string $pattern, string $uri): bool
     {
-        $pattern = str_replace('*', '.*', preg_quote($pattern));
+        $pattern = str_replace('\*', '.*', preg_quote($pattern, '/'));
         return preg_match("/^{$pattern}$/", $uri) === 1;
     }
 }

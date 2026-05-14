@@ -13,7 +13,19 @@ define('PUBLIC_PATH', __DIR__);
 define('STORAGE_PATH', BASE_PATH . '/storage');
 define('LOGS_PATH', STORAGE_PATH . '/logs');
 
-// Start session
+// Start session with secure defaults before application code writes session data.
+$isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+    || (($_SERVER['SERVER_PORT'] ?? null) === '443');
+
+session_set_cookie_params([
+    'lifetime' => 0,
+    'path' => '/',
+    'domain' => '',
+    'secure' => $isHttps,
+    'httponly' => true,
+    'samesite' => 'Lax',
+]);
+
 session_start();
 
 // Load Composer autoloader

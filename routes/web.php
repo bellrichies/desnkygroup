@@ -39,9 +39,9 @@ $router->get('/gallery.html', 'Frontend\PageController@redirectToProjects');
 // Admin Routes
 $router->group('/admin', function ($router) {
     // Authentication
-    $router->get('/login', 'Admin\AuthController@loginForm');
-    $router->post('/login', 'Admin\AuthController@login');
-    $router->post('/logout', 'Admin\AuthController@logout');
+    $router->get('/login', 'Admin\AuthController@login');
+    $router->post('/login', 'Admin\AuthController@authenticate')->middleware(['csrf']);
+    $router->post('/logout', 'Admin\AuthController@logout')->middleware(['auth', 'csrf']);
 
     // Dashboard (requires auth)
     $router->get('/', 'Admin\DashboardController@index')->middleware(['auth']);
@@ -50,7 +50,14 @@ $router->group('/admin', function ($router) {
     // Future-phase admin modules are stubbed until their implementation phases.
     $router->get('/pages', 'Admin\DashboardController@notImplemented')->middleware(['auth']);
     $router->get('/services', 'Admin\DashboardController@notImplemented')->middleware(['auth']);
+    $router->get('/projects', 'Admin\DashboardController@notImplemented')->middleware(['auth']);
     $router->get('/products', 'Admin\DashboardController@notImplemented')->middleware(['auth']);
+    $router->get('/product-categories', 'Admin\DashboardController@notImplemented')->middleware(['auth']);
     $router->get('/orders', 'Admin\DashboardController@notImplemented')->middleware(['auth']);
+    $router->get('/customers', 'Admin\DashboardController@notImplemented')->middleware(['auth']);
+    $router->get('/users', 'Admin\DashboardController@notImplemented')->middleware(['auth']);
+    $router->get('/roles', 'Admin\DashboardController@notImplemented')->middleware(['auth']);
+    $router->get('/permissions', 'Admin\DashboardController@notImplemented')->middleware(['auth']);
+    $router->get('/activity-logs', 'Admin\DashboardController@notImplemented')->middleware(['auth']);
     $router->get('/settings', 'Admin\DashboardController@notImplemented')->middleware(['auth', 'admin']);
 });

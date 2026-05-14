@@ -28,7 +28,7 @@ class Router
      * @var array<string, class-string> Middleware aliases.
      */
     private array $middlewareAliases = [
-        'auth' => \App\Middleware\AuthenticateUser::class,
+        'auth' => \App\Middleware\AuthMiddleware::class,
         'admin' => \App\Middleware\RequireAdmin::class,
         'csrf' => \App\Middleware\VerifyCsrfToken::class,
         'security' => \App\Middleware\SecurityHeaders::class,

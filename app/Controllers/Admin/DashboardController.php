@@ -3,12 +3,17 @@
 namespace App\Controllers\Admin;
 
 use App\Controllers\BaseController;
+use App\Services\DashboardService;
 
 /**
  * DashboardController - Handles admin dashboard
  */
 class DashboardController extends BaseController
 {
+    public function __construct(private DashboardService $dashboardService)
+    {
+    }
+
     /**
      * Display admin dashboard
      *
@@ -16,18 +21,19 @@ class DashboardController extends BaseController
      */
     public function index(): string
     {
-        // Get authenticated user
         $user = $this->user();
 
         return $this->view('admin/dashboard/index', [
             'title' => 'Admin Dashboard',
             'user' => $user,
-            'stats' => [
-                'pages' => 0,
-                'products' => 0,
-                'orders' => 0,
-                'contacts' => 0,
+            'breadcrumbs' => [
+                ['label' => 'Dashboard', 'url' => '/admin/dashboard'],
             ],
+            'kpis' => $this->dashboardService->getKpis(),
+            'recentInquiries' => $this->dashboardService->getRecentInquiries(),
+            'recentOrders' => $this->dashboardService->getRecentOrders(),
+            'recentActivities' => $this->dashboardService->getRecentActivities(),
+            'lastUpdated' => date('M j, Y g:i A'),
         ]);
     }
 
@@ -42,12 +48,15 @@ class DashboardController extends BaseController
         return $this->view('admin/dashboard/index', [
             'title' => 'Coming Soon',
             'user' => $this->user(),
-            'stats' => [
-                'pages' => 0,
-                'products' => 0,
-                'orders' => 0,
-                'contacts' => 0,
+            'breadcrumbs' => [
+                ['label' => 'Dashboard', 'url' => '/admin/dashboard'],
+                ['label' => 'Coming Soon', 'url' => null],
             ],
+            'kpis' => $this->dashboardService->getKpis(),
+            'recentInquiries' => $this->dashboardService->getRecentInquiries(),
+            'recentOrders' => $this->dashboardService->getRecentOrders(),
+            'recentActivities' => $this->dashboardService->getRecentActivities(),
+            'lastUpdated' => date('M j, Y g:i A'),
             'notice' => 'This admin module is planned for a later phase.',
         ]);
     }

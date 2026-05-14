@@ -1,8 +1,8 @@
-<div class="min-h-screen flex items-center justify-center bg-gray-900">
+<div class="min-h-screen flex items-center justify-center bg-slate-950 px-4 py-10">
     <div class="bg-white rounded-lg shadow-lg p-8 w-full max-w-md">
         <div class="text-center mb-8">
-            <h1 class="text-3xl font-bold text-blue-600">Desnky</h1>
-            <p class="text-gray-600 mt-2">Admin Panel</p>
+            <h1 class="text-3xl font-bold text-slate-900">Desnky</h1>
+            <p class="text-gray-600 mt-2">Admin Dashboard</p>
         </div>
 
         <form id="loginForm" class="space-y-6">
@@ -18,7 +18,7 @@
                     name="email"
                     required
                     class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500"
-                    placeholder="admin@example.com"
+                    autocomplete="email"
                 >
             </div>
 
@@ -32,13 +32,16 @@
                     name="password"
                     required
                     class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500"
-                    placeholder="Password"
+                    autocomplete="current-password"
                 >
             </div>
 
-            <div class="flex items-center">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
                 <input type="checkbox" id="remember" name="remember" class="w-4 h-4 text-blue-600 rounded">
                 <label for="remember" class="ml-2 text-sm text-gray-600">Remember me</label>
+                </div>
+                <a href="#" class="text-sm text-blue-700 hover:text-blue-800">Forgot password?</a>
             </div>
 
             <div id="errorMessage" class="hidden bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
@@ -51,15 +54,11 @@
 
             <button
                 type="submit"
-                class="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition"
+                class="w-full px-4 py-2 bg-blue-700 text-white rounded-lg hover:bg-blue-800 font-medium transition"
             >
                 Sign In
             </button>
         </form>
-
-        <div class="mt-6 text-center">
-            <p class="text-gray-600 text-sm">Demo Credentials: admin@example.com / password</p>
-        </div>
     </div>
 </div>
 
