@@ -128,14 +128,11 @@
         }
     };
 
-    window.submitForm = function (formSelector, options) {
-        options = options || {};
-
-        var form = document.querySelector(formSelector);
-
-        if (!form) {
+    function bindForm(form, options) {
+        if (!form || form.dataset.ajaxBound === 'true') {
             return;
         }
+        form.dataset.ajaxBound = 'true';
 
         form.addEventListener('submit', function (event) {
             event.preventDefault();
@@ -203,22 +200,19 @@
                     window.hideLoadingSpinner(form);
                 });
         });
+    }
+
+    // Public API: bind every form matching the selector (idempotent).
+    window.submitForm = function (formSelector, options) {
+        options = options || {};
+        document.querySelectorAll(formSelector).forEach(function (form) {
+            bindForm(form, options);
+        });
     };
 
-    document.addEventListener('click', function (event) {
-        var button = event.target.closest('[data-mobile-menu-button]');
-
-        if (!button) {
-            return;
-        }
-
-        var menu = document.querySelector('[data-mobile-menu]');
-
-        if (!menu) {
-            return;
-        }
-
-        var isHidden = menu.classList.toggle('hidden');
-        button.setAttribute('aria-expanded', isHidden ? 'false' : 'true');
+    // Auto-wire newsletter forms (footer appears on every page). Contact pages
+    // wire their own form explicitly with service-interest handling.
+    document.addEventListener('DOMContentLoaded', function () {
+        window.submitForm('[data-newsletter-form]', { resetOnSuccess: true });
     });
 }());

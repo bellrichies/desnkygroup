@@ -8,6 +8,8 @@ use App\Repositories\PageRepository;
 use App\Repositories\PageSectionRepository;
 use App\Repositories\ProjectRepository;
 use App\Repositories\SiteSettingRepository;
+use App\Services\AboutContentService;
+use App\Services\HseContentService;
 use App\Services\ProjectPageContentService;
 use App\Support\DatabaseFactory;
 
@@ -16,7 +18,11 @@ use App\Support\DatabaseFactory;
  */
 class PageController extends BaseController
 {
-    public function __construct(private ?ProjectPageContentService $projectContent = null)
+    public function __construct(
+        private ?ProjectPageContentService $projectContent = null,
+        private ?AboutContentService $aboutContent = null,
+        private ?HseContentService $hseContent = null
+    )
     {
     }
 
@@ -42,46 +48,22 @@ class PageController extends BaseController
 
     public function about(): string
     {
-        return $this->view('frontend/pages/show', [
-            'title' => 'About Desnky Global Resources Ltd',
+        $content = $this->aboutContent()->getContent();
+
+        return $this->view('frontend/pages/about', [
+            'title' => $content['title'],
             'active' => 'about',
-            'content' => '<p>Desnky Global Resources Ltd is a Nigerian corporate services company supporting organizations across engineering, energy, procurement, HSE, ICT and agro value chains.</p><p>Our work is built around practical delivery, clear communication, safety awareness and dependable sourcing for business-critical needs.</p>',
-            'seo' => [
-                'title' => 'About Desnky Global Resources Ltd',
-                'description' => 'Learn about Desnky Global Resources Ltd, a Nigerian company providing engineering, energy, procurement, HSE, ICT and agro services.',
-                'keywords' => 'Desnky Global Resources, Nigerian engineering company, procurement company Lagos, energy services Nigeria',
-                'canonical' => 'https://www.desnkygroup.com/about',
-                'schema' => [
-                    SeoHelper::organizationSchema(),
-                    SeoHelper::breadcrumbSchema([
-                        'Home' => 'https://www.desnkygroup.com/',
-                        'About' => 'https://www.desnkygroup.com/about',
-                    ]),
-                ],
-            ],
-        ]);
+        ] + $content);
     }
 
     public function hse(): string
     {
-        return $this->view('frontend/pages/show', [
-            'title' => 'HSE Policy',
+        $content = $this->hseContent()->getContent();
+
+        return $this->view('frontend/pages/hse', [
+            'title' => $content['title'],
             'active' => 'services',
-            'content' => '<p>Health, safety and environmental responsibility are central to how Desnky Global Resources Ltd plans and delivers work. We support safe operations through risk awareness, appropriate protective equipment, responsible supervision and continuous improvement.</p><p>Our HSE approach prioritizes people, assets, communities and the environment throughout each engagement.</p>',
-            'seo' => [
-                'title' => 'HSE Policy | Desnky Global Resources Ltd',
-                'description' => 'Read the Desnky Global Resources Ltd health, safety and environment commitment for Nigerian business operations.',
-                'keywords' => 'HSE policy Nigeria, safety services Nigeria, health safety environment',
-                'canonical' => 'https://www.desnkygroup.com/hse-policy',
-                'schema' => [
-                    SeoHelper::organizationSchema(),
-                    SeoHelper::breadcrumbSchema([
-                        'Home' => 'https://www.desnkygroup.com/',
-                        'HSE Policy' => 'https://www.desnkygroup.com/hse-policy',
-                    ]),
-                ],
-            ],
-        ]);
+        ] + $content);
     }
 
     public function projects(): string
@@ -135,6 +117,36 @@ class PageController extends BaseController
         );
     }
 
+    private function aboutContent(): AboutContentService
+    {
+        if ($this->aboutContent !== null) {
+            return $this->aboutContent;
+        }
+
+        $connection = DatabaseFactory::make();
+
+        return $this->aboutContent = new AboutContentService(
+            new PageRepository($connection),
+            new PageSectionRepository($connection),
+            new SiteSettingRepository($connection)
+        );
+    }
+
+    private function hseContent(): HseContentService
+    {
+        if ($this->hseContent !== null) {
+            return $this->hseContent;
+        }
+
+        $connection = DatabaseFactory::make();
+
+        return $this->hseContent = new HseContentService(
+            new PageRepository($connection),
+            new PageSectionRepository($connection),
+            new SiteSettingRepository($connection)
+        );
+    }
+
     /**
      * Display a page by slug
      *
@@ -143,13 +155,45 @@ class PageController extends BaseController
      */
     public function show(string $slug): string
     {
-        // In Phase 2+, would query database for page
-        // For now, return demo content
+        $connection = DatabaseFactory::make();
+        $page = (new PageRepository($connection))->findPublishedBySlug($slug);
+
+        if ($page === null) {
+            http_response_code(404);
+
+            return $this->view('frontend/pages/show', [
+                'title' => 'Page Not Found',
+                'active' => '',
+                'content' => '<p>The requested page could not be found.</p>',
+                'seo' => [
+                    'title' => 'Page Not Found | Desnky Global Resources',
+                    'description' => 'The requested Desnky Global Resources page could not be found.',
+                    'robots' => 'noindex, follow',
+                ],
+            ]);
+        }
+
+        $settings = (new SiteSettingRepository($connection))->publicSettings();
+        $baseUrl = rtrim((string) ($settings['site.url'] ?? 'https://www.desnkygroup.com'), '/');
 
         return $this->view('frontend/pages/show', [
-            'title' => ucfirst(str_replace('-', ' ', $slug)),
-            'slug' => $slug,
-            'content' => "Content for page: {$slug}",
+            'title' => (string) ($page['meta_title'] ?: $page['title']),
+            'active' => (string) $page['slug'],
+            'content' => (string) ($page['content'] ?? ''),
+            'seo' => [
+                'title' => (string) ($page['meta_title'] ?: $page['title']),
+                'description' => (string) ($page['meta_description'] ?: $page['excerpt'] ?: ''),
+                'keywords' => (string) ($page['meta_keywords'] ?: ''),
+                'canonical' => $baseUrl . '/' . $slug,
+                'image' => (string) ($page['featured_image'] ?? ''),
+                'schema' => [
+                    SeoHelper::organizationSchema(),
+                    SeoHelper::breadcrumbSchema([
+                        'Home' => $baseUrl . '/',
+                        (string) $page['title'] => $baseUrl . '/' . $slug,
+                    ]),
+                ],
+            ],
         ]);
     }
 }

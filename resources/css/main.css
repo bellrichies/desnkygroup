@@ -3,11 +3,26 @@
 @tailwind utilities;
 
 :root {
-  --color-brand-navy: #0f2742;
-  --color-brand-blue: #1769aa;
-  --color-brand-gold: #d9a441;
-  --color-brand-green: #207a4c;
-  --color-brand-surface: #f6f8fb;
+  /* Brand */
+  --color-brand-primary: #6c3483;
+  --color-brand-primary-700: #58296b;
+  --color-brand-primary-200: #d8c4e4;
+  --color-brand-primary-50: #f3edf7;
+  --color-brand-secondary: #008000;
+  --color-brand-dark: #1d1228;
+  --color-brand-darker: #150d1d;
+  --color-brand-surface: #f7f5fa;
+
+  /* Legacy aliases (kept for back-compat with existing rules) */
+  --color-brand-navy: var(--color-brand-dark);
+  --color-brand-blue: var(--color-brand-primary);
+  --color-brand-gold: var(--color-brand-primary-200);
+  --color-brand-green: var(--color-brand-secondary);
+}
+
+/* Alpine.js cloak — hide declarative UI until Alpine initialises. */
+[x-cloak] {
+  display: none !important;
 }
 
 @layer base {
@@ -22,34 +37,351 @@
   a {
     @apply transition-colors;
   }
+
+  /* Respect reduced-motion: neutralise non-essential animation globally. */
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
 }
 
 @layer components {
+  /* ---------------------------------------------------------------------------
+     Layout
+  --------------------------------------------------------------------------- */
   .container-page {
     @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8;
   }
 
+  .section-band {
+    @apply py-16 sm:py-20;
+  }
+
+  /* ---------------------------------------------------------------------------
+     Buttons — the CTA is always purple (inverted to white surface on dark).
+  --------------------------------------------------------------------------- */
   .btn-primary {
-    @apply inline-flex items-center justify-center rounded-md bg-desnky-blue px-5 py-3 text-sm font-semibold text-white shadow-sm hover:bg-desnky-navy focus:outline-none focus:ring-2 focus:ring-desnky-blue focus:ring-offset-2;
+    @apply inline-flex items-center justify-center gap-2 rounded-md bg-desnky-primary px-5 py-3 text-sm font-semibold text-white shadow-sm transition duration-base ease-brand hover:-translate-y-0.5 hover:bg-desnky-primary-700 focus:outline-none focus:ring-2 focus:ring-desnky-primary focus:ring-offset-2;
+  }
+
+  /* Primary action placed on dark backgrounds (heroes, CTA bands, transparent header).
+     Inverted treatment of the purple primary CTA: white surface + purple label, so the
+     CTA reads as the same brand color everywhere while staying AA-compliant on the dark anchor
+     (solid purple lacks contrast on dark). */
+  .btn-on-dark {
+    @apply inline-flex items-center justify-center gap-2 rounded-md bg-white px-5 py-3 text-sm font-semibold text-desnky-primary shadow-sm transition duration-base ease-brand hover:-translate-y-0.5 hover:bg-desnky-primary-50 hover:text-desnky-primary-700 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-desnky-dark;
   }
 
   .btn-secondary {
-    @apply inline-flex items-center justify-center rounded-md border border-desnky-navy px-5 py-3 text-sm font-semibold text-desnky-navy hover:bg-desnky-navy hover:text-white focus:outline-none focus:ring-2 focus:ring-desnky-navy focus:ring-offset-2;
+    @apply inline-flex items-center justify-center gap-2 rounded-md border border-desnky-dark px-5 py-3 text-sm font-semibold text-desnky-dark transition duration-base ease-brand hover:bg-desnky-dark hover:text-white focus:outline-none focus:ring-2 focus:ring-desnky-dark focus:ring-offset-2;
   }
 
+  /* Secondary action on dark backgrounds (outline-white). */
+  .btn-secondary-on-dark {
+    @apply inline-flex items-center justify-center gap-2 rounded-md border border-white/70 px-5 py-3 text-sm font-semibold text-white transition duration-base ease-brand hover:bg-white hover:text-desnky-dark focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-desnky-dark;
+  }
+
+  .btn-danger {
+    @apply inline-flex items-center justify-center gap-2 rounded-md bg-red-700 px-5 py-3 text-sm font-semibold text-white shadow-sm transition duration-base ease-brand hover:bg-red-800 focus:outline-none focus:ring-2 focus:ring-red-700 focus:ring-offset-2;
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center gap-1.5 text-sm font-semibold text-desnky-primary transition-colors hover:text-desnky-primary-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-desnky-primary focus-visible:ring-offset-2;
+  }
+
+  .btn-icon {
+    @apply inline-flex h-11 w-11 items-center justify-center rounded-md text-desnky-ink transition duration-base ease-brand hover:bg-desnky-surface focus:outline-none focus-visible:ring-2 focus-visible:ring-desnky-primary;
+  }
+
+  .btn[disabled],
+  button[disabled] {
+    @apply cursor-not-allowed opacity-60;
+  }
+
+  /* ---------------------------------------------------------------------------
+     Forms
+  --------------------------------------------------------------------------- */
   .form-field {
-    @apply block w-full rounded-md border-gray-300 text-desnky-ink shadow-sm focus:border-desnky-blue focus:ring-desnky-blue;
+    @apply block w-full rounded-md border-gray-300 text-desnky-ink shadow-sm transition-colors focus:border-desnky-primary focus:ring-desnky-primary;
+  }
+
+  .form-field[aria-invalid="true"] {
+    @apply border-red-500 focus:border-red-500 focus:ring-red-500;
   }
 
   .form-label {
     @apply mb-2 block text-sm font-semibold text-desnky-ink;
   }
 
+  .form-hint {
+    @apply mt-1 text-sm text-desnky-muted;
+  }
+
   .form-error {
     @apply mt-2 text-sm text-red-700;
   }
 
-  .section-band {
-    @apply py-16 sm:py-20;
+  /* ---------------------------------------------------------------------------
+     Typographic helpers
+  --------------------------------------------------------------------------- */
+  .eyebrow {
+    @apply text-sm font-semibold uppercase tracking-wide text-desnky-primary;
   }
+
+  .eyebrow-on-dark {
+    @apply text-sm font-semibold uppercase tracking-wide text-desnky-primary-200;
+  }
+
+  .eyebrow-success {
+    @apply text-sm font-semibold uppercase tracking-wide text-desnky-secondary;
+  }
+
+  .section-heading {
+    @apply text-3xl font-bold leading-tight text-desnky-dark sm:text-4xl;
+  }
+
+  .section-lead {
+    @apply mt-4 max-w-2xl text-lg leading-8 text-desnky-muted;
+  }
+
+  /* ---------------------------------------------------------------------------
+     Cards
+  --------------------------------------------------------------------------- */
+  .card {
+    @apply overflow-hidden rounded-lg border border-gray-200 bg-white shadow-card;
+  }
+
+  .card-interactive {
+    @apply card transition duration-base ease-brand hover:-translate-y-1 hover:shadow-lg;
+  }
+
+  .card-body {
+    @apply p-6;
+  }
+
+  /* Icon tile used on service / benefit / sector cards. */
+  .icon-tile {
+    @apply inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-md bg-desnky-primary-50 text-desnky-primary;
+  }
+
+  .icon-tile-success {
+    @apply inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-md bg-desnky-secondary-50 text-desnky-secondary;
+  }
+
+  /* ---------------------------------------------------------------------------
+     Badges / pills
+  --------------------------------------------------------------------------- */
+  .badge {
+    @apply inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold;
+  }
+
+  .badge-success {
+    @apply badge bg-desnky-secondary-50 text-desnky-secondary-700;
+  }
+
+  .badge-warning {
+    @apply badge bg-amber-50 text-amber-700;
+  }
+
+  .badge-danger {
+    @apply badge bg-red-50 text-red-700;
+  }
+
+  .badge-brand {
+    @apply badge bg-desnky-primary-50 text-desnky-primary;
+  }
+
+  /* Filter chip (projects / shop). */
+  .chip {
+    @apply inline-flex shrink-0 items-center rounded-full border border-gray-300 px-4 py-2 text-sm font-semibold text-desnky-ink transition-colors hover:border-desnky-primary hover:text-desnky-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-desnky-primary;
+  }
+
+  .chip-active {
+    @apply border-desnky-primary bg-desnky-primary text-white hover:text-white;
+  }
+
+  /* ---------------------------------------------------------------------------
+     Alerts
+  --------------------------------------------------------------------------- */
+  .alert {
+    @apply flex items-start gap-3 rounded-md border-l-4 p-4 text-sm;
+  }
+
+  .alert-success {
+    @apply alert border-desnky-secondary bg-desnky-secondary-50 text-desnky-secondary-700;
+  }
+
+  .alert-error {
+    @apply alert border-red-600 bg-red-50 text-red-800;
+  }
+
+  .alert-warning {
+    @apply alert border-amber-500 bg-amber-50 text-amber-800;
+  }
+
+  .alert-info {
+    @apply alert border-desnky-primary bg-desnky-primary-50 text-desnky-primary-700;
+  }
+
+  /* ---------------------------------------------------------------------------
+     Navigation: desktop mega-menu + mobile drawer
+  --------------------------------------------------------------------------- */
+  .nav-link {
+    @apply text-sm font-semibold text-desnky-ink transition-colors hover:text-desnky-primary;
+  }
+
+  .nav-link-active {
+    @apply text-desnky-primary;
+  }
+
+  .mega-panel {
+    @apply absolute left-1/2 top-full z-dropdown mt-3 w-[min(56rem,calc(100vw-2rem))] -translate-x-1/2 rounded-lg border border-gray-200 bg-white p-6 shadow-lg;
+  }
+
+  .mega-item {
+    @apply flex items-start gap-3 rounded-md p-3 transition-colors hover:bg-desnky-surface focus:outline-none focus-visible:ring-2 focus-visible:ring-desnky-primary;
+  }
+
+  .drawer-link {
+    @apply block rounded-md px-3 py-3 text-base font-semibold text-desnky-ink transition-colors hover:bg-desnky-surface;
+  }
+
+  /* ---------------------------------------------------------------------------
+     Sticky mobile action bar (Call · WhatsApp · Quote)
+  --------------------------------------------------------------------------- */
+  .mobile-action-bar {
+    @apply fixed inset-x-0 bottom-0 z-40 grid grid-cols-3 gap-px border-t border-gray-200 bg-white shadow-[0_-8px_30px_rgba(29,18,40,0.12)] lg:hidden;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .mobile-action-bar__item {
+    @apply flex flex-col items-center justify-center gap-1 py-2.5 text-xs font-semibold text-desnky-ink;
+    min-height: 56px;
+  }
+
+  /* ---------------------------------------------------------------------------
+     Prose (CMS / legal / HSE long-form) — scoped, no plugin dependency.
+  --------------------------------------------------------------------------- */
+  .prose-desnky {
+    @apply max-w-3xl text-base leading-7 text-desnky-ink;
+  }
+
+  .prose-desnky h2 {
+    @apply mt-10 text-2xl font-bold text-desnky-dark;
+  }
+
+  .prose-desnky h3 {
+    @apply mt-8 text-xl font-bold text-desnky-dark;
+  }
+
+  .prose-desnky p {
+    @apply mt-4 leading-7 text-desnky-ink;
+  }
+
+  .prose-desnky ul {
+    @apply mt-4 list-disc space-y-2 pl-6 text-desnky-ink;
+  }
+
+  .prose-desnky ol {
+    @apply mt-4 list-decimal space-y-2 pl-6 text-desnky-ink;
+  }
+
+  .prose-desnky a {
+    @apply font-semibold text-desnky-primary underline-offset-2 hover:underline;
+  }
+
+  .prose-desnky strong {
+    @apply font-semibold text-desnky-dark;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Scroll-reveal — progressive enhancement. Hidden state only applies once JS
+   has flagged support (html.js); without JS everything is visible.
+--------------------------------------------------------------------------- */
+.js [data-reveal] {
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1), transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.js [data-reveal].is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .js [data-reveal] {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
+.site-header {
+  transition: background-color 220ms ease, border-color 220ms ease, box-shadow 220ms ease, backdrop-filter 220ms ease;
+}
+
+.site-header--home {
+  position: fixed;
+  left: 0;
+  right: 0;
+}
+
+.site-header--transparent {
+  border-color: transparent;
+  background-color: transparent;
+  box-shadow: none;
+  backdrop-filter: blur(0);
+}
+
+.site-header--scrolled {
+  border-color: rgb(229 231 235);
+  background-color: rgb(255 255 255 / 0.95);
+  box-shadow: 0 12px 30px rgb(15 39 66 / 0.08);
+  backdrop-filter: blur(8px);
+}
+
+.site-header--transparent .site-header__mark {
+  background-color: rgb(255 255 255 / 0.15);
+  color: #fff;
+  box-shadow: 0 0 0 1px rgb(255 255 255 / 0.35);
+}
+
+.site-header--transparent .site-header__name,
+.site-header--transparent .site-header__menu-button,
+.site-header--transparent .site-header__nav-link {
+  color: #fff;
+}
+
+.site-header--transparent .site-header__meta {
+  color: rgb(255 255 255 / 0.8);
+}
+
+.site-header--transparent .site-header__nav-link:hover {
+  color: var(--color-brand-gold);
+}
+
+.site-header--transparent .site-header__menu-button:hover {
+  background-color: rgb(255 255 255 / 0.1);
+}
+
+.site-header--transparent .btn-primary {
+  background-color: #fff;
+  color: var(--color-brand-primary);
+}
+
+.site-header--transparent .btn-primary:hover {
+  background-color: var(--color-brand-primary-50);
+  color: var(--color-brand-primary-700);
 }

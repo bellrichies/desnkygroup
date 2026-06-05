@@ -2,6 +2,8 @@
 
 namespace App\Controllers;
 
+use App\Repositories\SiteSettingRepository;
+use App\Support\DatabaseFactory;
 use App\View;
 use App\Exceptions\ValidationException;
 
@@ -26,10 +28,62 @@ class BaseController
         // Auto-detect layout based on template path
         if (strpos($template, 'frontend') === 0 || strpos($template, 'frontend/') === 0) {
             $view->setLayout('frontend/layouts/app');
+            // Share normalised public site settings (brand, contact, socials) with every
+            // frontend view + partial so chrome reads from the CMS, not hardcoded values.
+            $view->share('site', $this->siteSettings());
         } elseif (strpos($template, 'admin') === 0 || strpos($template, 'admin/') === 0) {
             $view->setLayout('admin/layouts/app');
         }
         return $view->render($template, $data);
+    }
+
+    /**
+     * @var array<string, mixed>|null Per-request cache of normalised public settings.
+     */
+    private static ?array $siteSettingsCache = null;
+
+    /**
+     * Normalised public site settings with safe fallbacks, consumed by the global
+     * frontend chrome (header, footer, contact, mobile action bar).
+     *
+     * @return array<string, mixed>
+     */
+    protected function siteSettings(): array
+    {
+        if (self::$siteSettingsCache !== null) {
+            return self::$siteSettingsCache;
+        }
+
+        $raw = [];
+        try {
+            $raw = (new SiteSettingRepository(DatabaseFactory::make()))->publicSettings();
+        } catch (\Throwable) {
+            $raw = [];
+        }
+
+        $value = static function (string $key, string $default) use ($raw): string {
+            $v = trim((string) ($raw[$key] ?? ''));
+            return $v !== '' ? $v : $default;
+        };
+
+        $phone = $value('site.phone', '+2340000000000');
+
+        return self::$siteSettingsCache = [
+            'name' => $value('site.name', 'Desnky Global Resources Ltd'),
+            'url' => $value('site.url', 'https://www.desnkygroup.com/'),
+            'email' => $value('site.email', 'info@desnkygroup.com'),
+            'phone' => $phone,
+            'phone_display' => $value('site.phone_display', $phone),
+            'whatsapp' => preg_replace('/\D+/', '', $value('site.whatsapp', $phone)),
+            'address' => $value('site.address', 'Lagos, Nigeria'),
+            'hours' => $value('site.hours', 'Mon–Fri, 9:00 AM – 5:00 PM'),
+            'social' => array_filter([
+                'linkedin' => $value('social.linkedin', 'https://www.linkedin.com/company/desnkygroup'),
+                'x' => $value('social.x', 'https://x.com/desnkygroup'),
+                'facebook' => $value('social.facebook', 'https://www.facebook.com/desnkygroup'),
+                'instagram' => $value('social.instagram', 'https://www.instagram.com/desnkygroup'),
+            ]),
+        ];
     }
 
     /**

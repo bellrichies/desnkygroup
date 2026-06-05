@@ -1,9 +1,12 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="no-js">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#0f2742">
+    <meta name="theme-color" content="#1d1228">
+    <script>document.documentElement.classList.remove('no-js');document.documentElement.classList.add('js');</script>
+    <link rel="icon" type="image/png" href="/assets/images/favicon.png">
+    <link rel="apple-touch-icon" href="/assets/images/favicon.png">
     <?php echo $this->partial('frontend/partials/seo-meta', [
         'seo' => $seo ?? [],
         'title' => $title ?? 'Desnky Global Resources Ltd',
@@ -27,7 +30,17 @@
 
     <?php echo $this->partial('frontend/partials/footer'); ?>
 
+    <?php echo $this->partial('frontend/partials/mobile-action-bar', ['active' => $active ?? '']); ?>
+
+    <!-- Live region container for AJAX toast notifications -->
+    <div data-toast-container aria-live="polite" aria-atomic="true"></div>
+
+    <script src="/assets/js/lib/alpine-collapse.min.js" defer></script>
+    <script src="/assets/js/lib/alpine.min.js" defer></script>
     <script src="/assets/js/ajax-handler.js" defer></script>
+    <script src="/assets/js/header-scroll.js" defer></script>
+    <script src="/assets/js/media.js" defer></script>
+    <script src="/assets/js/shop.js" defer></script>
     <script src="/assets/js/analytics.js" defer></script>
     <?php echo $scripts ?? ''; ?>
 </body>

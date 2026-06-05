@@ -70,6 +70,36 @@ class FrontendRenderingTest extends TestCase
         $this->assertImagesHaveAltText($html);
     }
 
+    public function testAboutPageRendersDatabaseBackedSections(): void
+    {
+        $_SERVER['REQUEST_URI'] = '/about';
+
+        $html = (new PageController())->about();
+
+        $this->assertSame(1, substr_count(strtolower($html), '<h1'));
+        $this->assertStringContainsString('Built for practical delivery across Nigeria', $html);
+        $this->assertStringContainsString('A multi-sector partner focused on dependable execution', $html);
+        $this->assertStringContainsString('How we work with clients', $html);
+        $this->assertStringContainsString('Desmond Nkwocha', $html);
+        $this->assertStringContainsString('Project Coordinator', $html);
+        $this->assertStringContainsString('BreadcrumbList', $html);
+        $this->assertImagesHaveAltText($html);
+    }
+
+    public function testHsePolicyPageRendersDatabaseBackedSections(): void
+    {
+        $_SERVER['REQUEST_URI'] = '/hse-policy';
+
+        $html = (new PageController())->hse();
+
+        $this->assertSame(1, substr_count(strtolower($html), '<h1'));
+        $this->assertStringContainsString('Corporate Health, Safety and Environment (HSE) Policy', $html);
+        $this->assertStringContainsString('Management shall ensure the following', $html);
+        $this->assertStringContainsString('zero-compromise approach toward health, safety, and environmental standards', $html);
+        $this->assertStringContainsString('Policy communication and accessibility', $html);
+        $this->assertImagesHaveAltText($html);
+    }
+
     public function testServiceDetailRendersStructuredDatabaseContent(): void
     {
         $_SERVER['REQUEST_URI'] = '/services/engineering';

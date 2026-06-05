@@ -46,6 +46,8 @@ class HomeContentService
             'hseCommitment' => $sections['hse_commitment'] ?? [],
             'projectsIntro' => $sections['projects_intro'] ?? [],
             'clientsSection' => $sections['clients'] ?? [],
+            'stats' => $sections['stats'] ?? [],
+            'testimonials' => $sections['testimonials']['items'] ?? [],
             'cta' => $sections['cta'] ?? [],
             'services' => $this->publishedServices(),
             'projects' => array_slice($this->publishedProjects(), 0, 3),
@@ -100,6 +102,7 @@ class HomeContentService
                 'title' => (string) $service['title'],
                 'icon' => (string) ($service['icon'] ?? 'SR'),
                 'summary' => (string) ($service['summary'] ?? ''),
+                'image' => (string) ($service['featured_image'] ?? ''),
             ];
         }, $this->services->published());
     }

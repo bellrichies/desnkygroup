@@ -111,10 +111,18 @@ if ($superAdminRole !== null) {
 }
 
 $settings = [
-    ['site.name', 'Desnky Global Resources', 'string', 1],
+    ['site.name', 'Desnky Global Resources Ltd', 'string', 1],
     ['site.url', 'https://www.desnkygroup.com/', 'string', 1],
     ['site.email', 'info@desnkygroup.com', 'string', 1],
-    ['site.phone', '', 'string', 1],
+    ['site.phone', '+2340000000000', 'string', 1],
+    ['site.phone_display', '+234 000 000 0000', 'string', 1],
+    ['site.whatsapp', '2340000000000', 'string', 1],
+    ['site.address', 'Lagos, Nigeria', 'string', 1],
+    ['site.hours', 'Mon–Fri, 9:00 AM – 5:00 PM', 'string', 1],
+    ['social.linkedin', 'https://www.linkedin.com/company/desnkygroup', 'string', 1],
+    ['social.x', 'https://x.com/desnkygroup', 'string', 1],
+    ['social.facebook', 'https://www.facebook.com/desnkygroup', 'string', 1],
+    ['social.instagram', 'https://www.instagram.com/desnkygroup', 'string', 1],
 ];
 
 foreach ($settings as $setting) {
@@ -314,6 +322,401 @@ foreach ($homeSections as [$sectionKey, $heading, $body, $sortOrder]) {
         "INSERT INTO page_sections (page_id, section_key, heading, body, sort_order)
          VALUES (?, ?, ?, ?, ?)",
         [$homeId, $sectionKey, $heading, $encode($body), $sortOrder]
+    );
+}
+
+$aboutPage = [
+    'title' => 'About Desnky Global Resources Ltd',
+    'slug' => 'about',
+    'content' => 'CMS-managed about page assembled from structured page sections.',
+    'excerpt' => 'Learn about Desnky Global Resources Ltd, a Nigerian company supporting engineering, energy, procurement, HSE, ICT and agro value-chain needs.',
+    'meta_title' => 'About Desnky Global Resources Ltd',
+    'meta_description' => 'Learn about Desnky Global Resources Ltd, a Nigerian corporate services company supporting engineering, energy, procurement, HSE, ICT and agro value-chain operations.',
+    'meta_keywords' => 'Desnky Global Resources, Nigerian engineering company, procurement company Lagos, energy services Nigeria, HSE services Nigeria',
+    'featured_image' => 'https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=1800&q=80',
+];
+
+$connection->execute(
+    "INSERT INTO pages
+        (title, slug, content, excerpt, meta_title, meta_description, meta_keywords, featured_image,
+         is_published, published_by, published_at, created_by)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1, ?, NOW(), ?)
+     ON DUPLICATE KEY UPDATE
+        title = VALUES(title),
+        content = VALUES(content),
+        excerpt = VALUES(excerpt),
+        meta_title = VALUES(meta_title),
+        meta_description = VALUES(meta_description),
+        meta_keywords = VALUES(meta_keywords),
+        featured_image = VALUES(featured_image),
+        is_published = 1,
+        published_by = VALUES(published_by),
+        published_at = COALESCE(published_at, NOW())",
+    [
+        $aboutPage['title'],
+        $aboutPage['slug'],
+        $aboutPage['content'],
+        $aboutPage['excerpt'],
+        $aboutPage['meta_title'],
+        $aboutPage['meta_description'],
+        $aboutPage['meta_keywords'],
+        $aboutPage['featured_image'],
+        $adminId,
+        $adminId,
+    ]
+);
+
+$about = $connection->queryOne("SELECT id FROM pages WHERE slug = ?", ['about']);
+$aboutId = (int) ($about['id'] ?? 0);
+
+$aboutSections = [
+    [
+        'hero',
+        'Built for practical delivery across Nigeria',
+        [
+            'eyebrow' => 'About Desnky Global Resources Ltd',
+            'text' => 'We support organizations that need dependable sourcing, technical coordination, safety awareness and operations support across engineering, energy, procurement, HSE, ICT and agro value chains.',
+            'image' => 'https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=1800&q=80',
+            'image_alt' => 'Professional operations team in a modern business environment',
+            'breadcrumb_home_label' => 'Home',
+            'breadcrumb_current_label' => 'About',
+        ],
+        10,
+    ],
+    [
+        'overview',
+        'A multi-sector partner focused on dependable execution',
+        [
+            'eyebrow' => 'Company profile',
+            'paragraphs' => [
+                'Desnky Global Resources Ltd is a Nigerian corporate services company helping public and private organizations move critical work from requirement to delivery. Our engagements span technical support, procurement coordination, HSE readiness, ICT enablement and agro-related supply needs.',
+                'The company is structured around practical problem solving: clarify the requirement, coordinate the right resources, communicate progress clearly and close each engagement with attention to documentation, quality and safety.',
+                'Our team works with industrial operators, construction firms, commercial buyers, energy-sector stakeholders, ICT users and food value-chain participants that need responsive support without unnecessary complexity.',
+            ],
+        ],
+        20,
+    ],
+    [
+        'mission_vision',
+        'Mission and vision',
+        [
+            'mission' => [
+                'label' => 'Mission',
+                'heading' => 'To deliver reliable multi-sector support that keeps operations moving.',
+                'text' => 'We help clients source, plan, coordinate and complete business-critical work with practical communication, safety awareness and accountability.',
+            ],
+            'vision' => [
+                'label' => 'Vision',
+                'heading' => 'To be a trusted Nigerian partner for integrated operational services.',
+                'text' => 'We aim to be known for dependable delivery, clear follow-through and adaptable service across the industries we support.',
+            ],
+        ],
+        30,
+    ],
+    [
+        'sectors',
+        'The sectors we support',
+        [
+            'eyebrow' => 'Service coverage',
+            'text' => 'Our work is organized around complementary sectors so clients can access coordinated support from one responsive partner.',
+            'items' => [
+                ['code' => 'EN', 'title' => 'Engineering', 'text' => 'Electrical, mechanical and industrial support for maintenance, installation and project coordination needs.'],
+                ['code' => 'EG', 'title' => 'Energy', 'text' => 'Equipment sourcing, operational support and logistics coordination for energy-sector and power-related requirements.'],
+                ['code' => 'PR', 'title' => 'Procurement', 'text' => 'General and industrial procurement with specification review, supplier communication and delivery follow-up.'],
+                ['code' => 'HS', 'title' => 'HSE', 'text' => 'Safety materials, workplace readiness support and practical health, safety and environment coordination.'],
+                ['code' => 'IT', 'title' => 'ICT', 'text' => 'Business technology support, infrastructure coordination and digital enablement for growing teams.'],
+                ['code' => 'AG', 'title' => 'Agro Value Chain', 'text' => 'Agro product sourcing, processing support and supply coordination for buyers and value-chain participants.'],
+            ],
+        ],
+        40,
+    ],
+    [
+        'operating_model',
+        'How we work with clients',
+        [
+            'eyebrow' => 'Operating model',
+            'text' => 'Each engagement follows a clear workflow that keeps requirements, responsibilities, timelines and delivery expectations visible.',
+            'steps' => [
+                ['title' => 'Understand', 'text' => 'We review the requirement, context, constraints and expected outcome before recommending next steps.'],
+                ['title' => 'Plan', 'text' => 'We define scope, resources, sourcing needs and practical delivery milestones.'],
+                ['title' => 'Coordinate', 'text' => 'We manage communication with vendors, technical parties and client stakeholders through execution.'],
+                ['title' => 'Close out', 'text' => 'We document delivery, confirm outcomes and capture lessons for continuous improvement.'],
+            ],
+        ],
+        50,
+    ],
+    [
+        'values',
+        'The principles behind our delivery',
+        [
+            'eyebrow' => 'Our values',
+            'items' => [
+                ['title' => 'Reliability', 'text' => 'We prioritize commitments that can be tracked, communicated and delivered responsibly.'],
+                ['title' => 'Safety awareness', 'text' => 'We consider people, equipment, environment and worksite realities when supporting execution.'],
+                ['title' => 'Clear communication', 'text' => 'We keep clients informed with practical updates and direct follow-up.'],
+                ['title' => 'Adaptability', 'text' => 'We respond to changing requirements while keeping scope, quality and accountability visible.'],
+            ],
+        ],
+        60,
+    ],
+    [
+        'stats',
+        'Operational focus',
+        [
+            'items' => [
+                ['value' => '6', 'label' => 'Core service sectors'],
+                ['value' => '4', 'label' => 'Delivery workflow stages'],
+                ['value' => 'NG', 'label' => 'Nigeria-focused operations'],
+            ],
+        ],
+        70,
+    ],
+    [
+        'team',
+        'Our Team',
+        [
+            'eyebrow' => 'Leadership',
+            'text' => 'Desnky Global Resources Limited is led by a multidisciplinary team supporting operations, finance, technology, projects and business development.',
+            'members' => [
+                [
+                    'name' => 'Desmond Nkwocha',
+                    'role' => 'MD/CEO',
+                    'image' => 'https://www.desnkygroup.com/images/1.jpg',
+                    'image_alt' => 'Desmond Nkwocha, MD/CEO',
+                ],
+                [
+                    'name' => 'Husteyn Alphat',
+                    'role' => 'Project Coordinator',
+                    'image' => 'https://www.desnkygroup.com/images/2.jpg',
+                    'image_alt' => 'Husteyn Alphat, Project Coordinator',
+                ],
+                [
+                    'name' => 'Patrick Osiegbu',
+                    'role' => 'Financial Director',
+                    'image' => 'https://www.desnkygroup.com/images/4.jpg',
+                    'image_alt' => 'Patrick Osiegbu, Financial Director',
+                ],
+                [
+                    'name' => 'Adeoye Bello',
+                    'role' => 'IT Director',
+                    'image' => 'https://www.desnkygroup.com/images/3.jpg',
+                    'image_alt' => 'Adeoye Bello, IT Director',
+                ],
+                [
+                    'name' => 'Blessing Desmond',
+                    'role' => 'Business Director',
+                    'image' => 'https://www.desnkygroup.com/images/user1.jpg',
+                    'image_alt' => 'Blessing Desmond, Business Director',
+                ],
+                [
+                    'name' => 'Virenra Bhardwai',
+                    'role' => 'Executive Director',
+                    'image' => 'https://www.desnkygroup.com/images/user1.jpg',
+                    'image_alt' => 'Virenra Bhardwai, Executive Director',
+                ],
+                [
+                    'name' => 'Charles Mofunanya',
+                    'role' => 'Project Director',
+                    'image' => 'https://www.desnkygroup.com/images/user1.jpg',
+                    'image_alt' => 'Charles Mofunanya, Project Director',
+                ],
+            ],
+        ],
+        75,
+    ],
+    [
+        'cta',
+        'Start a practical conversation',
+        [
+            'text' => 'Share your requirement and our team will review the best way to support your sourcing, technical, safety, ICT or agro-related need.',
+            'primary_cta_label' => 'Contact Us',
+            'primary_cta_url' => '/contact',
+        ],
+        80,
+    ],
+];
+
+foreach ($aboutSections as [$sectionKey, $heading, $body, $sortOrder]) {
+    $existingSection = $connection->queryOne(
+        "SELECT id FROM page_sections WHERE page_id = ? AND section_key = ?",
+        [$aboutId, $sectionKey]
+    );
+
+    if ($existingSection !== null) {
+        $connection->execute(
+            "UPDATE page_sections
+             SET heading = ?, body = ?, sort_order = ?
+             WHERE id = ?",
+            [$heading, $encode($body), $sortOrder, $existingSection['id']]
+        );
+        continue;
+    }
+
+    $connection->execute(
+        "INSERT INTO page_sections (page_id, section_key, heading, body, sort_order)
+         VALUES (?, ?, ?, ?, ?)",
+        [$aboutId, $sectionKey, $heading, $encode($body), $sortOrder]
+    );
+}
+
+$hsePage = [
+    'title' => 'Corporate Health, Safety and Environment (HSE) Policy',
+    'slug' => 'hse-policy',
+    'content' => 'CMS-managed HSE policy page assembled from structured page sections.',
+    'excerpt' => 'Read the Desnky Global Resources Limited corporate Health, Safety and Environment policy for safe, responsible and environmentally sustainable operations.',
+    'meta_title' => 'Corporate HSE Policy | Desnky Global Resources Limited',
+    'meta_description' => 'Read the Desnky Global Resources Limited corporate Health, Safety and Environment policy covering compliance, PPE, training, zero-compromise safety and environmental stewardship.',
+    'meta_keywords' => 'Corporate HSE policy Nigeria, health safety environment policy, workplace safety Nigeria, environmental stewardship, Desnky Global Resources Limited',
+    'featured_image' => 'https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?auto=format&fit=crop&w=1800&q=80',
+];
+
+$connection->execute(
+    "INSERT INTO pages
+        (title, slug, content, excerpt, meta_title, meta_description, meta_keywords, featured_image,
+         is_published, published_by, published_at, created_by)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1, ?, NOW(), ?)
+     ON DUPLICATE KEY UPDATE
+        title = VALUES(title),
+        content = VALUES(content),
+        excerpt = VALUES(excerpt),
+        meta_title = VALUES(meta_title),
+        meta_description = VALUES(meta_description),
+        meta_keywords = VALUES(meta_keywords),
+        featured_image = VALUES(featured_image),
+        is_published = 1,
+        published_by = VALUES(published_by),
+        published_at = COALESCE(published_at, NOW())",
+    [
+        $hsePage['title'],
+        $hsePage['slug'],
+        $hsePage['content'],
+        $hsePage['excerpt'],
+        $hsePage['meta_title'],
+        $hsePage['meta_description'],
+        $hsePage['meta_keywords'],
+        $hsePage['featured_image'],
+        $adminId,
+        $adminId,
+    ]
+);
+
+$hse = $connection->queryOne("SELECT id FROM pages WHERE slug = ?", ['hse-policy']);
+$hseId = (int) ($hse['id'] ?? 0);
+
+$hseSections = [
+    [
+        'hero',
+        'Corporate Health, Safety and Environment (HSE) Policy',
+        [
+            'eyebrow' => 'HSE Policy',
+            'text' => 'Desnky Global Resources Limited is committed to safe, responsible and environmentally sustainable business operations across every area of our work.',
+            'image' => 'https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?auto=format&fit=crop&w=1800&q=80',
+            'image_alt' => 'Safety equipment and industrial worksite preparation',
+            'breadcrumb_home_label' => 'Home',
+            'breadcrumb_current_label' => 'HSE Policy',
+        ],
+        10,
+    ],
+    [
+        'policy_statement',
+        'Our corporate HSE commitment',
+        [
+            'eyebrow' => 'Policy statement',
+            'image' => 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=1200&q=80',
+            'image_alt' => 'Industrial team reviewing safety planning documents',
+            'paragraphs' => [
+                'At Desnky Global Resources Limited, we are fully committed to protecting the health, safety, and well-being of our employees, contractors, clients, stakeholders, host communities, and the environment in which we operate.',
+                'We recognize that effective Health, Safety, and Environmental (HSE) management is fundamental to the success and sustainability of our business operations.',
+            ],
+        ],
+        20,
+    ],
+    [
+        'objective',
+        'Our HSE objective',
+        [
+            'eyebrow' => 'Objective',
+            'text' => 'Our objective is to conduct all business activities in a safe, responsible, and environmentally sustainable manner while complying with all applicable local, national, and international laws, regulations, standards, and industry best practices governing our operations.',
+            'image' => 'https://images.unsplash.com/photo-1504917595217-d4dc5ebe6122?auto=format&fit=crop&w=1200&q=80',
+            'image_alt' => 'Industrial site representing responsible operations and compliance',
+        ],
+        30,
+    ],
+    [
+        'management_commitments',
+        'Management shall ensure the following',
+        [
+            'eyebrow' => 'Management commitments',
+            'text' => 'To achieve this commitment, Management of Desnky Global Resources Limited shall ensure the following:',
+            'image' => 'https://images.unsplash.com/photo-1581092795360-fd1ca04f0952?auto=format&fit=crop&w=1200&q=80',
+            'image_alt' => 'Safety-focused team coordinating worksite responsibilities',
+            'items' => [
+                ['title' => 'Integrate HSE into operations', 'text' => 'Integrate Health, Safety, and Environmental requirements into every stage of our business and operational processes, including project bidding and tendering, planning, design, procurement, recruitment, promotion, project execution, operations, and maintenance activities. All activities shall align with and support our HSE objectives and standards.'],
+                ['title' => 'Ensure compliance', 'text' => 'Ensure full compliance with all applicable local, state, federal, and international HSE laws, regulations, codes, and statutory requirements relevant to our operations.'],
+                ['title' => 'Provide resources and PPE', 'text' => 'Provide adequate and timely resources, tools, personal protective equipment (PPE), welfare facilities, and emergency response arrangements necessary for employees and contractors to perform their duties safely and effectively.'],
+                ['title' => 'Promote competence and awareness', 'text' => 'Promote continuous training, retraining, competency development, and HSE awareness for all employees to ensure that only qualified and competent personnel undertake assigned tasks and responsibilities.'],
+                ['title' => 'Maintain zero compromise', 'text' => 'Maintain a zero-compromise approach toward health, safety, and environmental standards. Any operation or activity identified as unsafe shall be suspended immediately until adequate control measures are implemented to ensure safe execution.'],
+                ['title' => 'Protect the environment', 'text' => 'Utilize environmentally responsible machinery, equipment, materials, and chemicals in order to minimize pollution, prevent spills, reduce emissions, and protect the environment. Appropriate emergency preparedness and spill containment measures shall be established and maintained at all operational locations.'],
+                ['title' => 'Encourage participation', 'text' => 'Encourage open communication, consultation, and active participation across all levels of the organization by engaging employees, contractors, clients, and stakeholders in HSE-related discussions, feedback, and decision-making processes.'],
+                ['title' => 'Set measurable objectives', 'text' => 'Establish measurable and achievable Health, Safety, and Environmental objectives aimed at eliminating hazards, reducing risks, preventing incidents, and continually improving HSE performance. These objectives shall be reviewed periodically to ensure effectiveness and continuous improvement.'],
+            ],
+        ],
+        40,
+    ],
+    [
+        'communication',
+        'Policy communication and accessibility',
+        [
+            'eyebrow' => 'Communication',
+            'image' => 'https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=1200&q=80',
+            'image_alt' => 'Team consultation meeting for policy communication',
+            'text' => 'This Health, Safety, and Environment Policy shall be communicated to all employees, contractors, and stakeholders, and prominently displayed at all offices, project sites, and business premises of the company. Where necessary, the policy shall be translated into relevant languages to ensure proper understanding and compliance.',
+        ],
+        50,
+    ],
+    [
+        'culture',
+        'Management commitment to HSE culture',
+        [
+            'eyebrow' => 'HSE culture',
+            'image' => 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1200&q=80',
+            'image_alt' => 'Modern business premises representing operational excellence',
+            'text' => 'Management remains committed to fostering a strong HSE culture that prioritizes safety, environmental stewardship, operational excellence, and continuous improvement across all areas of our business activities.',
+        ],
+        60,
+    ],
+    [
+        'cta',
+        'Need HSE-aware project or procurement support?',
+        [
+            'text' => 'Send your requirement and our team will review the practical safety, sourcing and delivery considerations for your engagement.',
+            'primary_cta_label' => 'Contact Us',
+            'primary_cta_url' => '/contact',
+        ],
+        70,
+    ],
+];
+
+foreach ($hseSections as [$sectionKey, $heading, $body, $sortOrder]) {
+    $existingSection = $connection->queryOne(
+        "SELECT id FROM page_sections WHERE page_id = ? AND section_key = ?",
+        [$hseId, $sectionKey]
+    );
+
+    if ($existingSection !== null) {
+        $connection->execute(
+            "UPDATE page_sections
+             SET heading = ?, body = ?, sort_order = ?
+             WHERE id = ?",
+            [$heading, $encode($body), $sortOrder, $existingSection['id']]
+        );
+        continue;
+    }
+
+    $connection->execute(
+        "INSERT INTO page_sections (page_id, section_key, heading, body, sort_order)
+         VALUES (?, ?, ?, ?, ?)",
+        [$hseId, $sectionKey, $heading, $encode($body), $sortOrder]
     );
 }
 
