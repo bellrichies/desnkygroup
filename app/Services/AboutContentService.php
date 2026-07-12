@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Helpers\SeoHelper;
 use App\Repositories\PageRepository;
 use App\Repositories\PageSectionRepository;
+use App\Repositories\ServiceRepository;
 use App\Repositories\SiteSettingRepository;
 
 /**
@@ -15,6 +16,7 @@ class AboutContentService
     public function __construct(
         private PageRepository $pages,
         private PageSectionRepository $sections,
+        private ServiceRepository $services,
         private SiteSettingRepository $settings
     ) {
     }
@@ -43,6 +45,7 @@ class AboutContentService
             'stats' => $sections['stats'] ?? [],
             'team' => $sections['team'] ?? [],
             'cta' => $sections['cta'] ?? [],
+            'services' => $this->publishedServices(),
             'seo' => $this->pageSeo($page),
         ];
     }
@@ -81,6 +84,19 @@ class AboutContentService
         }
 
         return ['text' => $body];
+    }
+
+    /**
+     * @return array<int, array<string, mixed>>
+     */
+    private function publishedServices(): array
+    {
+        return array_map(static fn (array $row): array => [
+            'slug' => (string) ($row['slug'] ?? ''),
+            'title' => (string) ($row['title'] ?? ''),
+            'summary' => (string) ($row['summary'] ?? ''),
+            'image' => (string) ($row['featured_image'] ?? ''),
+        ], $this->services->published());
     }
 
     /**

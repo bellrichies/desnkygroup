@@ -5,6 +5,7 @@ namespace App\Controllers\Frontend;
 use App\Controllers\BaseController;
 use App\Helpers\SeoHelper;
 use App\Repositories\ContactRepository;
+use App\Repositories\FaqRepository;
 use App\Services\ContactService;
 use App\Services\MailService;
 use App\Support\DatabaseFactory;
@@ -28,10 +29,13 @@ class ContactController extends BaseController
             $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
         }
 
+        $faqs = (new FaqRepository(DatabaseFactory::make()))->active();
+
         return $this->view('frontend/pages/contact', [
             'title' => 'Contact Us',
             'active' => 'contact',
             'csrf_token' => $_SESSION['csrf_token'],
+            'faqs' => $faqs,
             'seo' => [
                 'title' => 'Contact Desnky Global Resources Ltd',
                 'description' => 'Contact Desnky Global Resources Ltd for engineering, energy, procurement, HSE, ICT and agro service enquiries in Nigeria.',
@@ -67,6 +71,12 @@ class ContactController extends BaseController
         $validator = new ContactValidator();
 
         $payload = $validator->sanitize($_POST);
+
+        // Strip formatting characters (spaces, dashes, brackets) from the phone
+        // field so entries like "0803 456 7890" pass the Nigerian number regex.
+        if (isset($payload['phone'])) {
+            $payload['phone'] = preg_replace('/[\s\-\(\)]/', '', $payload['phone']);
+        }
 
         if (!$validator->validate($payload)) {
             return $this->json([

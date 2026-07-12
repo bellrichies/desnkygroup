@@ -22,6 +22,19 @@ $router->post('/contact/submit', 'Frontend\ContactController@submit')->middlewar
 $router->post('/api/contact', 'Frontend\ContactController@submit')->middleware(['csrf']);
 $router->post('/newsletter', 'Frontend\NewsletterController@subscribe')->middleware(['csrf']);
 
+$router->get('/blog', 'Frontend\BlogController@index');
+$router->get('/blog/search', 'Frontend\BlogController@search');
+$router->get('/blog/feed.xml', 'Frontend\BlogController@feed');
+$router->get('/blog/rss.xml', 'Frontend\BlogController@feed');
+$router->get('/blog/category/{slug}', 'Frontend\BlogController@category');
+$router->get('/blog/tag/{slug}', 'Frontend\BlogController@tag');
+$router->get('/blog/{slug}', 'Frontend\BlogController@show');
+
+$router->get('/privacy-policy', 'Frontend\LegalController@privacy');
+$router->get('/cookie-policy', 'Frontend\LegalController@cookies');
+$router->get('/terms-of-use', 'Frontend\LegalController@terms');
+$router->get('/terms-and-conditions', 'Frontend\LegalController@terms');
+
 $router->get('/shop', 'Frontend\ShopController@index');
 $router->get('/shop/category/{slug}', 'Frontend\ShopController@category');
 $router->get('/shop/product/{slug}', 'Frontend\ShopController@show');
@@ -71,9 +84,43 @@ $router->group('/admin', function ($router) {
     $router->post('/projects/{id}/delete', 'Admin\ProjectController@destroy')->middleware(['auth', 'csrf', 'permission:projects.delete']);
 
     $router->get('/media', 'Admin\MediaController@index')->middleware(['auth', 'permission:media.view']);
+    $router->get('/media/json', 'Admin\MediaController@listJson')->middleware(['auth', 'permission:media.view']);
     $router->post('/media', 'Admin\MediaController@store')->middleware(['auth', 'csrf', 'permission:media.upload']);
     $router->post('/media/{id}', 'Admin\MediaController@update')->middleware(['auth', 'csrf', 'permission:media.edit']);
     $router->post('/media/{id}/delete', 'Admin\MediaController@destroy')->middleware(['auth', 'csrf', 'permission:media.delete']);
+
+    $router->get('/homepage-hero', 'Admin\HeroSliderController@index')->middleware(['auth', 'permission:settings.view']);
+    $router->get('/homepage-hero/create', 'Admin\HeroSliderController@create')->middleware(['auth', 'permission:settings.edit']);
+    $router->post('/homepage-hero', 'Admin\HeroSliderController@store')->middleware(['auth', 'csrf', 'permission:settings.edit']);
+    $router->post('/homepage-hero/reorder', 'Admin\HeroSliderController@reorder')->middleware(['auth', 'csrf', 'permission:settings.edit']);
+    $router->get('/homepage-hero/{id}/edit', 'Admin\HeroSliderController@edit')->middleware(['auth', 'permission:settings.edit']);
+    $router->post('/homepage-hero/{id}', 'Admin\HeroSliderController@update')->middleware(['auth', 'csrf', 'permission:settings.edit']);
+    $router->post('/homepage-hero/{id}/toggle', 'Admin\HeroSliderController@toggle')->middleware(['auth', 'csrf', 'permission:settings.edit']);
+    $router->post('/homepage-hero/{id}/delete', 'Admin\HeroSliderController@destroy')->middleware(['auth', 'csrf', 'permission:settings.edit']);
+
+    // Blog management.
+    $router->get('/blog', 'Admin\BlogController@index')->middleware(['auth', 'permission:blog.view']);
+    $router->get('/blog/create', 'Admin\BlogController@create')->middleware(['auth', 'permission:blog.create']);
+    $router->post('/blog', 'Admin\BlogController@store')->middleware(['auth', 'csrf', 'permission:blog.create']);
+    $router->post('/blog/bulk-status', 'Admin\BlogController@bulkStatus')->middleware(['auth', 'csrf', 'permission:blog.publish']);
+    $router->get('/blog/categories', 'Admin\BlogController@taxonomy')->middleware(['auth', 'permission:blog.taxonomy']);
+    $router->post('/blog/categories', 'Admin\BlogController@categoryStore')->middleware(['auth', 'csrf', 'permission:blog.taxonomy']);
+    $router->post('/blog/categories/{id}', 'Admin\BlogController@categoryUpdate')->middleware(['auth', 'csrf', 'permission:blog.taxonomy']);
+    $router->post('/blog/categories/{id}/delete', 'Admin\BlogController@categoryDelete')->middleware(['auth', 'csrf', 'permission:blog.taxonomy']);
+    $router->post('/blog/tags', 'Admin\BlogController@tagStore')->middleware(['auth', 'csrf', 'permission:blog.taxonomy']);
+    $router->post('/blog/tags/{id}', 'Admin\BlogController@tagUpdate')->middleware(['auth', 'csrf', 'permission:blog.taxonomy']);
+    $router->post('/blog/tags/{id}/delete', 'Admin\BlogController@tagDelete')->middleware(['auth', 'csrf', 'permission:blog.taxonomy']);
+    $router->get('/blog/authors', 'Admin\BlogController@authors')->middleware(['auth', 'permission:blog.edit']);
+    $router->post('/blog/authors', 'Admin\BlogController@authorStore')->middleware(['auth', 'csrf', 'permission:blog.edit']);
+    $router->post('/blog/authors/{id}', 'Admin\BlogController@authorUpdate')->middleware(['auth', 'csrf', 'permission:blog.edit']);
+    $router->post('/blog/authors/{id}/delete', 'Admin\BlogController@authorDelete')->middleware(['auth', 'csrf', 'permission:blog.edit']);
+    $router->get('/blog/ads', 'Admin\BlogController@ads')->middleware(['auth', 'permission:blog.ads']);
+    $router->post('/blog/ads/{id}', 'Admin\BlogController@adUpdate')->middleware(['auth', 'csrf', 'permission:blog.ads']);
+    $router->get('/blog/{id}/preview', 'Admin\BlogController@preview')->middleware(['auth', 'permission:blog.view']);
+    $router->get('/blog/{id}/edit', 'Admin\BlogController@edit')->middleware(['auth', 'permission:blog.edit']);
+    $router->post('/blog/{id}', 'Admin\BlogController@update')->middleware(['auth', 'csrf', 'permission:blog.edit']);
+    $router->post('/blog/{id}/delete', 'Admin\BlogController@destroy')->middleware(['auth', 'csrf', 'permission:blog.delete']);
+    $router->post('/blog/{id}/restore', 'Admin\BlogController@restore')->middleware(['auth', 'csrf', 'permission:blog.restore']);
 
     // Phase 6 ecommerce management.
     $router->get('/products', 'Admin\ProductController@index')->middleware(['auth', 'permission:products.view']);
@@ -98,8 +145,8 @@ $router->group('/admin', function ($router) {
     $router->post('/orders/{id}/status', 'Admin\OrderController@status')->middleware(['auth', 'csrf', 'permission:orders.update_status']);
     $router->post('/orders/{id}/refund', 'Admin\OrderController@refund')->middleware(['auth', 'csrf', 'permission:orders.edit']);
 
-    // Future-phase admin modules are stubbed until their implementation phases.
-    $router->get('/customers', 'Admin\DashboardController@notImplemented')->middleware(['auth']);
+    $router->get('/customers', 'Admin\CustomerController@index')->middleware(['auth', 'permission:orders.view']);
+    $router->get('/customers/export', 'Admin\CustomerController@export')->middleware(['auth', 'permission:orders.export']);
     // Phase 7 RBAC and audit management.
     $router->get('/users', 'Admin\UserController@index')->middleware(['auth', 'permission:admins.view']);
     $router->get('/users/export', 'Admin\UserController@export')->middleware(['auth', 'permission:admins.view']);
@@ -124,5 +171,36 @@ $router->group('/admin', function ($router) {
     $router->post('/permissions/{id}', 'Admin\PermissionController@update')->middleware(['auth', 'csrf', 'permission:permissions.assign']);
 
     $router->get('/activity-logs', 'Admin\ActivityLogController@index')->middleware(['auth', 'permission:activity_logs.view']);
-    $router->get('/settings', 'Admin\DashboardController@notImplemented')->middleware(['auth', 'admin']);
+
+    // Trusted Clients
+    $router->get('/trusted-clients', 'Admin\TrustedClientController@index')->middleware(['auth', 'permission:settings.view']);
+    $router->get('/trusted-clients/create', 'Admin\TrustedClientController@create')->middleware(['auth', 'permission:settings.edit']);
+    $router->post('/trusted-clients', 'Admin\TrustedClientController@store')->middleware(['auth', 'csrf', 'permission:settings.edit']);
+    $router->get('/trusted-clients/{id}/edit', 'Admin\TrustedClientController@edit')->middleware(['auth', 'permission:settings.edit']);
+    $router->post('/trusted-clients/{id}', 'Admin\TrustedClientController@update')->middleware(['auth', 'csrf', 'permission:settings.edit']);
+    $router->post('/trusted-clients/{id}/delete', 'Admin\TrustedClientController@destroy')->middleware(['auth', 'csrf', 'permission:settings.edit']);
+    $router->post('/trusted-clients/{id}/toggle', 'Admin\TrustedClientController@toggle')->middleware(['auth', 'csrf', 'permission:settings.edit']);
+
+    // Contact Inquiries
+    $router->get('/contacts', 'Admin\ContactController@index')->middleware(['auth', 'permission:pages.view']);
+    $router->get('/contacts/{id}', 'Admin\ContactController@show')->middleware(['auth', 'permission:pages.view']);
+    $router->post('/contacts/{id}/status', 'Admin\ContactController@status')->middleware(['auth', 'csrf', 'permission:pages.view']);
+    $router->post('/contacts/{id}/notes', 'Admin\ContactController@notes')->middleware(['auth', 'csrf', 'permission:pages.view']);
+    $router->post('/contacts/{id}/delete', 'Admin\ContactController@destroy')->middleware(['auth', 'csrf', 'permission:pages.edit']);
+
+    // Newsletter Subscribers
+    $router->get('/subscribers', 'Admin\SubscriberController@index')->middleware(['auth', 'permission:pages.view']);
+    $router->get('/subscribers/export', 'Admin\SubscriberController@export')->middleware(['auth', 'permission:pages.view']);
+    $router->post('/subscribers/{id}/unsubscribe', 'Admin\SubscriberController@unsubscribe')->middleware(['auth', 'csrf', 'permission:pages.edit']);
+    $router->post('/subscribers/{id}/delete', 'Admin\SubscriberController@destroy')->middleware(['auth', 'csrf', 'permission:pages.edit']);
+
+    // Settings (with FAQs tab)
+    $router->get('/settings', 'Admin\SettingController@index')->middleware(['auth', 'permission:settings.view']);
+    $router->post('/settings', 'Admin\SettingController@update')->middleware(['auth', 'csrf', 'permission:settings.edit']);
+    $router->post('/settings/cache-clear', 'Admin\SettingController@clearCache')->middleware(['auth', 'csrf', 'permission:settings.edit']);
+    $router->post('/settings/faqs', 'Admin\SettingController@faqStore')->middleware(['auth', 'csrf', 'permission:settings.edit']);
+    $router->get('/settings/faqs/{id}/edit', 'Admin\SettingController@faqEdit')->middleware(['auth', 'permission:settings.edit']);
+    $router->post('/settings/faqs/{id}', 'Admin\SettingController@faqUpdate')->middleware(['auth', 'csrf', 'permission:settings.edit']);
+    $router->post('/settings/faqs/{id}/delete', 'Admin\SettingController@faqDestroy')->middleware(['auth', 'csrf', 'permission:settings.edit']);
+    $router->post('/settings/faqs/{id}/toggle', 'Admin\SettingController@faqToggle')->middleware(['auth', 'csrf', 'permission:settings.edit']);
 });

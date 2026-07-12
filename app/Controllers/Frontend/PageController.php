@@ -7,6 +7,7 @@ use App\Helpers\SeoHelper;
 use App\Repositories\PageRepository;
 use App\Repositories\PageSectionRepository;
 use App\Repositories\ProjectRepository;
+use App\Repositories\ServiceRepository;
 use App\Repositories\SiteSettingRepository;
 use App\Services\AboutContentService;
 use App\Services\HseContentService;
@@ -128,6 +129,7 @@ class PageController extends BaseController
         return $this->aboutContent = new AboutContentService(
             new PageRepository($connection),
             new PageSectionRepository($connection),
+            new ServiceRepository($connection),
             new SiteSettingRepository($connection)
         );
     }

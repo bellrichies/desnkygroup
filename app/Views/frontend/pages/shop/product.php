@@ -22,7 +22,7 @@ $csrf = (string) ($csrf_token ?? '');
             </ol>
         </nav>
 
-        <div class="grid gap-10 lg:grid-cols-2" x-data="{ main: <?php echo $this->escapeJson($primaryImage); ?>, alt: <?php echo $this->escapeJson($primaryAlt); ?> }">
+        <div class="grid gap-10 lg:grid-cols-2" x-data='{ "main": <?php echo $this->escapeJson($primaryImage); ?>, "alt": <?php echo $this->escapeJson($primaryAlt); ?> }'>
             <!-- Gallery -->
             <div>
                 <button type="button" class="block w-full overflow-hidden rounded-lg border border-gray-200" :data-lightbox="main" :data-lightbox-alt="alt" data-lightbox="<?php echo $this->escape($primaryImage); ?>" aria-label="Zoom product image">
@@ -35,8 +35,8 @@ $csrf = (string) ($csrf_token ?? '');
                             <button
                                 type="button"
                                 class="overflow-hidden rounded-md border-2 transition-colors"
-                                :class="main === <?php echo $this->escapeJson($p); ?> ? 'border-desnky-primary' : 'border-transparent hover:border-gray-300'"
-                                @click="main = <?php echo $this->escapeJson($p); ?>; alt = <?php echo $this->escapeJson($a); ?>"
+                                :class='main === <?php echo $this->escapeJson($p); ?> ? "border-desnky-primary" : "border-transparent hover:border-gray-300"'
+                                @click='main = <?php echo $this->escapeJson($p); ?>; alt = <?php echo $this->escapeJson($a); ?>'
                             >
                                 <img src="<?php echo $this->escape($p); ?>" alt="<?php echo $this->escape($a); ?>" class="aspect-square w-full object-cover" loading="<?php echo $index === 0 ? 'eager' : 'lazy'; ?>">
                             </button>

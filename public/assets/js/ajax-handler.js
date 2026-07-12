@@ -5,6 +5,11 @@
         return new FormData(form);
     }
 
+    function csrfToken() {
+        var meta = document.querySelector('meta[name="csrf-token"]');
+        return meta ? meta.getAttribute('content') : '';
+    }
+
     function setFormLoading(form, isLoading) {
         form.classList.toggle('is-submitting', isLoading);
 
@@ -138,7 +143,7 @@
             event.preventDefault();
 
             if (!validateRequiredFields(form)) {
-                window.createToastNotification('Please complete the required fields.', 'warning');
+                window.createToastNotification('Please complete the required fields.', 'warning', 5000);
                 return;
             }
 
@@ -150,9 +155,11 @@
 
             fetch(endpoint, {
                 method: method.toUpperCase(),
+                credentials: 'same-origin',
                 headers: {
                     'Accept': 'application/json',
                     'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': csrfToken(),
                 },
                 body: serializeForm(form),
             })
@@ -168,7 +175,8 @@
                         showValidationErrors(form, result.payload.errors || {});
                         window.createToastNotification(
                             result.payload.message || 'Please review the form and try again.',
-                            'error'
+                            'error',
+                            5000
                         );
 
                         if (typeof options.onError === 'function') {
@@ -178,7 +186,7 @@
                         return;
                     }
 
-                    window.createToastNotification(result.payload.message || 'Submitted successfully.', 'success');
+                    window.createToastNotification(result.payload.message || 'Submitted successfully.', 'success', 6000);
 
                     if (options.resetOnSuccess !== false) {
                         form.reset();
@@ -189,7 +197,7 @@
                     }
                 })
                 .catch(function (error) {
-                    window.createToastNotification('Network error. Please try again.', 'error');
+                    window.createToastNotification('Network error. Please try again.', 'error', 5000);
 
                     if (typeof options.onError === 'function') {
                         options.onError(error);

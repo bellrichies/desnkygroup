@@ -1629,4 +1629,174 @@ foreach ([
     );
 }
 
+$heroSliderTable = $connection->queryOne("SHOW TABLES LIKE 'homepage_hero_sliders'");
+if ($heroSliderTable !== null) {
+    $existingHeroSlides = $connection->queryOne("SELECT COUNT(*) AS aggregate FROM homepage_hero_sliders");
+
+    if ((int) ($existingHeroSlides['aggregate'] ?? 0) === 0) {
+        $homeHeroRow = $connection->queryOne(
+            "SELECT ps.heading, ps.body
+             FROM page_sections ps
+             INNER JOIN pages p ON p.id = ps.page_id
+             WHERE p.slug = ? AND ps.section_key = ?
+             ORDER BY ps.sort_order ASC, ps.id ASC
+             LIMIT 1",
+            ['home', 'hero']
+        );
+
+        $insertHeroSlide = static function (array $slide) use ($connection): void {
+            $connection->execute(
+                "INSERT INTO homepage_hero_sliders
+                    (background_image, heading, caption, primary_cta_label, primary_cta_url,
+                     secondary_cta_label, secondary_cta_url, sort_order, is_active, created_by)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1, NULL)",
+                [
+                    $slide['background_image'],
+                    $slide['heading'],
+                    $slide['caption'] ?? null,
+                    $slide['primary_cta_label'] ?? null,
+                    $slide['primary_cta_url'] ?? null,
+                    $slide['secondary_cta_label'] ?? null,
+                    $slide['secondary_cta_url'] ?? null,
+                    (int) ($slide['sort_order'] ?? 0),
+                ]
+            );
+        };
+
+        if ($homeHeroRow !== null) {
+            $body = json_decode((string) ($homeHeroRow['body'] ?? ''), true);
+            $body = is_array($body) ? $body : [];
+            $image = trim((string) ($body['image'] ?? ''));
+            $heading = trim((string) ($homeHeroRow['heading'] ?? ''));
+
+            if ($image !== '' && $heading !== '') {
+                $insertHeroSlide([
+                    'background_image' => $image,
+                    'heading' => $heading,
+                    'caption' => $body['text'] ?? null,
+                    'primary_cta_label' => $body['primary_cta_label'] ?? null,
+                    'primary_cta_url' => $body['primary_cta_url'] ?? null,
+                    'secondary_cta_label' => $body['secondary_cta_label'] ?? null,
+                    'secondary_cta_url' => $body['secondary_cta_url'] ?? null,
+                    'sort_order' => 10,
+                ]);
+            }
+        }
+
+        $publishedServices = $connection->query(
+            "SELECT title, slug, summary, featured_image, sort_order
+             FROM services
+             WHERE is_published = 1 AND deleted_at IS NULL AND featured_image IS NOT NULL AND featured_image <> ''
+             ORDER BY sort_order ASC, title ASC"
+        );
+
+        foreach ($publishedServices as $service) {
+            $insertHeroSlide([
+                'background_image' => (string) $service['featured_image'],
+                'heading' => (string) $service['title'],
+                'caption' => (string) ($service['summary'] ?? ''),
+                'primary_cta_label' => 'Explore service',
+                'primary_cta_url' => '/services/' . (string) $service['slug'],
+                'secondary_cta_label' => 'Request a Quote',
+                'secondary_cta_url' => '/contact?service=' . (string) $service['slug'],
+                'sort_order' => 20 + (int) ($service['sort_order'] ?? 0),
+            ]);
+        }
+    }
+}
+
+// Ensure a published Contact page exists so services and breadcrumbs can link to it
+$contactPage = [
+    'title' => 'Contact Us',
+    'slug' => 'contact',
+    'content' => 'Contact Desnky Global Resources Ltd using the form on this page or via the contact details provided in the site footer.',
+    'excerpt' => 'Contact Desnky Global Resources Ltd for enquiries and quotes.',
+    'meta_title' => 'Contact Desnky Global Resources Ltd',
+    'meta_description' => 'Contact Desnky Global Resources Ltd for engineering, energy, procurement, HSE, ICT and agro service enquiries in Nigeria.',
+    'meta_keywords' => 'contact Desnky Global, contact us Nigeria, enquiries Desnky',
+    'featured_image' => null,
+];
+
+$connection->execute(
+    "INSERT INTO pages
+        (title, slug, content, excerpt, meta_title, meta_description, meta_keywords, featured_image,
+         is_published, published_by, published_at, created_by)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1, ?, NOW(), ?)
+     ON DUPLICATE KEY UPDATE
+        title = VALUES(title),
+        content = VALUES(content),
+        excerpt = VALUES(excerpt),
+        meta_title = VALUES(meta_title),
+        meta_description = VALUES(meta_description),
+        meta_keywords = VALUES(meta_keywords),
+        featured_image = VALUES(featured_image),
+        is_published = 1,
+        published_by = VALUES(published_by),
+        published_at = COALESCE(published_at, NOW())",
+    [
+        $contactPage['title'],
+        $contactPage['slug'],
+        $contactPage['content'],
+        $contactPage['excerpt'],
+        $contactPage['meta_title'],
+        $contactPage['meta_description'],
+        $contactPage['meta_keywords'],
+        $contactPage['featured_image'],
+        $adminId,
+        $adminId,
+    ]
+);
+
+$contactRow = $connection->queryOne("SELECT id FROM pages WHERE slug = ?", ['contact']);
+$contactId = (int) ($contactRow['id'] ?? 0);
+
+$contactSections = [
+    [
+        'hero',
+        'Contact Desnky Global Resources Ltd',
+        [
+            'text' => 'Send your enquiry and our team will respond with next practical steps and a quote where appropriate.',
+            'breadcrumb_home_label' => 'Home',
+            'breadcrumb_current_label' => 'Contact',
+        ],
+        10,
+    ],
+    [
+        'contact_form',
+        'Get in touch',
+        [
+            'intro' => 'Use the contact form or the details below to reach our team.',
+        ],
+        20,
+    ],
+    [
+        'faq',
+        'Frequently asked questions',
+        [
+            'intro' => 'Common questions and answers to help you find quick information.',
+        ],
+        30,
+    ],
+];
+
+foreach ($contactSections as [$sectionKey, $heading, $body, $sortOrder]) {
+    $existingSection = $connection->queryOne(
+        "SELECT id FROM page_sections WHERE page_id = ? AND section_key = ?",
+        [$contactId, $sectionKey]
+    );
+
+    if ($existingSection !== null) {
+        $connection->execute(
+            "UPDATE page_sections SET heading = ?, body = ?, sort_order = ? WHERE id = ?",
+            [$heading, $encode($body), $sortOrder, $existingSection['id']]
+        );
+        continue;
+    }
+
+    $connection->execute(
+        "INSERT INTO page_sections (page_id, section_key, heading, body, sort_order) VALUES (?, ?, ?, ?, ?)",
+        [$contactId, $sectionKey, $heading, $encode($body), $sortOrder]
+    );
+}
+
 echo "Foundation seed data loaded successfully." . PHP_EOL;

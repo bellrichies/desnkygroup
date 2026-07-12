@@ -26,6 +26,7 @@ class ShopController extends BaseController
         return $this->view('frontend/pages/shop/index', [
             'title' => $content['title'],
             'active' => 'shop',
+            'csrf_token' => $this->csrf(),
         ] + $content);
     }
 
@@ -36,6 +37,7 @@ class ShopController extends BaseController
         return $this->view('frontend/pages/shop/index', [
             'title' => $content['title'],
             'active' => 'shop',
+            'csrf_token' => $this->csrf(),
         ] + $content);
     }
 

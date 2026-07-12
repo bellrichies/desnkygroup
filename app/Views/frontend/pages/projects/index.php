@@ -4,20 +4,18 @@ $listing = $listing ?? [];
 $projects = $projects ?? [];
 $categories = $categories ?? [];
 $allLabel = (string) ($listing['all_categories_label'] ?? 'All');
+$introText = (string) ($listing['text'] ?? $hero['text'] ?? '');
 ?>
 
-<?php echo $this->partial('frontend/partials/page-hero', [
-    'hero' => $hero,
-    'title' => $title ?? '',
-    'fallbackImage' => $page['featured_image'] ?? '',
-    'breadcrumbs' => [
-        ['label' => 'Home', 'href' => '/'],
-        ['label' => 'Projects'],
-    ],
-]); ?>
-
 <section class="section-band">
-    <div class="container-page" x-data="{ category: <?php echo $this->escapeJson($allLabel); ?>, search: '' }">
+    <div class="container-page" x-data='{ "category": <?php echo $this->escapeJson($allLabel); ?>, "search": "" }'>
+        <div class="mb-10 max-w-3xl" data-reveal>
+            <p class="eyebrow">Projects</p>
+            <h1 class="mt-3 section-heading"><?php echo $this->escape((string) ($listing['heading'] ?? $title ?? 'Projects')); ?></h1>
+            <?php if ($introText !== '') : ?>
+                <p class="section-lead"><?php echo $this->escape($introText); ?></p>
+            <?php endif; ?>
+        </div>
         <div class="mb-8 grid gap-4 lg:grid-cols-[1fr_auto] lg:items-center">
             <div class="relative">
                 <span class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-desnky-muted">
@@ -27,10 +25,10 @@ $allLabel = (string) ($listing['all_categories_label'] ?? 'All');
                 <input id="project-search" type="search" x-model="search" placeholder="<?php echo $this->escape((string) ($listing['search_placeholder'] ?? 'Search projects…')); ?>" class="form-field pl-10">
             </div>
             <div class="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 lg:mx-0 lg:flex-wrap lg:px-0" role="group" aria-label="<?php echo $this->escape((string) ($listing['filters_label'] ?? 'Filter by category')); ?>">
-                <button type="button" class="chip" :class="category === <?php echo $this->escapeJson($allLabel); ?> && 'chip-active'" @click="category = <?php echo $this->escapeJson($allLabel); ?>"><?php echo $this->escape($allLabel); ?></button>
+                <button type="button" class="chip" :class='category === <?php echo $this->escapeJson($allLabel); ?> && "chip-active"' @click='category = <?php echo $this->escapeJson($allLabel); ?>'><?php echo $this->escape($allLabel); ?></button>
                 <?php foreach ($categories as $category) : ?>
                     <?php $cat = (string) $category; ?>
-                    <button type="button" class="chip" :class="category === <?php echo $this->escapeJson($cat); ?> && 'chip-active'" @click="category = <?php echo $this->escapeJson($cat); ?>"><?php echo $this->escape($cat); ?></button>
+                    <button type="button" class="chip" :class='category === <?php echo $this->escapeJson($cat); ?> && "chip-active"' @click='category = <?php echo $this->escapeJson($cat); ?>'><?php echo $this->escape($cat); ?></button>
                 <?php endforeach; ?>
             </div>
         </div>
@@ -48,18 +46,15 @@ $allLabel = (string) ($listing['all_categories_label'] ?? 'All');
                         class="card-interactive flex flex-col"
                         data-reveal
                         data-category="<?php echo $this->escape($cat); ?>"
-                        x-show="(category === <?php echo $this->escapeJson($allLabel); ?> || category === <?php echo $this->escapeJson($cat); ?>) && <?php echo $this->escapeJson($haystack); ?>.includes(search.toLowerCase())"
-                        x-transition.opacity
+                        x-show='(category === <?php echo $this->escapeJson($allLabel); ?> || category === <?php echo $this->escapeJson($cat); ?>) && <?php echo $this->escapeJson($haystack); ?>.includes(search.toLowerCase())'
+                x-transition.opacity
                     >
                         <?php if (!empty($project['image'])) : ?>
                             <button type="button" class="block overflow-hidden" data-lightbox="<?php echo $this->escape((string) $project['image']); ?>" data-lightbox-alt="<?php echo $this->escape($title_); ?>" aria-label="View image of <?php echo $this->escape($title_); ?>">
-                                <img src="<?php echo $this->escape((string) $project['image']); ?>" alt="<?php echo $this->escape($title_); ?>" class="h-52 w-full object-cover transition-transform duration-slow hover:scale-105" loading="lazy">
+                                <img src="<?php echo $this->escape((string) $project['image']); ?>" alt="<?php echo $this->escape($title_); ?>" class="project-card__image" loading="lazy">
                             </button>
                         <?php endif; ?>
                         <div class="card-body flex flex-1 flex-col">
-                            <?php if ($cat !== '') : ?>
-                                <span class="badge-brand mb-3 self-start"><?php echo $this->escape($cat); ?></span>
-                            <?php endif; ?>
                             <h2 class="text-lg font-bold text-desnky-dark">
                                 <?php if (!empty($project['slug'])) : ?>
                                     <a href="/projects/<?php echo $this->escape((string) $project['slug']); ?>" class="hover:text-desnky-primary"><?php echo $this->escape($title_); ?></a>
@@ -84,13 +79,5 @@ $allLabel = (string) ($listing['all_categories_label'] ?? 'All');
                 <a href="/contact" class="btn-primary mt-5">Discuss your project</a>
             </div>
         <?php endif; ?>
-    </div>
-</section>
-
-<!-- CTA band -->
-<section class="bg-desnky-dark text-white">
-    <div class="container-page section-band flex flex-col items-start justify-between gap-6 md:flex-row md:items-center">
-        <h2 class="max-w-2xl text-3xl font-bold sm:text-4xl">Have a similar project? Let's talk.</h2>
-        <a href="/contact" class="btn-on-dark">Start your project</a>
     </div>
 </section>

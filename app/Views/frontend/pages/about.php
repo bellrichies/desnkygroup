@@ -8,32 +8,45 @@ $values = $values ?? [];
 $stats = $stats ?? [];
 $team = $team ?? [];
 $cta = $cta ?? [];
+$services = $services ?? [];
 $sectorItems = is_array($sectors['items'] ?? null) ? $sectors['items'] : [];
 $modelItems = is_array($operatingModel['steps'] ?? null) ? $operatingModel['steps'] : [];
 $valueItems = is_array($values['items'] ?? null) ? $values['items'] : [];
 $statItems = is_array($stats['items'] ?? null) ? $stats['items'] : [];
 $teamMembers = is_array($team['members'] ?? null) ? $team['members'] : [];
+$profileImage = (string) ($overview['image'] ?? $hero['image'] ?? $page['featured_image'] ?? '');
+$profileImageAlt = (string) ($overview['image_alt'] ?? $hero['image_alt'] ?? 'Desnky Global Resources operations team');
 ?>
 
-<?php echo $this->partial('frontend/partials/page-hero', [
-    'hero' => $hero,
-    'title' => $title ?? '',
-    'fallbackImage' => $page['featured_image'] ?? '',
-]); ?>
-
 <?php if ($overview !== []) : ?>
-<section class="section-band">
-    <div class="container-page grid gap-10 lg:grid-cols-[0.95fr_1.05fr] lg:items-start">
-        <div>
-            <?php if (!empty($overview['eyebrow'])) : ?>
-                <p class="text-sm font-semibold uppercase tracking-wide text-desnky-blue"><?php echo $this->escape((string) $overview['eyebrow']); ?></p>
+<section class="section-band bg-white">
+    <div class="container-page grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
+        <div class="profile-image-panel" data-reveal>
+            <?php if ($profileImage !== '') : ?>
+                <img
+                    src="<?php echo $this->escape($profileImage); ?>"
+                    alt="<?php echo $this->escape($profileImageAlt); ?>"
+                    class="h-full w-full object-cover"
+                    loading="eager"
+                    decoding="async"
+                >
+            <?php else : ?>
+                <div class="flex aspect-[4/5] w-full items-center justify-center bg-desnky-surface text-sm font-semibold text-desnky-muted">Desnky Global Resources Ltd</div>
             <?php endif; ?>
-            <h2 class="mt-3 text-3xl font-bold text-desnky-navy"><?php echo $this->escape((string) ($overview['heading'] ?? '')); ?></h2>
         </div>
-        <div class="space-y-5 text-base leading-8 text-desnky-muted">
-            <?php foreach ((array) ($overview['paragraphs'] ?? []) as $paragraph) : ?>
-                <p><?php echo $this->escape((string) $paragraph); ?></p>
-            <?php endforeach; ?>
+        <div data-reveal>
+            <?php if (!empty($overview['eyebrow'])) : ?>
+                <p class="eyebrow"><?php echo $this->escape((string) $overview['eyebrow']); ?></p>
+            <?php endif; ?>
+            <h1 class="mt-3 section-heading"><?php echo $this->escape((string) ($overview['heading'] ?? $title ?? 'About Desnky Global Resources')); ?></h1>
+            <?php if (!empty($hero['heading'])) : ?>
+                <p class="mt-4 text-xl font-semibold leading-8 text-desnky-dark"><?php echo $this->escape((string) $hero['heading']); ?></p>
+            <?php endif; ?>
+            <div class="mt-6 space-y-5 text-base leading-8 text-desnky-muted">
+                <?php foreach ((array) ($overview['paragraphs'] ?? []) as $paragraph) : ?>
+                    <p><?php echo $this->escape((string) $paragraph); ?></p>
+                <?php endforeach; ?>
+            </div>
         </div>
     </div>
 </section>
@@ -58,27 +71,40 @@ $teamMembers = is_array($team['members'] ?? null) ? $team['members'] : [];
 </section>
 <?php endif; ?>
 
-<?php if ($sectorItems !== []) : ?>
+<?php if ($services !== []) : ?>
 <section class="section-band">
     <div class="container-page">
         <div class="max-w-3xl">
             <?php if (!empty($sectors['eyebrow'])) : ?>
-                <p class="text-sm font-semibold uppercase tracking-wide text-desnky-blue"><?php echo $this->escape((string) $sectors['eyebrow']); ?></p>
+                <p class="eyebrow"><?php echo $this->escape((string) $sectors['eyebrow']); ?></p>
             <?php endif; ?>
-            <h2 class="mt-3 text-3xl font-bold text-desnky-navy"><?php echo $this->escape((string) ($sectors['heading'] ?? '')); ?></h2>
+            <h2 class="mt-3 section-heading"><?php echo $this->escape((string) ($sectors['heading'] ?? 'The sectors we support')); ?></h2>
             <?php if (!empty($sectors['text'])) : ?>
-                <p class="mt-4 leading-7 text-desnky-muted"><?php echo $this->escape((string) $sectors['text']); ?></p>
+                <p class="section-lead"><?php echo $this->escape((string) $sectors['text']); ?></p>
             <?php endif; ?>
         </div>
         <div class="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            <?php foreach ($sectorItems as $item) : ?>
-                <?php if (!is_array($item)) continue; ?>
-                <article class="rounded-lg border border-gray-200 bg-white p-6 shadow-card">
-                    <div class="flex h-11 w-11 items-center justify-center rounded-md bg-desnky-surface text-sm font-bold text-desnky-blue">
-                        <?php echo $this->escape((string) ($item['code'] ?? '')); ?>
+            <?php foreach ($services as $service) : ?>
+                <?php if (!is_array($service)) continue; ?>
+                <article class="card-interactive service-card flex flex-col" data-reveal>
+                    <?php if (!empty($service['image'])) : ?>
+                        <img
+                            src="<?php echo $this->escape((string) $service['image']); ?>"
+                            alt="<?php echo $this->escape((string) ($service['title'] ?? 'Service image')); ?>"
+                            class="service-card__image"
+                            loading="lazy"
+                        >
+                    <?php endif; ?>
+                    <div class="card-body flex flex-1 flex-col">
+                        <h3 class="text-xl font-bold text-desnky-dark"><?php echo $this->escape((string) ($service['title'] ?? '')); ?></h3>
+                        <p class="mt-3 flex-1 text-sm leading-6 text-desnky-muted"><?php echo $this->escape((string) ($service['summary'] ?? '')); ?></p>
+                        <?php if (!empty($service['slug'])) : ?>
+                            <a href="/services/<?php echo $this->escape((string) $service['slug']); ?>" class="btn-ghost mt-5">
+                                Learn more
+                                <?php echo $this->partial('frontend/partials/icon', ['name' => 'arrow-right', 'class' => 'h-4 w-4']); ?>
+                            </a>
+                        <?php endif; ?>
                     </div>
-                    <h3 class="mt-5 text-xl font-bold text-desnky-navy"><?php echo $this->escape((string) ($item['title'] ?? '')); ?></h3>
-                    <p class="mt-3 text-sm leading-6 text-desnky-muted"><?php echo $this->escape((string) ($item['text'] ?? '')); ?></p>
                 </article>
             <?php endforeach; ?>
         </div>
@@ -156,51 +182,39 @@ $teamMembers = is_array($team['members'] ?? null) ? $team['members'] : [];
         <div class="flex flex-col justify-between gap-5 md:flex-row md:items-end">
             <div class="max-w-3xl">
                 <?php if (!empty($team['eyebrow'])) : ?>
-                    <p class="text-sm font-semibold uppercase tracking-wide text-desnky-blue"><?php echo $this->escape((string) $team['eyebrow']); ?></p>
+                    <p class="eyebrow"><?php echo $this->escape((string) $team['eyebrow']); ?></p>
                 <?php endif; ?>
-                <h2 class="mt-3 text-3xl font-bold text-desnky-navy"><?php echo $this->escape((string) ($team['heading'] ?? '')); ?></h2>
+                <h2 class="mt-3 section-heading"><?php echo $this->escape((string) ($team['heading'] ?? 'Our Team')); ?></h2>
                 <?php if (!empty($team['text'])) : ?>
-                    <p class="mt-4 leading-7 text-desnky-muted"><?php echo $this->escape((string) $team['text']); ?></p>
+                    <p class="section-lead"><?php echo $this->escape((string) $team['text']); ?></p>
                 <?php endif; ?>
             </div>
         </div>
-        <div class="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <div class="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             <?php foreach ($teamMembers as $member) : ?>
                 <?php if (!is_array($member)) continue; ?>
-                <article class="overflow-hidden rounded-lg bg-white shadow-card">
-                    <?php if (!empty($member['image'])) : ?>
-                        <img
-                            src="<?php echo $this->escape((string) $member['image']); ?>"
-                            alt="<?php echo $this->escape((string) ($member['image_alt'] ?? $member['name'] ?? '')); ?>"
-                            class="h-72 w-full object-cover"
-                            loading="lazy"
-                        >
-                    <?php endif; ?>
+                <article class="team-card" data-reveal>
+                    <div class="team-card__media">
+                        <?php if (!empty($member['image'])) : ?>
+                            <img
+                                src="<?php echo $this->escape((string) $member['image']); ?>"
+                                alt="<?php echo $this->escape((string) ($member['image_alt'] ?? $member['name'] ?? 'Team member')); ?>"
+                                class="h-full w-full object-cover"
+                                loading="lazy"
+                            >
+                        <?php else : ?>
+                            <div class="flex h-full w-full items-center justify-center bg-desnky-primary-50 text-2xl font-bold text-desnky-primary">
+                                <?php echo $this->escape(substr((string) ($member['name'] ?? 'D'), 0, 1)); ?>
+                            </div>
+                        <?php endif; ?>
+                    </div>
                     <div class="p-5">
-                        <h3 class="text-lg font-bold text-desnky-navy"><?php echo $this->escape((string) ($member['name'] ?? '')); ?></h3>
-                        <p class="mt-2 text-sm font-semibold uppercase tracking-wide text-desnky-blue"><?php echo $this->escape((string) ($member['role'] ?? '')); ?></p>
+                        <h3 class="text-lg font-bold text-desnky-dark"><?php echo $this->escape((string) ($member['name'] ?? '')); ?></h3>
+                        <p class="mt-2 text-sm font-semibold text-desnky-primary"><?php echo $this->escape((string) ($member['role'] ?? '')); ?></p>
                     </div>
                 </article>
             <?php endforeach; ?>
         </div>
-    </div>
-</section>
-<?php endif; ?>
-
-<?php if ($cta !== []) : ?>
-<section class="section-band bg-desnky-surface">
-    <div class="container-page flex flex-col justify-between gap-6 md:flex-row md:items-center">
-        <div class="max-w-2xl">
-            <h2 class="text-3xl font-bold text-desnky-navy"><?php echo $this->escape((string) ($cta['heading'] ?? '')); ?></h2>
-            <?php if (!empty($cta['text'])) : ?>
-                <p class="mt-4 leading-7 text-desnky-muted"><?php echo $this->escape((string) $cta['text']); ?></p>
-            <?php endif; ?>
-        </div>
-        <?php if (!empty($cta['primary_cta_label']) && !empty($cta['primary_cta_url'])) : ?>
-            <a href="<?php echo $this->escape((string) $cta['primary_cta_url']); ?>" class="btn-primary">
-                <?php echo $this->escape((string) $cta['primary_cta_label']); ?>
-            </a>
-        <?php endif; ?>
     </div>
 </section>
 <?php endif; ?>

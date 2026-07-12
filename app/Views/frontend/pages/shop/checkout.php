@@ -66,7 +66,7 @@ $csrf = (string) ($csrf_token ?? '');
                 <div class="grid gap-3">
                     <?php foreach ($paymentMethods as $method) : ?>
                         <?php $value = (string) ($method['value'] ?? ''); ?>
-                        <label class="flex cursor-pointer items-start gap-3 rounded-md border p-4 transition-colors" :class="payment === <?php echo $this->escapeJson($value); ?> ? 'border-desnky-primary bg-desnky-primary-50' : 'border-gray-300 hover:border-desnky-primary'">
+                        <label class="flex cursor-pointer items-start gap-3 rounded-md border p-4 transition-colors" :class='payment === <?php echo $this->escapeJson($value); ?> ? "border-desnky-primary bg-desnky-primary-50" : "border-gray-300 hover:border-desnky-primary"'>
                             <input type="radio" name="payment_method" value="<?php echo $this->escape($value); ?>" x-model="payment" required class="mt-0.5 text-desnky-primary focus:ring-desnky-primary">
                             <span>
                                 <span class="block font-semibold text-desnky-dark"><?php echo $this->escape((string) ($method['label'] ?? '')); ?></span>

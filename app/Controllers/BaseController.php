@@ -31,6 +31,10 @@ class BaseController
             // Share normalised public site settings (brand, contact, socials) with every
             // frontend view + partial so chrome reads from the CMS, not hardcoded values.
             $view->share('site', $this->siteSettings());
+            // Share the CSRF token globally so partials rendered from the layout
+            // (e.g. footer newsletter form) always have a valid token without each
+            // controller needing to pass it explicitly.
+            $view->share('csrf_token', $this->csrf());
         } elseif (strpos($template, 'admin') === 0 || strpos($template, 'admin/') === 0) {
             $view->setLayout('admin/layouts/app');
         }

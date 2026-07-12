@@ -60,6 +60,7 @@ foreach (($site['social'] ?? []) as $key => $href) {
                 <h2 class="text-sm font-semibold uppercase tracking-wide text-white">Company</h2>
                 <ul class="mt-4 space-y-3 text-sm">
                     <li><a href="/about" class="hover:text-white">About Us</a></li>
+                    <li><a href="/blog" class="hover:text-white">Blog</a></li>
                     <li><a href="/hse-policy" class="hover:text-white">HSE Policy</a></li>
                     <li><a href="/projects" class="hover:text-white">Projects</a></li>
                     <li><a href="/contact" class="hover:text-white">Contact</a></li>
@@ -119,7 +120,9 @@ foreach (($site['social'] ?? []) as $key => $href) {
             <p>&copy; <?php echo $year; ?> Desnky Global Resources Ltd. All rights reserved.</p>
             <nav aria-label="Legal" class="flex flex-wrap items-center gap-x-5 gap-y-2">
                 <a href="/privacy-policy" class="hover:text-white">Privacy Policy</a>
+                <a href="/cookie-policy" class="hover:text-white">Cookie Policy</a>
                 <a href="/terms-of-use" class="hover:text-white">Terms of Use</a>
+                <a href="/blog/feed.xml" class="hover:text-white">RSS</a>
                 <a href="/sitemap.xml" class="hover:text-white">Sitemap</a>
             </nav>
         </div>

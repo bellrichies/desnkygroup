@@ -8,11 +8,14 @@
 <form method="POST" action="/admin/media" enctype="multipart/form-data" class="mb-6 rounded border border-gray-200 bg-white p-5 shadow-sm">
     <input type="hidden" name="_token" value="<?php echo $this->escape((string) ($_SESSION['csrf_token'] ?? '')); ?>">
     <div class="grid gap-4 md:grid-cols-4">
-        <input type="file" name="image" accept=".jpg,.jpeg,.png,.webp" required class="rounded border border-gray-300 px-3 py-2 text-sm md:col-span-2">
-        <input name="title" placeholder="Image title" class="rounded border-gray-300 shadow-sm focus:border-blue-600 focus:ring-blue-600">
-        <input name="alt_text" placeholder="Alt text" class="rounded border-gray-300 shadow-sm focus:border-blue-600 focus:ring-blue-600">
+        <div class="md:col-span-4">
+            <input type="file" name="images[]" accept=".jpg,.jpeg,.png,.webp" multiple required class="w-full rounded border border-gray-300 px-3 py-2 text-sm">
+            <p class="mt-1 text-xs text-gray-500">Select one or more JPG, PNG, or WebP images (max 5 MB each). Title and alt text below apply to all files in the batch.</p>
+        </div>
+        <input name="title" placeholder="Image title (optional)" class="rounded border-gray-300 shadow-sm focus:border-blue-600 focus:ring-blue-600 md:col-span-2">
+        <input name="alt_text" placeholder="Alt text (optional)" class="rounded border-gray-300 shadow-sm focus:border-blue-600 focus:ring-blue-600 md:col-span-2">
     </div>
-    <button class="mt-4 rounded bg-blue-700 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-800">Upload Image</button>
+    <button class="mt-4 rounded bg-blue-700 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-800">Upload Images</button>
 </form>
 
 <div class="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">

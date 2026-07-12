@@ -7,6 +7,7 @@
 <?php
 $cards = [
     ['label' => 'Published Pages', 'value' => $kpis['published_pages'] ?? 0, 'url' => '/admin/pages'],
+    ['label' => 'Active Hero Slides', 'value' => $kpis['active_hero_slides'] ?? 0, 'url' => '/admin/homepage-hero'],
     ['label' => 'Products Listed', 'value' => $kpis['products'] ?? 0, 'url' => '/admin/products'],
     ['label' => 'Pending Orders', 'value' => $kpis['pending_orders'] ?? 0, 'url' => '/admin/orders'],
     [
@@ -14,8 +15,8 @@ $cards = [
         'value' => '₦' . number_format((float) ($kpis['completed_orders_total'] ?? 0), 2),
         'url' => '/admin/orders',
     ],
-    ['label' => 'New Inquiries', 'value' => $kpis['unread_inquiries'] ?? 0, 'url' => '/admin/pages'],
-    ['label' => 'Subscribers', 'value' => $kpis['newsletter_subscribers'] ?? 0, 'url' => '/admin/settings'],
+    ['label' => 'New Inquiries', 'value' => $kpis['unread_inquiries'] ?? 0, 'url' => '/admin/customers?segment=with_inquiries'],
+    ['label' => 'Subscribers', 'value' => $kpis['newsletter_subscribers'] ?? 0, 'url' => '/admin/customers?segment=newsletter'],
     ['label' => 'Low Stock', 'value' => $kpis['low_stock_products'] ?? 0, 'url' => '/admin/products'],
     ['label' => 'Admin Users', 'value' => $kpis['admin_users'] ?? 0, 'url' => '/admin/users'],
 ];
@@ -50,6 +51,9 @@ $cards = [
         <div class="mt-4 grid gap-2">
             <a href="/admin/pages" class="rounded bg-blue-50 px-4 py-3 text-sm font-medium text-blue-800 hover:bg-blue-100">
                 Create new page
+            </a>
+            <a href="/admin/homepage-hero" class="rounded bg-purple-50 px-4 py-3 text-sm font-medium text-purple-800 hover:bg-purple-100">
+                Manage homepage hero
             </a>
             <a href="/admin/products" class="rounded bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800 hover:bg-emerald-100">
                 Create new product

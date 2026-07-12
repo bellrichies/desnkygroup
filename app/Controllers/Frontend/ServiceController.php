@@ -5,8 +5,10 @@ namespace App\Controllers\Frontend;
 use App\Controllers\BaseController;
 use App\Repositories\PageRepository;
 use App\Repositories\PageSectionRepository;
+use App\Repositories\ProjectRepository;
 use App\Repositories\ServiceRepository;
 use App\Repositories\SiteSettingRepository;
+use App\Repositories\TrustedClientRepository;
 use App\Services\ServicePageContentService;
 use App\Support\DatabaseFactory;
 
@@ -24,7 +26,7 @@ class ServiceController extends BaseController
         $content = $this->content()->indexContent();
 
         return $this->view('frontend/pages/services/index', [
-            'title' => $content['title'],
+            'title'  => $content['title'],
             'active' => 'services',
         ] + $content);
     }
@@ -37,14 +39,14 @@ class ServiceController extends BaseController
             http_response_code(404);
 
             return $this->view('frontend/pages/show', [
-                'title' => 'Service Not Found',
+                'title'   => 'Service Not Found',
                 'content' => '<p>The requested service page could not be found.</p>',
-                'active' => 'services',
+                'active'  => 'services',
             ]);
         }
 
         return $this->view('frontend/pages/services/show', [
-            'title' => $content['title'],
+            'title'  => $content['title'],
             'active' => 'services',
         ] + $content);
     }
@@ -55,13 +57,15 @@ class ServiceController extends BaseController
             return $this->serviceContent;
         }
 
-        $connection = DatabaseFactory::make();
+        $db = DatabaseFactory::make();
 
         return $this->serviceContent = new ServicePageContentService(
-            new PageRepository($connection),
-            new PageSectionRepository($connection),
-            new ServiceRepository($connection),
-            new SiteSettingRepository($connection)
+            new PageRepository($db),
+            new PageSectionRepository($db),
+            new ServiceRepository($db),
+            new SiteSettingRepository($db),
+            new ProjectRepository($db),
+            new TrustedClientRepository($db)
         );
     }
 }

@@ -1,95 +1,282 @@
 <?php
-$hero = $hero ?? [];
-$servicesIntro = $servicesIntro ?? [];
-$whyChooseUs = $whyChooseUs ?? [];
-$hseCommitment = $hseCommitment ?? [];
-$projectsIntro = $projectsIntro ?? [];
-$clientsSection = $clientsSection ?? [];
-$cta = $cta ?? [];
-$services = $services ?? [];
-$projects = $projects ?? [];
-$clients = $clientsSection['items'] ?? [];
-$testimonials = $testimonials ?? [];
+$hero           ??= [];
+$servicesIntro  ??= [];
+$whyChooseUs    ??= [];
+$hseCommitment  ??= [];
+$projectsIntro  ??= [];
+$clientsSection  ??= [];
+$cta             ??= [];
+$heroSlides      ??= [];
+$services        ??= [];
+$projects        ??= [];
+$trustedClients  ??= [];
+$clients           = $trustedClients;
+$testimonials    ??= [];
 
 // CMS-overridable stats band; sensible defaults keep the band populated.
-$stats = $stats ?? [];
-$statItems = $stats['items'] ?? [
-    ['value' => '15', 'suffix' => '+', 'label' => 'Years of operation'],
+$stats     ??= [];
+$statItems   = $stats['items'] ?? [
+    ['value' => '15',  'suffix' => '+', 'label' => 'Years of operation'],
     ['value' => '200', 'suffix' => '+', 'label' => 'Projects delivered'],
-    ['value' => '6', 'suffix' => '', 'label' => 'Industrial sectors'],
+    ['value' => '6',   'suffix' => '',  'label' => 'Industrial sectors'],
     ['value' => '100', 'suffix' => '%', 'label' => 'HSE commitment'],
 ];
 
 // Map service slugs to curated sector icons for consistent iconography.
 $sectorIcons = [
-    'engineering' => 'cog',
-    'energy-solutions' => 'bolt',
-    'procurement' => 'truck',
-    'hse-safety' => 'shield-check',
-    'ict-solutions' => 'server',
+    'engineering'          => 'cog',
+    'energy-solutions'     => 'bolt',
+    'procurement'          => 'truck',
+    'hse-safety'           => 'shield-check',
+    'ict-solutions'        => 'server',
     'agro-food-processing' => 'leaf',
 ];
-$iconFor = static function (string $slug) use ($sectorIcons): string {
-    return $sectorIcons[$slug] ?? 'sparkles';
-};
+$iconFor = static fn (string $slug): string => $sectorIcons[$slug] ?? 'sparkles';
 ?>
 
-<?php if ($hero !== []) : ?>
-<section class="relative isolate overflow-hidden bg-desnky-dark text-white">
-    <?php if (!empty($hero['image'])) : ?>
-        <img
-            src="<?php echo $this->escape((string) $hero['image']); ?>"
-            alt="<?php echo $this->escape((string) ($hero['image_alt'] ?? $hero['heading'] ?? '')); ?>"
-            class="absolute inset-0 -z-10 h-full w-full object-cover opacity-40"
-            loading="eager"
-            fetchpriority="high"
+<?php
+// Homepage hero slides are managed from the dedicated database table.
+$sliderSlides = [];
+
+foreach ($heroSlides as $slide) {
+    $sliderSlides[] = [
+        'type'            => 'admin',
+        'eyebrow'         => $hero['eyebrow'] ?? '',
+        'heading'         => (string) ($slide['heading'] ?? ''),
+        'text'            => (string) ($slide['caption'] ?? ''),
+        'image'           => (string) ($slide['background_image'] ?? ''),
+        'image_alt'       => (string) ($slide['heading'] ?? 'Homepage hero background'),
+        'primary_label'   => (string) ($slide['primary_cta_label'] ?? ''),
+        'primary_url'     => (string) ($slide['primary_cta_url'] ?? ''),
+        'secondary_label' => (string) ($slide['secondary_cta_label'] ?? ''),
+        'secondary_url'   => (string) ($slide['secondary_cta_url'] ?? ''),
+    ];
+}
+
+// Encode for Alpine.js x-data — all values are escaped in PHP before encoding.
+$slidesJson = json_encode(array_map(static function (array $s): array {
+    return array_map(static fn ($v) => is_string($v) ? htmlspecialchars($v, ENT_QUOTES, 'UTF-8') : $v, $s);
+}, $sliderSlides), JSON_HEX_TAG | JSON_HEX_AMP);
+?>
+
+<?php if ($sliderSlides !== []) : ?>
+<section
+    class="hero-slider"
+    x-data='heroSlider(<?php echo $slidesJson; ?>)'
+    x-init="startAutoplay()"
+    @focusin="holdAutoplay()"
+    @focusout="resumeAutoplay()"
+    @touchstart.passive="touchStart($event)"
+    @touchend.passive="touchEnd($event)"
+    @keydown.arrow-left.window="prev()"
+    @keydown.arrow-right.window="next()"
+    aria-label="Homepage hero"
+    aria-roledescription="carousel"
+    x-bind:aria-live="_paused ? 'polite' : 'off'"
+>
+    <!-- Slide backgrounds (cross-fade) -->
+    <template x-for="(slide, i) in slides" :key="i">
+        <div
+            x-show="current === i"
+            x-transition:enter="transition-opacity duration-700"
+            x-transition:enter-start="opacity-0"
+            x-transition:enter-end="opacity-100"
+            x-transition:leave="transition-opacity duration-500"
+            x-transition:leave-start="opacity-100"
+            x-transition:leave-end="opacity-0"
+            class="hero-slider__background"
+            aria-hidden="true"
         >
-    <?php endif; ?>
-    <div class="absolute inset-0 -z-10 bg-gradient-to-br from-desnky-dark via-desnky-dark/85 to-desnky-dark/70"></div>
-    <div class="container-page grid min-h-[calc(100vh-5rem)] content-center py-20 sm:py-24">
-        <div class="max-w-4xl">
-            <?php if (!empty($hero['eyebrow'])) : ?>
-                <p class="eyebrow-on-dark"><?php echo $this->escape((string) $hero['eyebrow']); ?></p>
-            <?php endif; ?>
-            <h1 class="mt-5 max-w-5xl text-4xl font-bold leading-tight sm:text-6xl">
-                <?php echo $this->escape((string) ($hero['heading'] ?? '')); ?>
-            </h1>
-            <?php if (!empty($hero['text'])) : ?>
-                <p class="mt-6 max-w-2xl text-lg leading-8 text-gray-200"><?php echo $this->escape((string) $hero['text']); ?></p>
-            <?php endif; ?>
-            <div class="mt-8 flex flex-col gap-3 sm:flex-row">
-                <?php if (!empty($hero['primary_cta_label']) && !empty($hero['primary_cta_url'])) : ?>
-                    <a href="<?php echo $this->escape((string) $hero['primary_cta_url']); ?>" class="btn-on-dark" data-analytics-event="hero_quote">
-                        <?php echo $this->escape((string) $hero['primary_cta_label']); ?>
-                    </a>
-                <?php endif; ?>
-                <?php if (!empty($hero['secondary_cta_label']) && !empty($hero['secondary_cta_url'])) : ?>
-                    <a href="<?php echo $this->escape((string) $hero['secondary_cta_url']); ?>" class="btn-secondary-on-dark">
-                        <?php echo $this->escape((string) $hero['secondary_cta_label']); ?>
-                    </a>
-                <?php endif; ?>
+            <img
+                x-show="slide.image"
+                x-bind:src="slide.image || ''"
+                x-bind:alt="slide.image_alt || ''"
+                alt="Featured service visual"
+                class="hero-slider__image"
+                x-bind:loading="i === 0 ? 'eager' : 'lazy'"
+                x-bind:fetchpriority="i === 0 ? 'high' : 'auto'"
+                decoding="async"
+            >
+        </div>
+    </template>
+    <div class="hero-slider__overlay" aria-hidden="true"></div>
+    <div class="hero-slider__vignette" aria-hidden="true"></div>
+
+    <!-- Slide content -->
+    <div class="container-page hero-slider__inner">
+        <template x-for="(slide, i) in slides" :key="'c' + i">
+            <div
+                x-show="current === i"
+                x-transition:enter="transition duration-700 ease-out"
+                x-transition:enter-start="opacity-0 translate-y-4"
+                x-transition:enter-end="opacity-100 translate-y-0"
+                x-transition:leave="transition duration-slow ease-in"
+                x-transition:leave-start="opacity-100"
+                x-transition:leave-end="opacity-0"
+                class="hero-slider__copy"
+                role="group"
+                aria-roledescription="slide"
+                x-bind:aria-label="'Slide ' + (i + 1) + ' of ' + slides.length"
+            >
+                <p class="eyebrow-on-dark" x-text="slide.eyebrow"></p>
+                <h1 class="hero-slider__title" x-text="slide.heading"></h1>
+                <p class="hero-slider__text" x-text="slide.text" x-show="slide.text"></p>
+                <div class="mt-8 flex flex-col gap-3 sm:flex-row">
+                    <a
+                        x-bind:href="slide.primary_url"
+                        class="btn-primary"
+                        x-text="slide.primary_label"
+                        x-show="slide.primary_label"
+                        data-analytics-event="hero_cta"
+                    ></a>
+                    <a
+                        x-bind:href="slide.secondary_url"
+                        class="btn-secondary-on-dark"
+                        x-text="slide.secondary_label"
+                        x-show="slide.secondary_label && slide.secondary_url"
+                    ></a>
+                </div>
+            </div>
+        </template>
+    </div>
+
+    <div class="hero-slider__nav" x-show="slides.length > 1" x-cloak>
+        <div class="container-page flex items-center justify-between gap-4">
+            <!-- Dot indicators -->
+            <div class="hero-slider__dots" role="tablist" aria-label="Slides">
+                <template x-for="(_, i) in slides" :key="'dot' + i">
+                    <button
+                        type="button"
+                        role="tab"
+                        @click="goTo(i); pauseAutoplay()"
+                        :aria-selected="current === i"
+                        :tabindex="current === i ? 0 : -1"
+                        :aria-label="'Go to slide ' + (i + 1)"
+                        :class="current === i ? 'hero-slider__dot hero-slider__dot--active' : 'hero-slider__dot'"
+                    ></button>
+                </template>
+            </div>
+
+            <!-- Prev / Next controls -->
+            <div class="flex items-center gap-2">
+                <button
+                    type="button"
+                    @click="prev(); pauseAutoplay()"
+                    class="hero-slider__control"
+                    aria-label="Previous slide"
+                >
+                    <?php echo $this->partial('frontend/partials/icon', ['name' => 'chevron-right', 'class' => 'h-5 w-5 rotate-180']); ?>
+                </button>
+                <button
+                    type="button"
+                    @click="next(); pauseAutoplay()"
+                    class="hero-slider__control"
+                    aria-label="Next slide"
+                >
+                    <?php echo $this->partial('frontend/partials/icon', ['name' => 'chevron-right', 'class' => 'h-5 w-5']); ?>
+                </button>
             </div>
         </div>
     </div>
+
+    <!-- Progress bar -->
+    <div class="hero-slider__progress" x-show="slides.length > 1" x-cloak>
+        <div
+            class="hero-slider__progress-bar"
+            :style="'width:' + progress + '%'"
+            aria-hidden="true"
+        ></div>
+    </div>
 </section>
+
+<script>
+function heroSlider(slides) {
+    return {
+        slides,
+        current: 0,
+        progress: 0,
+        _timer: null,
+        _progTimer: null,
+        _paused: false,
+        _resumeTimer: null,
+        _touchStartX: null,
+        interval: 6000,
+
+        goTo(i) { this.current = (i + this.slides.length) % this.slides.length; this.progress = 0; },
+        next()   { this.goTo(this.current + 1); },
+        prev()   { this.goTo(this.current - 1); },
+
+        startAutoplay() {
+            if (this.slides.length <= 1) return;
+            if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+            this._runAutoplay();
+        },
+        _runAutoplay() {
+            clearInterval(this._timer);
+            clearInterval(this._progTimer);
+            this.progress = 0;
+            const step = 100 / (this.interval / 100);
+            this._progTimer = setInterval(() => { if (!this._paused) this.progress = Math.min(this.progress + step, 100); }, 100);
+            this._timer = setInterval(() => {
+                if (this._paused) return;
+                this.next();
+                this.progress = 0;
+            }, this.interval);
+        },
+        holdAutoplay() {
+            this._paused = true;
+        },
+        resumeAutoplay() {
+            clearTimeout(this._resumeTimer);
+            this._paused = false;
+        },
+        pauseAutoplay() {
+            this._paused = true;
+            clearTimeout(this._resumeTimer);
+            this._resumeTimer = setTimeout(() => { this._paused = false; }, 8000);
+        },
+        touchStart(event) {
+            this._touchStartX = event.changedTouches && event.changedTouches[0]
+                ? event.changedTouches[0].clientX
+                : null;
+        },
+        touchEnd(event) {
+            if (this._touchStartX === null || !event.changedTouches || !event.changedTouches[0]) return;
+            const delta = event.changedTouches[0].clientX - this._touchStartX;
+            this._touchStartX = null;
+
+            if (Math.abs(delta) < 48) return;
+            delta < 0 ? this.next() : this.prev();
+            this.pauseAutoplay();
+        },
+    };
+}
+</script>
 <?php endif; ?>
 
 <!-- Trust / stats band (count-up) -->
 <?php if ($statItems !== []) : ?>
-<section class="border-b border-gray-200 bg-white">
-    <div class="container-page py-10">
-        <dl class="grid grid-cols-2 gap-6 lg:grid-cols-4">
-            <?php foreach ($statItems as $stat) : ?>
-                <div class="text-center" data-reveal>
-                    <dd
-                        class="text-4xl font-bold text-desnky-dark"
-                        data-countup="<?php echo $this->escape((string) ($stat['value'] ?? '0')); ?>"
-                        data-countup-suffix="<?php echo $this->escape((string) ($stat['suffix'] ?? '')); ?>"
-                    ><?php echo $this->escape((string) ($stat['value'] ?? '0') . ($stat['suffix'] ?? '')); ?></dd>
-                    <dt class="mt-2 text-sm font-medium text-desnky-muted"><?php echo $this->escape((string) ($stat['label'] ?? '')); ?></dt>
-                </div>
-            <?php endforeach; ?>
-        </dl>
+<section class="stats-band" aria-labelledby="home-stats-heading">
+    <div class="container-page">
+        <div class="grid gap-8 lg:grid-cols-[0.95fr_1.3fr] lg:items-center">
+            <div data-reveal>
+                <p class="eyebrow-on-dark">Delivery confidence</p>
+                <h2 id="home-stats-heading" class="mt-3 text-3xl font-bold leading-tight text-white sm:text-4xl">Built for measurable, accountable execution</h2>
+                <p class="mt-4 max-w-xl text-base leading-7 text-white/75">A focused operating model across technical, procurement, HSE, ICT and agro support work.</p>
+            </div>
+            <dl class="grid gap-4 sm:grid-cols-2">
+                <?php foreach ($statItems as $stat) : ?>
+                    <div class="stats-card" data-reveal>
+                        <dd
+                            class="text-4xl font-extrabold leading-none text-white sm:text-5xl"
+                            data-countup="<?php echo $this->escape((string) ($stat['value'] ?? '0')); ?>"
+                            data-countup-suffix="<?php echo $this->escape((string) ($stat['suffix'] ?? '')); ?>"
+                        ><?php echo $this->escape((string) ($stat['value'] ?? '0') . ($stat['suffix'] ?? '')); ?></dd>
+                        <dt class="mt-3 text-sm font-semibold leading-6 text-white/78"><?php echo $this->escape((string) ($stat['label'] ?? '')); ?></dt>
+                    </div>
+                <?php endforeach; ?>
+            </dl>
+        </div>
     </div>
 </section>
 <?php endif; ?>
@@ -109,20 +296,17 @@ $iconFor = static function (string $slug) use ($sectorIcons): string {
         </div>
         <div class="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             <?php foreach ($services as $service) : ?>
-                <article class="card-interactive flex flex-col" data-reveal>
+                <article class="card-interactive service-card flex flex-col" data-reveal>
                     <?php if (!empty($service['image'])) : ?>
                         <img
                             src="<?php echo $this->escape((string) $service['image']); ?>"
                             alt="<?php echo $this->escape((string) $service['title']); ?>"
-                            class="h-48 w-full object-cover"
+                            class="service-card__image"
                             loading="lazy"
                         >
                     <?php endif; ?>
                     <div class="card-body flex flex-1 flex-col">
-                        <span class="icon-tile">
-                            <?php echo $this->partial('frontend/partials/icon', ['name' => $iconFor((string) $service['slug']), 'class' => 'h-6 w-6']); ?>
-                        </span>
-                        <h3 class="mt-5 text-xl font-bold text-desnky-dark"><?php echo $this->escape((string) $service['title']); ?></h3>
+                        <h3 class="text-xl font-bold text-desnky-dark"><?php echo $this->escape((string) $service['title']); ?></h3>
                         <p class="mt-3 flex-1 text-sm leading-6 text-desnky-muted"><?php echo $this->escape((string) $service['summary']); ?></p>
                         <a href="/services/<?php echo $this->escape((string) $service['slug']); ?>" class="btn-ghost mt-5">
                             <?php echo $this->escape((string) ($servicesIntro['item_cta_label'] ?? 'Explore')); ?>
@@ -294,38 +478,75 @@ $iconFor = static function (string $slug) use ($sectorIcons): string {
 <?php endif; ?>
 
 <!-- Client showcase -->
-<?php if ($clientsSection !== [] && is_array($clients) && $clients !== []) : ?>
+<?php if (!empty($clients)) : ?>
 <section class="section-band">
     <div class="container-page">
-        <h2 class="text-center text-2xl font-bold text-desnky-dark"><?php echo $this->escape((string) ($clientsSection['heading'] ?? 'Trusted by leading organisations')); ?></h2>
-        <div class="mt-10 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-            <?php foreach ($clients as $client) : ?>
-                <div class="flex items-center justify-center rounded-lg border border-gray-200 bg-white px-5 py-6 text-center text-sm font-semibold text-desnky-muted transition-colors hover:text-desnky-dark">
-                    <?php echo $this->escape((string) $client); ?>
+        <div class="mx-auto max-w-3xl text-center" data-reveal>
+            <p class="eyebrow">Client confidence</p>
+            <h2 class="mt-3 section-heading"><?php echo $this->escape((string) ($clientsSection['heading'] ?? 'Trusted by leading organisations')); ?></h2>
+        </div>
+        <?php
+        $clientItems = array_values($clients);
+        $clientRows = [[], []];
+        foreach ($clientItems as $index => $client) {
+            $clientRows[$index % 2][] = $client;
+        }
+        if ($clientRows[1] === []) {
+            $clientRows[1] = $clientRows[0];
+        }
+        $renderClientCard = function ($client, bool $duplicate = false): void {
+            $clientName = is_array($client) ? (string) ($client['name'] ?? '') : (string) $client;
+            $clientLogo = is_array($client) ? (string) ($client['logo'] ?? '') : '';
+            $clientUrl  = is_array($client) ? (string) ($client['website_url'] ?? '') : '';
+            $hiddenAttrs = $duplicate ? ' aria-hidden="true"' : '';
+            $hiddenLinkAttrs = $duplicate ? ' aria-hidden="true" tabindex="-1"' : '';
+            ?>
+            <?php if ($clientUrl !== '') : ?>
+            <a href="<?php echo $this->escape($clientUrl); ?>" target="_blank" rel="noopener noreferrer" class="trusted-client-card"<?php echo $hiddenLinkAttrs; ?>>
+            <?php else : ?>
+            <div class="trusted-client-card"<?php echo $hiddenAttrs; ?>>
+            <?php endif; ?>
+                <?php if ($clientLogo !== '') : ?>
+                    <img src="<?php echo $this->escape($clientLogo); ?>" alt="<?php echo $this->escape($clientName); ?>" class="trusted-client-logo" loading="lazy">
+                <?php else : ?>
+                    <span class="trusted-client-name"><?php echo $this->escape($clientName); ?></span>
+                <?php endif; ?>
+            <?php if ($clientUrl !== '') : ?>
+            </a>
+            <?php else : ?>
+            </div>
+            <?php endif; ?>
+            <?php
+        };
+        ?>
+        <div class="trusted-carousel mt-10" aria-label="Trusted clients carousel" data-reveal>
+            <div class="trusted-carousel__mobile">
+                <div class="trusted-carousel__track">
+                    <?php foreach ($clientItems as $client) : ?>
+                        <?php $renderClientCard($client); ?>
+                    <?php endforeach; ?>
+                    <?php foreach ($clientItems as $client) : ?>
+                        <?php $renderClientCard($client, true); ?>
+                    <?php endforeach; ?>
                 </div>
-            <?php endforeach; ?>
+            </div>
+            <div class="trusted-carousel__desktop">
+                <?php foreach ($clientRows as $rowIndex => $row) : ?>
+                    <div class="trusted-carousel__track <?php echo $rowIndex === 1 ? 'trusted-carousel__track--reverse' : ''; ?>">
+                        <?php foreach ($row as $client) : ?>
+                            <?php $renderClientCard($client); ?>
+                        <?php endforeach; ?>
+                        <?php foreach ($row as $client) : ?>
+                            <?php $renderClientCard($client, true); ?>
+                        <?php endforeach; ?>
+                    </div>
+                <?php endforeach; ?>
+            </div>
         </div>
     </div>
 </section>
 <?php endif; ?>
-
-<!-- Conversion + newsletter band -->
-<?php if ($cta !== []) : ?>
-<section class="relative isolate overflow-hidden bg-desnky-dark text-white">
-    <div class="container-page section-band grid gap-10 lg:grid-cols-2 lg:items-center">
-        <div data-reveal>
-            <p class="eyebrow-on-dark">Let's build together</p>
-            <h2 class="mt-3 text-3xl font-bold sm:text-4xl"><?php echo $this->escape((string) ($cta['heading'] ?? '')); ?></h2>
-            <?php if (!empty($cta['text'])) : ?>
-                <p class="mt-4 max-w-xl text-lg text-gray-200"><?php echo $this->escape((string) $cta['text']); ?></p>
-            <?php endif; ?>
-            <div class="mt-8 flex flex-col gap-3 sm:flex-row">
-                <a href="/contact" class="btn-on-dark" data-analytics-event="cta_quote">Request a Quote</a>
-                <?php if (!empty($cta['contact_label']) && !empty($cta['contact_url'])) : ?>
-                    <a href="<?php echo $this->escape((string) $cta['contact_url']); ?>" class="btn-secondary-on-dark"><?php echo $this->escape((string) $cta['contact_label']); ?></a>
-                <?php endif; ?>
-            </div>
-        </div>
+<?php if (false) : ?>
         <div class="rounded-lg bg-white/5 p-6 ring-1 ring-white/10 sm:p-8" data-reveal>
             <h3 class="text-lg font-bold text-white"><?php echo $this->escape((string) ($cta['newsletter_heading'] ?? 'Subscribe to industry insights')); ?></h3>
             <p class="mt-2 text-sm text-gray-300">Project trends, HSE guidance and procurement tips — straight to your inbox.</p>
@@ -349,9 +570,3 @@ $iconFor = static function (string $slug) use ($sectorIcons): string {
     </div>
 </section>
 <?php endif; ?>
-
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    submitForm('[data-newsletter-form]', { endpoint: '/newsletter', resetOnSuccess: true });
-});
-</script>

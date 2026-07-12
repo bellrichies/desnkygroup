@@ -7,6 +7,7 @@ $items = [
     ['label' => 'Services', 'href' => '/services', 'key' => 'services'],
     ['label' => 'Projects', 'href' => '/projects', 'key' => 'projects'],
     ['label' => 'Shop', 'href' => '/shop', 'key' => 'shop'],
+    ['label' => 'Blog', 'href' => '/blog', 'key' => 'blog'],
     ['label' => 'Contact', 'href' => '/contact', 'key' => 'contact'],
 ];
 
