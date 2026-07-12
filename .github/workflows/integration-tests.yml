@@ -1,0 +1,36 @@
+name: Integration Tests
+
+on:
+  push:
+    branches: [ feature/phase-5-cms-admin-module, cms-dynamic-content-refactor ]
+  pull_request:
+    branches: [ feature/phase-5-cms-admin-module ]
+
+jobs:
+  phpunit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: mbstring, pdo_mysql
+      - name: Install dependencies
+        run: composer install --no-progress --no-suggest --prefer-dist
+      - name: Run migrations
+        run: php scripts/migrate.php
+      - name: Seed minimal data
+        run: php scripts/seed.php
+      - name: Start PHP built-in server
+        run: php -S 127.0.0.1:8000 -t public > /tmp/php-server.log 2>&1 &
+      - name: Wait for server
+        run: |
+          for i in {1..15}; do
+            if nc -z 127.0.0.1 8000; then echo 'server up' && exit 0; fi
+            sleep 1
+          done
+          cat /tmp/php-server.log
+          exit 1
+      - name: Run integration tests
+        run: vendor/bin/phpunit tests/Integration --colors=always
