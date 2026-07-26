@@ -72,6 +72,14 @@ $router->group('/admin', function ($router) {
     $router->get('/services', 'Admin\ServiceController@index')->middleware(['auth', 'permission:services.view']);
     $router->get('/services/create', 'Admin\ServiceController@create')->middleware(['auth', 'permission:services.create']);
     $router->post('/services', 'Admin\ServiceController@store')->middleware(['auth', 'csrf', 'permission:services.create']);
+    $router->get('/services/{serviceId}/heroes', 'Admin\ServiceHeroController@index')->middleware(['auth', 'permission:services.view']);
+    $router->get('/services/{serviceId}/heroes/create', 'Admin\ServiceHeroController@create')->middleware(['auth', 'permission:services.edit']);
+    $router->post('/services/{serviceId}/heroes', 'Admin\ServiceHeroController@store')->middleware(['auth', 'csrf', 'permission:services.edit']);
+    $router->post('/services/{serviceId}/heroes/reorder', 'Admin\ServiceHeroController@reorder')->middleware(['auth', 'csrf', 'permission:services.edit']);
+    $router->get('/services/{serviceId}/heroes/{id}/edit', 'Admin\ServiceHeroController@edit')->middleware(['auth', 'permission:services.edit']);
+    $router->post('/services/{serviceId}/heroes/{id}', 'Admin\ServiceHeroController@update')->middleware(['auth', 'csrf', 'permission:services.edit']);
+    $router->post('/services/{serviceId}/heroes/{id}/toggle', 'Admin\ServiceHeroController@toggle')->middleware(['auth', 'csrf', 'permission:services.edit']);
+    $router->post('/services/{serviceId}/heroes/{id}/delete', 'Admin\ServiceHeroController@destroy')->middleware(['auth', 'csrf', 'permission:services.delete']);
     $router->get('/services/{id}/edit', 'Admin\ServiceController@edit')->middleware(['auth', 'permission:services.edit']);
     $router->post('/services/{id}', 'Admin\ServiceController@update')->middleware(['auth', 'csrf', 'permission:services.edit']);
     $router->post('/services/{id}/delete', 'Admin\ServiceController@destroy')->middleware(['auth', 'csrf', 'permission:services.delete']);
