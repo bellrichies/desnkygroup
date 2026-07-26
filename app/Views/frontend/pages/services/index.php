@@ -2,6 +2,7 @@
 $hero = $hero ?? [];
 $listing = $listing ?? [];
 $services = $services ?? [];
+$introText = (string) ($listing['text'] ?? $hero['text'] ?? '');
 
 $sectorIcons = [
     'engineering' => 'cog',
@@ -21,49 +22,40 @@ $process = [
 ];
 ?>
 
-<?php echo $this->partial('frontend/partials/page-hero', [
-    'hero' => $hero,
-    'title' => $title ?? '',
-    'fallbackImage' => $page['featured_image'] ?? '',
-    'breadcrumbs' => [
-        ['label' => 'Home', 'href' => '/'],
-        ['label' => 'Services'],
-    ],
-]); ?>
-
-<?php if ($services !== []) : ?>
 <section class="section-band">
     <div class="container-page">
-        <div class="mb-8 flex flex-wrap gap-2.5" aria-label="<?php echo $this->escape((string) ($listing['filters_label'] ?? 'Service filters')); ?>">
-            <a href="/services" class="chip chip-active"><?php echo $this->escape((string) ($listing['all_services_label'] ?? 'All services')); ?></a>
-            <?php foreach ($services as $service) : ?>
-                <a href="/services/<?php echo $this->escape((string) $service['slug']); ?>" class="chip"><?php echo $this->escape((string) $service['title']); ?></a>
-            <?php endforeach; ?>
+        <div class="mb-10 max-w-3xl" data-reveal>
+            <p class="eyebrow">Services</p>
+            <h1 class="mt-3 section-heading"><?php echo $this->escape((string) ($listing['heading'] ?? $hero['heading'] ?? $title ?? 'Services')); ?></h1>
+            <?php if ($introText !== '') : ?>
+                <p class="section-lead"><?php echo $this->escape($introText); ?></p>
+            <?php endif; ?>
         </div>
 
-        <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            <?php foreach ($services as $service) : ?>
-                <article class="card-interactive flex flex-col" data-reveal>
-                    <?php if (!empty($service['image'])) : ?>
-                        <img src="<?php echo $this->escape((string) $service['image']); ?>" alt="<?php echo $this->escape((string) $service['title']); ?>" class="h-48 w-full object-cover" loading="lazy">
-                    <?php endif; ?>
-                    <div class="card-body flex flex-1 flex-col">
-                        <span class="icon-tile">
-                            <?php echo $this->partial('frontend/partials/icon', ['name' => $iconFor((string) $service['slug']), 'class' => 'h-6 w-6']); ?>
-                        </span>
-                        <h2 class="mt-5 text-xl font-bold text-desnky-dark"><?php echo $this->escape((string) $service['title']); ?></h2>
-                        <p class="mt-3 flex-1 text-sm leading-6 text-desnky-muted"><?php echo $this->escape((string) $service['summary']); ?></p>
-                        <a href="/services/<?php echo $this->escape((string) $service['slug']); ?>" class="btn-ghost mt-5">
-                            <?php echo $this->escape((string) ($listing['card_cta_label'] ?? 'Explore')); ?>
-                            <?php echo $this->partial('frontend/partials/icon', ['name' => 'arrow-right', 'class' => 'h-4 w-4']); ?>
-                        </a>
-                    </div>
-                </article>
-            <?php endforeach; ?>
-        </div>
+        <?php if ($services !== []) : ?>
+            <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                <?php foreach ($services as $service) : ?>
+                    <article class="card-interactive flex flex-col" data-reveal>
+                        <?php if (!empty($service['image'])) : ?>
+                            <img src="<?php echo $this->escape((string) $service['image']); ?>" alt="<?php echo $this->escape((string) $service['title']); ?>" class="h-48 w-full object-cover" loading="lazy">
+                        <?php endif; ?>
+                        <div class="card-body flex flex-1 flex-col">
+                            <span class="icon-tile">
+                                <?php echo $this->partial('frontend/partials/icon', ['name' => $iconFor((string) $service['slug']), 'class' => 'h-6 w-6']); ?>
+                            </span>
+                            <h2 class="mt-5 text-xl font-bold text-desnky-dark"><?php echo $this->escape((string) $service['title']); ?></h2>
+                            <p class="mt-3 flex-1 text-sm leading-6 text-desnky-muted"><?php echo $this->escape((string) $service['summary']); ?></p>
+                            <a href="/services/<?php echo $this->escape((string) $service['slug']); ?>" class="btn-ghost mt-5">
+                                <?php echo $this->escape((string) ($listing['card_cta_label'] ?? 'Explore')); ?>
+                                <?php echo $this->partial('frontend/partials/icon', ['name' => 'arrow-right', 'class' => 'h-4 w-4']); ?>
+                            </a>
+                        </div>
+                    </article>
+                <?php endforeach; ?>
+            </div>
+        <?php endif; ?>
     </div>
 </section>
-<?php endif; ?>
 
 <!-- Process overview -->
 <section class="section-band bg-desnky-surface">
