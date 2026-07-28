@@ -63,6 +63,25 @@ class MailService
         return $this->sendAdminMail($subject, $body, (string) ($order['customer_email'] ?? ''));
     }
 
+    /**
+     * Send a customer-facing order status update.
+     *
+     * @param array $order Order payload.
+     * @return bool
+     */
+    public function sendOrderStatusNotification(array $order): bool
+    {
+        $subject = 'Order status update: ' . (string) ($order['order_number'] ?? '');
+        $body = sprintf(
+            "Hello %s,\n\nYour order %s is now %s.\n\nThank you,\nDesnky Global Resources Ltd",
+            (string) ($order['customer_name'] ?? 'Customer'),
+            (string) ($order['order_number'] ?? ''),
+            (string) ($order['order_status'] ?? 'pending')
+        );
+
+        return $this->sendCustomerMail($subject, $body, (string) ($order['customer_email'] ?? ''));
+    }
+
     private function sendAdminMail(string $subject, string $body, string $replyTo = ''): bool
     {
         try {
@@ -104,6 +123,51 @@ class MailService
         } catch (Throwable $exception) {
             $this->logger->error('Mail delivery failed', [
                 'subject' => $subject,
+                'error' => $exception->getMessage(),
+            ]);
+
+            return false;
+        }
+    }
+
+    private function sendCustomerMail(string $subject, string $body, string $recipient): bool
+    {
+        if (!filter_var($recipient, FILTER_VALIDATE_EMAIL)) {
+            return false;
+        }
+
+        try {
+            $mail = new PHPMailer(true);
+            $mail->isSMTP();
+            $mail->Host = (string) Config::get('mail.mailers.smtp.host', 'localhost');
+            $mail->Port = (int) Config::get('mail.mailers.smtp.port', 587);
+
+            $username = (string) Config::get('mail.mailers.smtp.username', '');
+            if ($username !== '') {
+                $mail->SMTPAuth = true;
+                $mail->Username = $username;
+                $mail->Password = (string) Config::get('mail.mailers.smtp.password', '');
+            }
+
+            $encryption = (string) Config::get('mail.mailers.smtp.encryption', '');
+            if ($encryption !== '') {
+                $mail->SMTPSecure = $encryption;
+            }
+
+            $mail->setFrom(
+                (string) Config::get('mail.from.address', 'noreply@desnkygroup.com'),
+                (string) Config::get('mail.from.name', 'Desnky Global Resources')
+            );
+            $mail->addAddress($recipient);
+            $mail->Subject = $subject;
+            $mail->Body = $body;
+            $mail->send();
+
+            return true;
+        } catch (Throwable $exception) {
+            $this->logger->error('Customer mail delivery failed', [
+                'subject' => $subject,
+                'recipient' => $recipient,
                 'error' => $exception->getMessage(),
             ]);
 

@@ -15,7 +15,11 @@ class ProductRepository extends BaseRepository
     public function all(): array
     {
         return $this->connection->query(
-            "SELECT * FROM products ORDER BY name ASC"
+            "SELECT p.*, c.name AS category_name
+             FROM products p
+             LEFT JOIN product_categories c ON c.id = p.category_id
+             WHERE p.deleted_at IS NULL
+             ORDER BY p.created_at DESC"
         );
     }
 
@@ -49,7 +53,7 @@ class ProductRepository extends BaseRepository
              LEFT JOIN product_images pi ON pi.product_id = p.id AND pi.sort_order = (
                 SELECT MIN(pi2.sort_order) FROM product_images pi2 WHERE pi2.product_id = p.id
              )
-             WHERE p.is_active = 1 AND p.deleted_at IS NULL
+             WHERE p.is_active = 1 AND p.status = 'active' AND p.deleted_at IS NULL
              ORDER BY p.name ASC"
         );
     }
@@ -62,7 +66,7 @@ class ProductRepository extends BaseRepository
     public function activeCategories(): array
     {
         return $this->connection->query(
-            'SELECT name, slug FROM product_categories WHERE is_active = 1 ORDER BY name ASC'
+            'SELECT id, name, slug FROM product_categories WHERE is_active = 1 ORDER BY sort_order ASC, name ASC'
         );
     }
 
@@ -75,7 +79,7 @@ class ProductRepository extends BaseRepository
     public function find(int $id): ?array
     {
         $result = $this->connection->query(
-            "SELECT * FROM products WHERE id = ?",
+            "SELECT * FROM products WHERE id = ? AND deleted_at IS NULL",
             [$id]
         );
 
@@ -91,7 +95,7 @@ class ProductRepository extends BaseRepository
     public function findActive(int $id): ?array
     {
         $result = $this->connection->query(
-            "SELECT * FROM products WHERE id = ? AND is_active = true",
+            "SELECT * FROM products WHERE id = ? AND is_active = true AND status = 'active' AND deleted_at IS NULL",
             [$id]
         );
 
@@ -107,7 +111,7 @@ class ProductRepository extends BaseRepository
     public function findBySlug(string $slug): ?array
     {
         $result = $this->connection->query(
-            "SELECT * FROM products WHERE slug = ?",
+            "SELECT * FROM products WHERE slug = ? AND deleted_at IS NULL",
             [$slug]
         );
 
@@ -123,7 +127,7 @@ class ProductRepository extends BaseRepository
     public function findActiveBySlug(string $slug): ?array
     {
         $result = $this->connection->query(
-            "SELECT * FROM products WHERE slug = ? AND is_active = true",
+            "SELECT * FROM products WHERE slug = ? AND is_active = true AND status = 'active' AND deleted_at IS NULL",
             [$slug]
         );
 
@@ -157,10 +161,12 @@ class ProductRepository extends BaseRepository
         $searchTerm = "%{$query}%";
 
         return $this->connection->query(
-            "SELECT * FROM products 
-             WHERE is_active = true 
-             AND (name LIKE ? OR description LIKE ? OR sku LIKE ?)
-             ORDER BY name ASC",
+            "SELECT p.*, c.name AS category_name
+             FROM products p
+             LEFT JOIN product_categories c ON c.id = p.category_id
+             WHERE p.deleted_at IS NULL
+             AND (p.name LIKE ? OR p.description LIKE ? OR p.sku LIKE ?)
+             ORDER BY p.name ASC",
             [$searchTerm, $searchTerm, $searchTerm]
         );
     }
@@ -174,7 +180,9 @@ class ProductRepository extends BaseRepository
     public function byCategory(int $categoryId): array
     {
         return $this->connection->query(
-            "SELECT * FROM products WHERE category_id = ? AND is_active = true ORDER BY name ASC",
+            "SELECT * FROM products
+             WHERE category_id = ? AND is_active = true AND status = 'active' AND deleted_at IS NULL
+             ORDER BY name ASC",
             [$categoryId]
         );
     }
@@ -187,7 +195,44 @@ class ProductRepository extends BaseRepository
     public function lowStock(): array
     {
         return $this->connection->query(
-            "SELECT * FROM products WHERE quantity_in_stock <= reorder_level ORDER BY quantity_in_stock ASC"
+            "SELECT * FROM products
+             WHERE quantity_in_stock <= reorder_level AND is_active = 1 AND deleted_at IS NULL
+             ORDER BY quantity_in_stock ASC"
+        );
+    }
+
+    /**
+     * @return array<int, array<string, mixed>>
+     */
+    public function filterAdmin(array $filters = []): array
+    {
+        $where = ['p.deleted_at IS NULL'];
+        $params = [];
+
+        if (!empty($filters['status'])) {
+            $where[] = 'p.status = ?';
+            $params[] = $filters['status'];
+        }
+
+        if (!empty($filters['category_id'])) {
+            $where[] = 'p.category_id = ?';
+            $params[] = (int) $filters['category_id'];
+        }
+
+        if (!empty($filters['q'])) {
+            $where[] = '(p.name LIKE ? OR p.sku LIKE ?)';
+            $search = '%' . $filters['q'] . '%';
+            $params[] = $search;
+            $params[] = $search;
+        }
+
+        return $this->connection->query(
+            "SELECT p.*, c.name AS category_name
+             FROM products p
+             LEFT JOIN product_categories c ON c.id = p.category_id
+             WHERE " . implode(' AND ', $where) . "
+             ORDER BY p.created_at DESC",
+            $params
         );
     }
 
@@ -200,20 +245,30 @@ class ProductRepository extends BaseRepository
     public function create(array $data): int
     {
         return $this->connection->insert(
-            "INSERT INTO products (name, slug, description, short_description, price, cost_price, 
-             quantity_in_stock, reorder_level, sku, category_id, created_by) 
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            "INSERT INTO products (
+                name, slug, description, short_description, price, discount_price, cost_price,
+                quantity_in_stock, reorder_level, sku, weight, category_id, featured_image,
+                meta_title, meta_description, is_active, status, is_featured, created_by
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             [
                 $data['name'] ?? '',
                 $data['slug'] ?? '',
                 $data['description'] ?? '',
                 $data['short_description'] ?? null,
                 $data['price'] ?? 0,
+                $data['discount_price'] ?: null,
                 $data['cost_price'] ?? null,
                 $data['quantity_in_stock'] ?? 0,
                 $data['reorder_level'] ?? 10,
                 $data['sku'] ?? '',
+                $data['weight'] ?: null,
                 $data['category_id'] ?? null,
+                $data['featured_image'] ?? null,
+                $data['meta_title'] ?? null,
+                $data['meta_description'] ?? null,
+                !empty($data['is_active']) ? 1 : 0,
+                $data['status'] ?? 'active',
+                !empty($data['is_featured']) ? 1 : 0,
                 $data['created_by'] ?? 1,
             ]
         );
@@ -229,13 +284,31 @@ class ProductRepository extends BaseRepository
     public function update(int $id, array $data): bool
     {
         $this->connection->update(
-            "UPDATE products SET name = ?, slug = ?, description = ?, price = ?, quantity_in_stock = ? WHERE id = ?",
+            "UPDATE products
+             SET name = ?, slug = ?, description = ?, short_description = ?, price = ?,
+                 discount_price = ?, cost_price = ?, quantity_in_stock = ?, reorder_level = ?,
+                 sku = ?, weight = ?, category_id = ?, featured_image = ?, meta_title = ?,
+                 meta_description = ?, is_active = ?, status = ?, is_featured = ?
+             WHERE id = ?",
             [
                 $data['name'] ?? '',
                 $data['slug'] ?? '',
                 $data['description'] ?? '',
+                $data['short_description'] ?? null,
                 $data['price'] ?? 0,
+                $data['discount_price'] ?: null,
+                $data['cost_price'] ?: null,
                 $data['quantity_in_stock'] ?? 0,
+                $data['reorder_level'] ?? 10,
+                $data['sku'] ?? '',
+                $data['weight'] ?: null,
+                $data['category_id'] ?? null,
+                $data['featured_image'] ?? null,
+                $data['meta_title'] ?? null,
+                $data['meta_description'] ?? null,
+                !empty($data['is_active']) ? 1 : 0,
+                $data['status'] ?? 'active',
+                !empty($data['is_featured']) ? 1 : 0,
                 $id,
             ]
         );
@@ -284,11 +357,77 @@ class ProductRepository extends BaseRepository
      */
     public function updateInventory(int $id, int $quantity): bool
     {
+        $current = $this->find($id);
         $this->connection->update(
             "UPDATE products SET quantity_in_stock = ? WHERE id = ?",
             [$quantity, $id]
         );
 
+        if ($current !== null) {
+            $this->recordInventoryMovement(
+                $id,
+                'manual_adjustment',
+                $quantity - (int) $current['quantity_in_stock'],
+                $quantity,
+                null,
+                'Manual inventory update'
+            );
+        }
+
         return true;
+    }
+
+    public function decrementStock(int $id, int $quantity, string $reference): bool
+    {
+        $affected = $this->connection->update(
+            "UPDATE products
+             SET quantity_in_stock = quantity_in_stock - ?
+             WHERE id = ? AND quantity_in_stock >= ? AND deleted_at IS NULL",
+            [$quantity, $id, $quantity]
+        );
+
+        if ($affected > 0) {
+            $product = $this->find($id);
+            $this->recordInventoryMovement(
+                $id,
+                'order',
+                -$quantity,
+                (int) ($product['quantity_in_stock'] ?? 0),
+                $reference,
+                'Stock reserved for order'
+            );
+        }
+
+        return $affected > 0;
+    }
+
+    public function recordInventoryMovement(
+        int $productId,
+        string $type,
+        int $change,
+        int $quantityAfter,
+        ?string $reference = null,
+        ?string $notes = null
+    ): void {
+        $this->connection->insert(
+            "INSERT INTO inventory_movements (
+                product_id, movement_type, quantity_change, quantity_after, reference, notes
+            ) VALUES (?, ?, ?, ?, ?, ?)",
+            [$productId, $type, $change, $quantityAfter, $reference, $notes]
+        );
+    }
+
+    /**
+     * @return array<int, array<string, mixed>>
+     */
+    public function inventoryHistory(int $productId): array
+    {
+        return $this->connection->query(
+            "SELECT * FROM inventory_movements
+             WHERE product_id = ?
+             ORDER BY created_at DESC, id DESC
+             LIMIT 50",
+            [$productId]
+        );
     }
 }

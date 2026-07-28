@@ -4,8 +4,10 @@ namespace App\Controllers\Frontend;
 
 use App\Controllers\BaseController;
 use App\Repositories\OrderRepository;
+use App\Repositories\ProductRepository;
 use App\Services\MailService;
 use App\Services\OrderService;
+use App\Services\ProductService;
 use App\Support\DatabaseFactory;
 use Throwable;
 
@@ -62,11 +64,29 @@ class CheckoutController extends BaseController
         }
 
         try {
+            $productService = new ProductService(new ProductRepository(DatabaseFactory::make()));
+            foreach ($this->cartItems() as $item) {
+                if (!empty($item['id'])) {
+                    $product = $productService->find((int) $item['id']);
+                    if ($product === null || (int) $product['quantity_in_stock'] < (int) $item['quantity']) {
+                        return $this->json([
+                            'success' => false,
+                            'message' => 'One or more cart items are no longer available in the requested quantity.',
+                        ], 422);
+                    }
+                }
+            }
+
             $order = (new OrderService(new OrderRepository(DatabaseFactory::make())))->createFromCheckout(
                 $_POST,
                 $this->cartItems(),
                 $this->totals()
             );
+            foreach ($this->cartItems() as $item) {
+                if (!empty($item['id'])) {
+                    $productService->reserveInventory((int) $item['id'], (int) $item['quantity'], $order['order_number']);
+                }
+            }
             (new MailService())->sendOrderNotification($order);
             $_SESSION['last_order'] = [
                 'order_number' => $order['order_number'],

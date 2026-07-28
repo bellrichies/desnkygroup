@@ -74,9 +74,30 @@ $router->group('/admin', function ($router) {
     $router->post('/media/{id}', 'Admin\MediaController@update')->middleware(['auth', 'csrf']);
     $router->post('/media/{id}/delete', 'Admin\MediaController@destroy')->middleware(['auth', 'csrf']);
 
-    $router->get('/products', 'Admin\DashboardController@notImplemented')->middleware(['auth']);
-    $router->get('/product-categories', 'Admin\DashboardController@notImplemented')->middleware(['auth']);
-    $router->get('/orders', 'Admin\DashboardController@notImplemented')->middleware(['auth']);
+    // Phase 6 ecommerce management.
+    $router->get('/products', 'Admin\ProductController@index')->middleware(['auth']);
+    $router->get('/products/create', 'Admin\ProductController@create')->middleware(['auth']);
+    $router->post('/products', 'Admin\ProductController@store')->middleware(['auth', 'csrf']);
+    $router->post('/products/import', 'Admin\ProductController@import')->middleware(['auth', 'csrf']);
+    $router->get('/products/{id}/edit', 'Admin\ProductController@edit')->middleware(['auth']);
+    $router->post('/products/{id}', 'Admin\ProductController@update')->middleware(['auth', 'csrf']);
+    $router->post('/products/{id}/delete', 'Admin\ProductController@destroy')->middleware(['auth', 'csrf']);
+    $router->post('/products/{id}/stock', 'Admin\ProductController@stock')->middleware(['auth', 'csrf']);
+
+    $router->get('/product-categories', 'Admin\ProductCategoryController@index')->middleware(['auth']);
+    $router->get('/product-categories/create', 'Admin\ProductCategoryController@create')->middleware(['auth']);
+    $router->post('/product-categories', 'Admin\ProductCategoryController@store')->middleware(['auth', 'csrf']);
+    $router->get('/product-categories/{id}/edit', 'Admin\ProductCategoryController@edit')->middleware(['auth']);
+    $router->post('/product-categories/{id}', 'Admin\ProductCategoryController@update')->middleware(['auth', 'csrf']);
+    $router->post('/product-categories/{id}/delete', 'Admin\ProductCategoryController@destroy')->middleware(['auth', 'csrf']);
+
+    $router->get('/orders', 'Admin\OrderController@index')->middleware(['auth']);
+    $router->get('/orders/export', 'Admin\OrderController@export')->middleware(['auth']);
+    $router->get('/orders/{id}', 'Admin\OrderController@show')->middleware(['auth']);
+    $router->post('/orders/{id}/status', 'Admin\OrderController@status')->middleware(['auth', 'csrf']);
+    $router->post('/orders/{id}/refund', 'Admin\OrderController@refund')->middleware(['auth', 'csrf']);
+
+    // Future-phase admin modules are stubbed until their implementation phases.
     $router->get('/customers', 'Admin\DashboardController@notImplemented')->middleware(['auth']);
     $router->get('/users', 'Admin\DashboardController@notImplemented')->middleware(['auth']);
     $router->get('/roles', 'Admin\DashboardController@notImplemented')->middleware(['auth']);
