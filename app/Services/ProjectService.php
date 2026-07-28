@@ -9,11 +9,8 @@ use App\Repositories\ProjectRepository;
  */
 class ProjectService extends BaseService
 {
-    private ProjectRepository $projects;
-
-    public function __construct(ProjectRepository $projects)
+    public function __construct(private ProjectRepository $projects, private ?CacheService $cache = null)
     {
-        $this->projects = $projects;
     }
 
     /**
@@ -21,6 +18,15 @@ class ProjectService extends BaseService
      */
     public function published(): array
     {
+        $projects = $this->cache === null
+            ? $this->projects->published()
+            : $this->cache->remember(
+                'projects.published',
+                600,
+                fn (): array => $this->projects->published(),
+                ['projects']
+            );
+
         return array_map(function (array $project): array {
             $project['title'] = (string) ($project['title'] ?? '');
             $project['summary'] = (string) ($project['summary'] ?? '');
@@ -29,7 +35,7 @@ class ProjectService extends BaseService
                 ?: 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=900&q=80';
 
             return $project;
-        }, $this->projects->published());
+        }, $projects);
     }
 
     /**
@@ -49,19 +55,28 @@ class ProjectService extends BaseService
     {
         $data['slug'] = $this->slug($data['slug'] ?? $data['title'] ?? '');
 
-        return $this->projects->create($data);
+        $id = $this->projects->create($data);
+        $this->cache?->flushTag('projects');
+
+        return $id;
     }
 
     public function update(int $id, array $data): bool
     {
         $data['slug'] = $this->slug($data['slug'] ?? $data['title'] ?? '');
 
-        return $this->projects->update($id, $data);
+        $updated = $this->projects->update($id, $data);
+        $this->cache?->flushTag('projects');
+
+        return $updated;
     }
 
     public function delete(int $id): bool
     {
-        return $this->projects->delete($id);
+        $deleted = $this->projects->delete($id);
+        $this->cache?->flushTag('projects');
+
+        return $deleted;
     }
 
     private function slug(string $value): string

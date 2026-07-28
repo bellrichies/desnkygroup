@@ -34,6 +34,7 @@ class Router
         'role' => \App\Middleware\RoleMiddleware::class,
         'csrf' => \App\Middleware\VerifyCsrfToken::class,
         'security' => \App\Middleware\SecurityHeaders::class,
+        'throttle' => \App\Middleware\RateLimitMiddleware::class,
     ];
     /**
      * Register a GET route

@@ -9,7 +9,7 @@ use App\Repositories\ServiceRepository;
  */
 class ServiceService extends BaseService
 {
-    public function __construct(private ServiceRepository $services)
+    public function __construct(private ServiceRepository $services, private ?CacheService $cache = null)
     {
     }
 
@@ -26,7 +26,16 @@ class ServiceService extends BaseService
      */
     public function published(): array
     {
-        return $this->services->published();
+        if ($this->cache === null) {
+            return $this->services->published();
+        }
+
+        return $this->cache->remember(
+            'services.published',
+            600,
+            fn (): array => $this->services->published(),
+            ['services']
+        );
     }
 
     public function getById(int $id): ?array
@@ -43,19 +52,28 @@ class ServiceService extends BaseService
     {
         $data['slug'] = $this->slug($data['slug'] ?? $data['title'] ?? '');
 
-        return $this->services->create($data);
+        $id = $this->services->create($data);
+        $this->cache?->flushTag('services');
+
+        return $id;
     }
 
     public function update(int $id, array $data): bool
     {
         $data['slug'] = $this->slug($data['slug'] ?? $data['title'] ?? '');
 
-        return $this->services->update($id, $data);
+        $updated = $this->services->update($id, $data);
+        $this->cache?->flushTag('services');
+
+        return $updated;
     }
 
     public function delete(int $id): bool
     {
-        return $this->services->delete($id);
+        $deleted = $this->services->delete($id);
+        $this->cache?->flushTag('services');
+
+        return $deleted;
     }
 
     private function slug(string $value): string

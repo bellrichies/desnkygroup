@@ -43,6 +43,25 @@ class BaseValidator
     }
 
     /**
+     * Return a trimmed scalar payload with tags and control characters removed.
+     *
+     * @param array<string, mixed> $data
+     * @return array<string, mixed>
+     */
+    public function sanitize(array $data): array
+    {
+        foreach ($data as $key => $value) {
+            if (is_string($value)) {
+                $value = strip_tags($value);
+                $value = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/u', '', $value) ?? '';
+                $data[$key] = trim($value);
+            }
+        }
+
+        return $data;
+    }
+
+    /**
      * Return validation errors.
      *
      * @return array
@@ -110,6 +129,49 @@ class BaseValidator
                     $this->addError($field, $ruleName, 'The :field field format is invalid.');
                 }
                 break;
+
+            case 'in':
+                $allowed = $parameter === null ? [] : explode(',', $parameter);
+                if (!in_array((string) $value, $allowed, true)) {
+                    $this->addError($field, $ruleName, 'The selected :field value is invalid.');
+                }
+                break;
+
+            case 'integer':
+                if (filter_var($value, FILTER_VALIDATE_INT) === false) {
+                    $this->addError($field, $ruleName, 'The :field field must be an integer.');
+                }
+                break;
+
+            case 'boolean':
+                if (!in_array($value, [true, false, 0, 1, '0', '1', 'on', 'yes'], true)) {
+                    $this->addError($field, $ruleName, 'The :field field must be accepted.');
+                }
+                break;
+
+            case 'url':
+                if (!filter_var((string) $value, FILTER_VALIDATE_URL)) {
+                    $this->addError($field, $ruleName, 'The :field field must be a valid URL.');
+                }
+                break;
+
+            case 'slug':
+                if (!preg_match('/^[a-z0-9]+(?:-[a-z0-9]+)*$/', (string) $value)) {
+                    $this->addError($field, $ruleName, 'The :field field must be a valid slug.');
+                }
+                break;
+
+            case 'no_html':
+                if ((string) $value !== strip_tags((string) $value)) {
+                    $this->addError($field, $ruleName, 'The :field field cannot contain HTML.');
+                }
+                break;
+
+            case 'safe_text':
+                if ($this->containsSuspiciousInput((string) $value)) {
+                    $this->addError($field, $ruleName, 'The :field field contains unsupported content.');
+                }
+                break;
         }
     }
 
@@ -151,5 +213,24 @@ class BaseValidator
         );
 
         return (int) ($row['total'] ?? 0) === 0;
+    }
+
+    private function containsSuspiciousInput(string $value): bool
+    {
+        $patterns = [
+            '/<\s*script\b/i',
+            '/javascript\s*:/i',
+            '/on[a-z]+\s*=/i',
+            '/\bUNION\b.+\bSELECT\b/i',
+            '/\bDROP\s+TABLE\b/i',
+        ];
+
+        foreach ($patterns as $pattern) {
+            if (preg_match($pattern, $value) === 1) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

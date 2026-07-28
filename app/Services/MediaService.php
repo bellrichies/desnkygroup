@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Config;
 use App\Repositories\MediaRepository;
 use RuntimeException;
 
@@ -10,11 +11,6 @@ use RuntimeException;
  */
 class MediaService extends BaseService
 {
-    private const MAX_SIZE = 5242880;
-
-    /** @var array<int, string> */
-    private array $allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
-
     public function __construct(private MediaRepository $media)
     {
     }
@@ -38,12 +34,20 @@ class MediaService extends BaseService
             throw new RuntimeException('Please choose a valid image file.');
         }
 
-        if ((int) ($file['size'] ?? 0) > self::MAX_SIZE) {
+        $maxSize = (int) Config::get('security.uploads.max_size', 5242880);
+        if ((int) ($file['size'] ?? 0) > $maxSize) {
             throw new RuntimeException('Images must be 5MB or smaller.');
         }
 
+        $originalExtension = strtolower((string) pathinfo((string) ($file['name'] ?? ''), PATHINFO_EXTENSION));
+        $allowedExtensions = (array) Config::get('security.uploads.allowed_extensions', ['jpg', 'jpeg', 'png', 'webp']);
+        if (!in_array($originalExtension, $allowedExtensions, true)) {
+            throw new RuntimeException('Only JPG, PNG, and WebP images are allowed.');
+        }
+
         $mimeType = (string) mime_content_type((string) $file['tmp_name']);
-        if (!in_array($mimeType, $this->allowedTypes, true)) {
+        $allowedTypes = (array) Config::get('security.uploads.allowed_mime_types', ['image/jpeg', 'image/png', 'image/webp']);
+        if (!in_array($mimeType, $allowedTypes, true) || getimagesize((string) $file['tmp_name']) === false) {
             throw new RuntimeException('Only JPG, PNG, and WebP images are allowed.');
         }
 
@@ -64,6 +68,9 @@ class MediaService extends BaseService
         if (!move_uploaded_file((string) $file['tmp_name'], $target)) {
             throw new RuntimeException('The image could not be uploaded.');
         }
+
+        $this->stripImageMetadata($target, $mimeType);
+        chmod($target, 0644);
 
         return $this->media->create([
             'path' => '/uploads/media/' . $filename,
@@ -97,5 +104,30 @@ class MediaService extends BaseService
     private function basePath(): string
     {
         return defined('BASE_PATH') ? BASE_PATH : dirname(__DIR__, 2);
+    }
+
+    private function stripImageMetadata(string $path, string $mimeType): void
+    {
+        if (!function_exists('imagecreatefromjpeg')) {
+            return;
+        }
+
+        $image = match ($mimeType) {
+            'image/png' => function_exists('imagecreatefrompng') ? @imagecreatefrompng($path) : false,
+            'image/webp' => function_exists('imagecreatefromwebp') ? @imagecreatefromwebp($path) : false,
+            default => @imagecreatefromjpeg($path),
+        };
+
+        if ($image === false) {
+            return;
+        }
+
+        match ($mimeType) {
+            'image/png' => imagepng($image, $path, 6),
+            'image/webp' => function_exists('imagewebp') ? imagewebp($image, $path, 82) : null,
+            default => imagejpeg($image, $path, 82),
+        };
+
+        imagedestroy($image);
     }
 }

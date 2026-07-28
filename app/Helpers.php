@@ -12,6 +12,45 @@ function e($value): string
 }
 
 /**
+ * Escape a value for safe HTML attribute output.
+ *
+ * @param mixed $value Value to escape.
+ * @return string
+ */
+function e_attr($value): string
+{
+    return htmlspecialchars((string) $value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+}
+
+/**
+ * Escape and normalize a URL for link and image attributes.
+ *
+ * @param mixed $value URL value.
+ * @return string
+ */
+function e_url($value): string
+{
+    $url = trim((string) $value);
+
+    if (preg_match('/^\s*javascript:/i', $url) === 1) {
+        return '#';
+    }
+
+    return e_attr(filter_var($url, FILTER_SANITIZE_URL));
+}
+
+/**
+ * Encode a value safely for JavaScript context.
+ *
+ * @param mixed $value Value to encode.
+ * @return string
+ */
+function e_js($value): string
+{
+    return (string) json_encode($value, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP);
+}
+
+/**
  * Build an absolute application path.
  *
  * @param string $path Relative path.

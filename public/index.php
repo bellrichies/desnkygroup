@@ -81,9 +81,16 @@ try {
         return new \App\Security\Encrypter((string) \App\Config::get('app.key', ''));
     });
 
+    $container->singleton(\App\Services\CacheService::class, function () {
+        return new \App\Services\CacheService();
+    });
+
     $container->singleton('router', function () {
         return new \App\Router();
     });
+
+    $container->make(\App\Middleware\SecurityHeaders::class)->handle();
+    $container->make(\App\Middleware\RateLimitMiddleware::class)->handle();
 
     // Load routes
     $router = $container->get('router');
