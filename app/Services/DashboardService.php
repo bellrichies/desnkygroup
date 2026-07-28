@@ -24,6 +24,7 @@ class DashboardService extends BaseService
     {
         return [
             'published_pages' => $this->safeCount('pages', 'is_published = 1 AND deleted_at IS NULL'),
+            'active_hero_slides' => $this->safeCount('homepage_hero_sliders', 'is_active = 1'),
             'products' => $this->safeCount('products', 'is_active = 1 AND deleted_at IS NULL'),
             'pending_orders' => $this->safeCount('orders', 'order_status = ?', ['pending']),
             'completed_orders_total' => $this->safeSum('orders', 'total', 'order_status IN (?, ?)', ['delivered', 'completed']),
@@ -67,7 +68,7 @@ class DashboardService extends BaseService
      * @param int $limit Number of rows.
      * @return array<int, array<string, mixed>>
      */
-    public function getRecentActivities(int $limit = 10): array
+    public function getRecentActivities(int $limit = 5): array
     {
         return $this->activityLogService->recent($limit);
     }

@@ -175,6 +175,49 @@ class ContactRepository extends BaseRepository
         return true;
     }
 
+    public function updateStatus(int $id, string $status): bool
+    {
+        $extra = '';
+        $params = [$status, $id];
+
+        if ($status === 'responded') {
+            $extra = ', responded_at = NOW()';
+        } elseif ($status === 'archived') {
+            $extra = ', archived_at = NOW()';
+        }
+
+        $this->connection->update(
+            "UPDATE contacts SET status = ?{$extra} WHERE id = ?",
+            $params
+        );
+
+        return true;
+    }
+
+    /** @return array<int, array<string, mixed>> */
+    public function filtered(array $filters = []): array
+    {
+        $where = ['1=1'];
+        $params = [];
+
+        if (!empty($filters['status'])) {
+            $where[] = 'status = ?';
+            $params[] = $filters['status'];
+        }
+
+        if (!empty($filters['q'])) {
+            $where[] = '(full_name LIKE ? OR email LIKE ? OR subject LIKE ?)';
+            $term = '%' . $filters['q'] . '%';
+            $params[] = $term;
+            $params[] = $term;
+            $params[] = $term;
+        }
+
+        $sql = 'SELECT * FROM contacts WHERE ' . implode(' AND ', $where) . ' ORDER BY created_at DESC';
+
+        return $this->connection->query($sql, $params);
+    }
+
     /**
      * Delete a contact
      *

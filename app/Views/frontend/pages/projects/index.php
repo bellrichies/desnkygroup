@@ -1,71 +1,83 @@
-<section class="section-band bg-desnky-surface">
-    <div class="container-page">
-        <nav class="text-sm text-desnky-muted" aria-label="Breadcrumb">
-            <a href="/" class="hover:text-desnky-blue">Home</a> / <span>Projects</span>
-        </nav>
-        <div class="mt-6 max-w-3xl">
-            <h1 class="text-4xl font-bold text-desnky-navy sm:text-5xl">Projects and Gallery</h1>
-            <p class="mt-5 text-lg leading-8 text-desnky-muted">
-                A representative gallery of the sectors we support, including engineering, HSE, procurement and agro
-                supply coordination.
-            </p>
-        </div>
-    </div>
-</section>
+<?php
+$hero = $hero ?? [];
+$listing = $listing ?? [];
+$projects = $projects ?? [];
+$categories = $categories ?? [];
+$allLabel = (string) ($listing['all_categories_label'] ?? 'All');
+$introText = (string) ($listing['text'] ?? $hero['text'] ?? '');
+?>
 
 <section class="section-band">
-    <div class="container-page">
-        <div class="mb-8 grid gap-4 md:grid-cols-[1fr_auto]">
-            <label class="sr-only" for="project-search">Search projects</label>
-            <input id="project-search" type="search" placeholder="Search projects" class="form-field" data-project-search>
-            <div class="flex flex-wrap gap-2" data-project-filters>
-                <?php foreach (['All', 'Engineering', 'HSE', 'Procurement', 'Agro'] as $category) : ?>
-                    <button type="button" class="rounded-md border border-gray-200 px-4 py-2 text-sm font-semibold text-desnky-navy hover:border-desnky-blue" data-category="<?php echo $this->escape($category); ?>">
-                        <?php echo $this->escape($category); ?>
-                    </button>
+    <div class="container-page" x-data='{ "category": <?php echo $this->escapeJson($allLabel); ?>, "search": "" }'>
+        <div class="mb-10 max-w-3xl" data-reveal>
+            <p class="eyebrow">Projects</p>
+            <h1 class="mt-3 section-heading"><?php echo $this->escape((string) ($listing['heading'] ?? $title ?? 'Projects')); ?></h1>
+            <?php if ($introText !== '') : ?>
+                <p class="section-lead"><?php echo $this->escape($introText); ?></p>
+            <?php endif; ?>
+        </div>
+        <div class="mb-8 grid gap-4 lg:grid-cols-[1fr_auto] lg:items-center">
+            <div class="relative">
+                <span class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-desnky-muted">
+                    <?php echo $this->partial('frontend/partials/icon', ['name' => 'search', 'class' => 'h-5 w-5']); ?>
+                </span>
+                <label class="sr-only" for="project-search"><?php echo $this->escape((string) ($listing['search_label'] ?? 'Search projects')); ?></label>
+                <input id="project-search" type="search" x-model="search" placeholder="<?php echo $this->escape((string) ($listing['search_placeholder'] ?? 'Search projects…')); ?>" class="form-field pl-10">
+            </div>
+            <div class="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 lg:mx-0 lg:flex-wrap lg:px-0" role="group" aria-label="<?php echo $this->escape((string) ($listing['filters_label'] ?? 'Filter by category')); ?>">
+                <button type="button" class="chip" :class='category === <?php echo $this->escapeJson($allLabel); ?> && "chip-active"' @click='category = <?php echo $this->escapeJson($allLabel); ?>'><?php echo $this->escape($allLabel); ?></button>
+                <?php foreach ($categories as $category) : ?>
+                    <?php $cat = (string) $category; ?>
+                    <button type="button" class="chip" :class='category === <?php echo $this->escapeJson($cat); ?> && "chip-active"' @click='category = <?php echo $this->escapeJson($cat); ?>'><?php echo $this->escape($cat); ?></button>
                 <?php endforeach; ?>
             </div>
         </div>
 
-        <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-            <?php foreach ($projects as $project) : ?>
-                <article class="bg-white shadow-card" data-project-card data-category="<?php echo $this->escape($project['category']); ?>">
-                    <img src="<?php echo $this->escape($project['image']); ?>" alt="<?php echo $this->escape($project['title']); ?>" class="h-52 w-full object-cover" loading="lazy">
-                    <div class="p-5">
-                        <span class="text-xs font-bold uppercase tracking-wide text-desnky-blue"><?php echo $this->escape($project['category']); ?></span>
-                        <h2 class="mt-2 text-lg font-bold text-desnky-navy"><?php echo $this->escape($project['title']); ?></h2>
-                        <p class="mt-2 text-sm leading-6 text-desnky-muted"><?php echo $this->escape($project['summary']); ?></p>
-                    </div>
-                </article>
-            <?php endforeach; ?>
-        </div>
+        <?php if ($projects !== []) : ?>
+            <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                <?php foreach ($projects as $project) : ?>
+                    <?php
+                    $cat = (string) ($project['category'] ?? '');
+                    $title_ = (string) ($project['title'] ?? '');
+                    $summary = (string) ($project['summary'] ?? '');
+                    $haystack = strtolower($title_ . ' ' . $summary . ' ' . $cat);
+                    ?>
+                    <article
+                        class="card-interactive flex flex-col"
+                        data-reveal
+                        data-category="<?php echo $this->escape($cat); ?>"
+                        x-show='(category === <?php echo $this->escapeJson($allLabel); ?> || category === <?php echo $this->escapeJson($cat); ?>) && <?php echo $this->escapeJson($haystack); ?>.includes(search.toLowerCase())'
+                x-transition.opacity
+                    >
+                        <?php if (!empty($project['image'])) : ?>
+                            <button type="button" class="block overflow-hidden" data-lightbox="<?php echo $this->escape((string) $project['image']); ?>" data-lightbox-alt="<?php echo $this->escape($title_); ?>" aria-label="View image of <?php echo $this->escape($title_); ?>">
+                                <img src="<?php echo $this->escape((string) $project['image']); ?>" alt="<?php echo $this->escape($title_); ?>" class="project-card__image" loading="lazy">
+                            </button>
+                        <?php endif; ?>
+                        <div class="card-body flex flex-1 flex-col">
+                            <h2 class="text-lg font-bold text-desnky-dark">
+                                <?php if (!empty($project['slug'])) : ?>
+                                    <a href="/projects/<?php echo $this->escape((string) $project['slug']); ?>" class="hover:text-desnky-primary"><?php echo $this->escape($title_); ?></a>
+                                <?php else : ?>
+                                    <?php echo $this->escape($title_); ?>
+                                <?php endif; ?>
+                            </h2>
+                            <p class="mt-2 flex-1 text-sm leading-6 text-desnky-muted"><?php echo $this->escape($summary); ?></p>
+                            <?php if (!empty($project['slug'])) : ?>
+                                <a href="/projects/<?php echo $this->escape((string) $project['slug']); ?>" class="btn-ghost mt-4">
+                                    <?php echo $this->escape((string) ($listing['card_cta_label'] ?? 'View case study')); ?>
+                                    <?php echo $this->partial('frontend/partials/icon', ['name' => 'arrow-right', 'class' => 'h-4 w-4']); ?>
+                                </a>
+                            <?php endif; ?>
+                        </div>
+                    </article>
+                <?php endforeach; ?>
+            </div>
+        <?php else : ?>
+            <div class="rounded-lg border border-dashed border-gray-300 bg-desnky-surface py-16 text-center">
+                <p class="text-desnky-muted">No projects to display yet. Check back soon.</p>
+                <a href="/contact" class="btn-primary mt-5">Discuss your project</a>
+            </div>
+        <?php endif; ?>
     </div>
 </section>
-
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    var cards = Array.from(document.querySelectorAll('[data-project-card]'));
-    var search = document.querySelector('[data-project-search]');
-
-    function applyFilter(category) {
-        var term = search ? search.value.toLowerCase() : '';
-        cards.forEach(function (card) {
-            var matchesCategory = category === 'All' || card.dataset.category === category;
-            var matchesSearch = card.textContent.toLowerCase().indexOf(term) !== -1;
-            card.classList.toggle('hidden', !(matchesCategory && matchesSearch));
-        });
-    }
-
-    document.querySelectorAll('[data-project-filters] button').forEach(function (button) {
-        button.addEventListener('click', function () {
-            applyFilter(button.dataset.category);
-        });
-    });
-
-    if (search) {
-        search.addEventListener('input', function () {
-            applyFilter('All');
-        });
-    }
-});
-</script>

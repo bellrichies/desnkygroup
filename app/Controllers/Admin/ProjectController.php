@@ -4,18 +4,23 @@ namespace App\Controllers\Admin;
 
 use App\Controllers\BaseController;
 use App\Exceptions\ValidationException;
+use App\Repositories\ProjectRepository;
 use App\Services\ActivityLogService;
 use App\Services\ProjectService;
+use App\Support\DatabaseFactory;
 
 /**
  * Admin CRUD controller for projects and gallery entries.
  */
 class ProjectController extends BaseController
 {
+    private ProjectRepository $projectRepo;
+
     public function __construct(
         private ProjectService $projectService,
         private ActivityLogService $activityLogService
     ) {
+        $this->projectRepo = new ProjectRepository(DatabaseFactory::make());
     }
 
     public function index(): string
@@ -70,6 +75,7 @@ class ProjectController extends BaseController
                 'meta_title' => 'max:255',
             ]);
             $data['is_published'] = isset($_POST['is_published']);
+
             if ($id === null) {
                 $id = $this->projectService->create($data);
                 $this->log('project_created', 'Created project #' . $id);
@@ -78,9 +84,13 @@ class ProjectController extends BaseController
                 $this->log('project_updated', 'Updated project #' . $id);
             }
 
+            // Sync gallery images submitted with the form.
+            $gallery = \is_array($_POST['gallery'] ?? null) ? $_POST['gallery'] : [];
+            $this->projectRepo->syncGallery($id, $gallery);
+
             $this->flash('success', 'Project saved successfully.');
             $this->redirect('/admin/projects');
-        } catch (ValidationException $exception) {
+        } catch (ValidationException) { // $e unused — flash is set inline
             $this->flash('error', 'Please review the project form.');
             $this->redirect($id === null ? '/admin/projects/create' : '/admin/projects/' . $id . '/edit');
         }
@@ -88,12 +98,16 @@ class ProjectController extends BaseController
 
     private function form(string $title, ?array $project = null): string
     {
+        $galleryImages = $project ? $this->projectRepo->galleryImages((int) $project['id']) : [];
+
         return $this->view('admin/pages/projects/form', [
             'title' => $title,
             'user' => $this->user(),
             'breadcrumbs' => $this->breadcrumbs($title),
             'project' => $project,
+            'galleryImages' => $galleryImages,
             'action' => $project ? '/admin/projects/' . $project['id'] : '/admin/projects',
+            'csrf_token' => $this->csrf(),
         ]);
     }
 

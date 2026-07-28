@@ -47,7 +47,7 @@ class ProductRepository extends BaseRepository
                 p.*,
                 c.name AS category_name,
                 c.slug AS category_slug,
-                COALESCE(pi.path, p.featured_image) AS display_image
+                COALESCE(NULLIF(p.featured_image, ''), pi.path) AS display_image
              FROM products p
              LEFT JOIN product_categories c ON c.id = p.category_id
              LEFT JOIN product_images pi ON pi.product_id = p.id AND pi.sort_order = (
@@ -68,6 +68,54 @@ class ProductRepository extends BaseRepository
         return $this->connection->query(
             'SELECT id, name, slug FROM product_categories WHERE is_active = 1 ORDER BY sort_order ASC, name ASC'
         );
+    }
+
+    /**
+     * Get ordered gallery images for a product.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    public function imagesForProduct(int $productId): array
+    {
+        return $this->connection->query(
+            "SELECT id, product_id, path, alt_text, sort_order
+             FROM product_images
+             WHERE product_id = ?
+             ORDER BY sort_order ASC, id ASC",
+            [$productId]
+        );
+    }
+
+    /**
+     * Replace a product gallery atomically.
+     *
+     * @param array<int, array{path: string, alt_text: string}> $images
+     */
+    public function syncImages(int $productId, array $images): void
+    {
+        $this->connection->beginTransaction();
+
+        try {
+            $this->connection->delete(
+                "DELETE FROM product_images WHERE product_id = ?",
+                [$productId]
+            );
+
+            foreach (array_slice($images, 0, 5) as $sortOrder => $image) {
+                $this->connection->insert(
+                    "INSERT INTO product_images (product_id, path, alt_text, sort_order)
+                     VALUES (?, ?, ?, ?)",
+                    [$productId, $image['path'], $image['alt_text'], $sortOrder]
+                );
+            }
+
+            $this->connection->commit();
+        } catch (\Throwable $exception) {
+            if ($this->connection->inTransaction()) {
+                $this->connection->rollBack();
+            }
+            throw $exception;
+        }
     }
 
     /**

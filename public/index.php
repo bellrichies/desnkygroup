@@ -7,6 +7,15 @@
  * All requests are routed through this file via Apache/Nginx rewrite rules.
  */
 
+// Let PHP's built-in development server deliver real static assets directly.
+if (PHP_SAPI === 'cli-server') {
+    $requestPath = parse_url((string) ($_SERVER['REQUEST_URI'] ?? '/'), PHP_URL_PATH);
+    $assetPath = __DIR__ . DIRECTORY_SEPARATOR . ltrim((string) $requestPath, '/');
+    if ($requestPath !== '/' && is_file($assetPath)) {
+        return false;
+    }
+}
+
 // Define base path
 define('BASE_PATH', dirname(__DIR__));
 define('PUBLIC_PATH', __DIR__);

@@ -1082,6 +1082,71 @@ terser public/assets/js/main.js -o public/assets/js/main.min.js
 
 ---
 
+## Blog / Editorial CMS Technical Plan
+
+### Application Structure
+
+The blog module follows the existing MVC, service, and repository architecture:
+
+```text
+app/Controllers/Frontend/BlogController.php
+app/Controllers/Admin/PostController.php
+app/Controllers/Admin/PostCategoryController.php
+app/Controllers/Admin/PostTagController.php
+app/Services/PostService.php
+app/Services/PostCategoryService.php
+app/Services/PostTagService.php
+app/Services/TipTapSanitizer.php
+app/Repositories/PostRepository.php
+app/Repositories/PostCategoryRepository.php
+app/Repositories/PostTagRepository.php
+app/Views/frontend/pages/blog/
+app/Views/admin/posts/
+app/Views/admin/post-categories/
+app/Views/admin/post-tags/
+```
+
+### TipTap Editor Rules
+
+- TipTap JSON is stored in `posts.content_json` as the canonical editable document.
+- Sanitized HTML is stored in `posts.content_html` for fast frontend rendering.
+- Server-side sanitation must allow only approved nodes and marks such as paragraphs, headings, lists, blockquotes, links, images, tables, code blocks, bold, italic, underline, and text alignment.
+- Inline images must reference records in the centralized media library.
+- Autosave should write drafts without changing the public published version until the editor explicitly publishes.
+
+### Public Routes
+
+```php
+$router->get('/blog', 'Frontend\\BlogController@index');
+$router->get('/blog/{slug}', 'Frontend\\BlogController@show');
+$router->get('/blog/category/{slug}', 'Frontend\\BlogController@category');
+$router->get('/blog/tag/{slug}', 'Frontend\\BlogController@tag');
+$router->get('/blog/rss.xml', 'Frontend\\BlogController@rss');
+```
+
+### Admin Routes
+
+```php
+$router->resource('/admin/posts', 'Admin\\PostController');
+$router->resource('/admin/post-categories', 'Admin\\PostCategoryController');
+$router->resource('/admin/post-tags', 'Admin\\PostTagController');
+$router->post('/admin/posts/{id}/preview', 'Admin\\PostController@preview');
+$router->post('/admin/posts/{id}/publish', 'Admin\\PostController@publish');
+$router->post('/admin/posts/{id}/schedule', 'Admin\\PostController@schedule');
+$router->post('/admin/posts/{id}/archive', 'Admin\\PostController@archive');
+$router->post('/admin/posts/{id}/restore', 'Admin\\PostController@restore');
+```
+
+### Scalability and Maintainability
+
+- Public blog queries must paginate and use indexed `status`, `published_at`, `category_id`, and slug fields.
+- Post archives must be cacheable and invalidated when posts, categories, tags, or media change.
+- Search uses fulltext indexes on post title, excerpt, and sanitized HTML.
+- Public queries must exclude drafts, private posts, archived posts, soft-deleted posts, and posts with future scheduled dates.
+- Editorial services must be independently testable and keep controllers thin.
+
+---
+
 ## Testing Strategy
 
 ### Testing Pyramid

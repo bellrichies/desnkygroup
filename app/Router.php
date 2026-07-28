@@ -197,15 +197,15 @@ class Router
     public function dispatch(array $routeData, Container $container)
     {
         $route = $routeData['route'];
-        $parameters = $routeData['parameters'];
+        $routeParameters = $routeData['parameters'];
 
         // Process middleware
         foreach ($route->getMiddleware() as $middlewareClass) {
-            [$middlewareClass, $parameters] = $this->parseMiddleware((string) $middlewareClass);
+            [$middlewareClass, $middlewareParameters] = $this->parseMiddleware((string) $middlewareClass);
             $middlewareClass = $this->resolveMiddlewareClass($middlewareClass);
             $middleware = $container->make($middlewareClass);
             if (method_exists($middleware, 'setParameters')) {
-                $middleware->setParameters($parameters);
+                $middleware->setParameters($middlewareParameters);
             }
             $response = $middleware->handle();
             if ($response !== null) {
@@ -218,7 +218,7 @@ class Router
             [$controller, $method] = explode('@', $action);
         } else {
             // Handle callable action
-            return $container->call($action, $parameters);
+            return $container->call($action, $routeParameters);
         }
 
         // Resolve controller from container
@@ -234,7 +234,7 @@ class Router
             throw new Exceptions\NotFoundException("Method {$method} not found in {$controllerClass}");
         }
 
-        return $controllerInstance->{$method}(...array_values($parameters));
+        return $controllerInstance->{$method}(...array_values($routeParameters));
     }
 
     /**

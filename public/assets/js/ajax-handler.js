@@ -5,6 +5,11 @@
         return new FormData(form);
     }
 
+    function csrfToken() {
+        var meta = document.querySelector('meta[name="csrf-token"]');
+        return meta ? meta.getAttribute('content') : '';
+    }
+
     function setFormLoading(form, isLoading) {
         form.classList.toggle('is-submitting', isLoading);
 
@@ -128,20 +133,17 @@
         }
     };
 
-    window.submitForm = function (formSelector, options) {
-        options = options || {};
-
-        var form = document.querySelector(formSelector);
-
-        if (!form) {
+    function bindForm(form, options) {
+        if (!form || form.dataset.ajaxBound === 'true') {
             return;
         }
+        form.dataset.ajaxBound = 'true';
 
         form.addEventListener('submit', function (event) {
             event.preventDefault();
 
             if (!validateRequiredFields(form)) {
-                window.createToastNotification('Please complete the required fields.', 'warning');
+                window.createToastNotification('Please complete the required fields.', 'warning', 5000);
                 return;
             }
 
@@ -153,9 +155,11 @@
 
             fetch(endpoint, {
                 method: method.toUpperCase(),
+                credentials: 'same-origin',
                 headers: {
                     'Accept': 'application/json',
                     'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': csrfToken(),
                 },
                 body: serializeForm(form),
             })
@@ -171,7 +175,8 @@
                         showValidationErrors(form, result.payload.errors || {});
                         window.createToastNotification(
                             result.payload.message || 'Please review the form and try again.',
-                            'error'
+                            'error',
+                            5000
                         );
 
                         if (typeof options.onError === 'function') {
@@ -181,7 +186,7 @@
                         return;
                     }
 
-                    window.createToastNotification(result.payload.message || 'Submitted successfully.', 'success');
+                    window.createToastNotification(result.payload.message || 'Submitted successfully.', 'success', 6000);
 
                     if (options.resetOnSuccess !== false) {
                         form.reset();
@@ -192,7 +197,7 @@
                     }
                 })
                 .catch(function (error) {
-                    window.createToastNotification('Network error. Please try again.', 'error');
+                    window.createToastNotification('Network error. Please try again.', 'error', 5000);
 
                     if (typeof options.onError === 'function') {
                         options.onError(error);
@@ -203,22 +208,19 @@
                     window.hideLoadingSpinner(form);
                 });
         });
+    }
+
+    // Public API: bind every form matching the selector (idempotent).
+    window.submitForm = function (formSelector, options) {
+        options = options || {};
+        document.querySelectorAll(formSelector).forEach(function (form) {
+            bindForm(form, options);
+        });
     };
 
-    document.addEventListener('click', function (event) {
-        var button = event.target.closest('[data-mobile-menu-button]');
-
-        if (!button) {
-            return;
-        }
-
-        var menu = document.querySelector('[data-mobile-menu]');
-
-        if (!menu) {
-            return;
-        }
-
-        var isHidden = menu.classList.toggle('hidden');
-        button.setAttribute('aria-expanded', isHidden ? 'false' : 'true');
+    // Auto-wire newsletter forms (footer appears on every page). Contact pages
+    // wire their own form explicitly with service-interest handling.
+    document.addEventListener('DOMContentLoaded', function () {
+        window.submitForm('[data-newsletter-form]', { resetOnSuccess: true });
     });
 }());

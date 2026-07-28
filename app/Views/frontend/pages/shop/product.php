@@ -1,55 +1,96 @@
+<?php
+$product = $product ?? [];
+$detail = $detail ?? [];
+$relatedProducts = $relatedProducts ?? [];
+$gallery = is_array($product['gallery'] ?? null) ? $product['gallery'] : [];
+$primaryImage = (string) ($gallery[0]['path'] ?? ($product['image'] ?? ''));
+$primaryAlt = (string) ($gallery[0]['alt_text'] ?? ($product['name'] ?? ''));
+$currency = (string) ($detail['currency_label'] ?? '₦');
+$inStock = !empty($product['in_stock']);
+$csrf = (string) ($csrf_token ?? '');
+?>
+
 <section class="section-band">
     <div class="container-page">
         <nav class="mb-8 text-sm text-desnky-muted" aria-label="Breadcrumb">
-            <a href="/" class="hover:text-desnky-blue">Home</a> /
-            <a href="/shop" class="hover:text-desnky-blue">Shop</a> /
-            <span><?php echo $this->escape($product['name']); ?></span>
+            <ol class="flex flex-wrap items-center gap-2">
+                <li><a href="/" class="hover:text-desnky-primary"><?php echo $this->escape((string) ($detail['breadcrumb_home_label'] ?? 'Home')); ?></a></li>
+                <li aria-hidden="true">/</li>
+                <li><a href="/shop" class="hover:text-desnky-primary"><?php echo $this->escape((string) ($detail['breadcrumb_shop_label'] ?? 'Shop')); ?></a></li>
+                <li aria-hidden="true">/</li>
+                <li><span class="text-desnky-dark" aria-current="page"><?php echo $this->escape((string) $product['name']); ?></span></li>
+            </ol>
         </nav>
 
-        <div class="grid gap-10 lg:grid-cols-[1fr_0.9fr]">
+        <div class="grid gap-10 lg:grid-cols-2" x-data='{ "main": <?php echo $this->escapeJson($primaryImage); ?>, "alt": <?php echo $this->escapeJson($primaryAlt); ?> }'>
+            <!-- Gallery -->
             <div>
-                <img src="<?php echo $this->escape($product['image']); ?>" alt="<?php echo $this->escape($product['name']); ?>" class="aspect-[4/3] w-full object-cover" loading="eager">
-                <div class="mt-4 grid grid-cols-3 gap-3">
-                    <?php for ($i = 0; $i < 3; $i++) : ?>
-                        <img src="<?php echo $this->escape($product['image']); ?>" alt="<?php echo $this->escape($product['name']); ?> gallery image <?php echo $i + 1; ?>" class="aspect-square w-full object-cover" loading="lazy">
-                    <?php endfor; ?>
-                </div>
+                <?php if ($primaryImage !== '') : ?>
+                    <button type="button" class="group block w-full overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-card" :data-lightbox="main" :data-lightbox-alt="alt" data-lightbox="<?php echo $this->escape($primaryImage); ?>" aria-label="Open larger product image">
+                        <img src="<?php echo $this->escape($primaryImage); ?>" :src="main" alt="<?php echo $this->escape($primaryAlt); ?>" :alt="alt" class="aspect-square w-full object-cover transition duration-slow group-hover:scale-[1.02]" width="800" height="800" loading="eager" fetchpriority="high" decoding="async">
+                    </button>
+                <?php else : ?>
+                    <div class="flex aspect-square w-full items-center justify-center rounded-2xl border border-gray-200 bg-desnky-surface text-sm font-bold text-desnky-muted">Product image unavailable</div>
+                <?php endif; ?>
+                <?php if (count($gallery) > 1) : ?>
+                    <div class="mt-4 grid grid-cols-4 gap-3 sm:grid-cols-5" role="group" aria-label="Product images">
+                        <?php foreach ($gallery as $index => $image) : ?>
+                            <?php $p = (string) ($image['path'] ?? ''); $a = (string) ($image['alt_text'] ?: $product['name']); ?>
+                            <button
+                                type="button"
+                                class="overflow-hidden rounded-xl border-2 bg-white p-1 shadow-sm transition-all"
+                                :class='main === <?php echo $this->escapeJson($p); ?> ? "border-desnky-primary ring-4 ring-desnky-primary/10" : "border-gray-200 hover:border-desnky-primary/50"'
+                                @click='main = <?php echo $this->escapeJson($p); ?>; alt = <?php echo $this->escapeJson($a); ?>'
+                                :aria-pressed='main === <?php echo $this->escapeJson($p); ?>'
+                                aria-label="View product image <?php echo $index + 1; ?> of <?php echo count($gallery); ?>"
+                            >
+                                <img src="<?php echo $this->escape($p); ?>" alt="" class="aspect-square w-full rounded-lg object-cover" width="160" height="160" loading="<?php echo $index === 0 ? 'eager' : 'lazy'; ?>" decoding="async">
+                            </button>
+                        <?php endforeach; ?>
+                    </div>
+                <?php endif; ?>
             </div>
 
+            <!-- Info -->
             <div>
-                <p class="text-sm font-bold uppercase tracking-wide text-desnky-blue"><?php echo $this->escape($product['category']); ?></p>
-                <h1 class="mt-3 text-4xl font-bold text-desnky-navy"><?php echo $this->escape($product['name']); ?></h1>
-                <p class="mt-4 text-base leading-7 text-desnky-muted"><?php echo $this->escape($product['description']); ?></p>
-                <div class="mt-6 flex items-baseline gap-3">
-                    <span class="text-3xl font-bold text-desnky-navy">NGN <?php echo number_format($product['price']); ?></span>
-                    <?php if ($product['old_price']) : ?>
-                        <span class="text-base text-desnky-muted line-through">NGN <?php echo number_format($product['old_price']); ?></span>
-                    <?php endif; ?>
-                </div>
-                <p class="mt-3 text-sm <?php echo $product['in_stock'] ? 'text-desnky-green' : 'text-red-700'; ?>">
-                    <?php echo $product['in_stock'] ? 'In stock: ' . (int) $product['stock'] . ' available' : 'Out of stock'; ?>
-                </p>
+                <p class="text-sm font-bold uppercase tracking-wide text-desnky-primary"><?php echo $this->escape((string) $product['category']); ?></p>
+                <h1 class="mt-2 text-3xl font-bold text-desnky-dark sm:text-4xl"><?php echo $this->escape((string) $product['name']); ?></h1>
 
-                <form id="add-to-cart-form" action="/shop/cart/add" method="POST" class="mt-8 grid gap-4 sm:grid-cols-[8rem_1fr]">
-                    <input type="hidden" name="_token" value="<?php echo $this->escape($csrf_token); ?>">
-                    <input type="hidden" name="slug" value="<?php echo $this->escape($product['slug']); ?>">
-                    <label>
+                <div class="mt-5 flex items-center gap-3">
+                    <span class="text-3xl font-bold text-desnky-dark"><?php echo $this->escape($currency); ?> <?php echo number_format((float) $product['price']); ?></span>
+                    <?php if (!empty($product['old_price'])) : ?>
+                        <span class="text-base text-desnky-muted line-through"><?php echo $this->escape($currency); ?> <?php echo number_format((float) $product['old_price']); ?></span>
+                    <?php endif; ?>
+                    <span class="<?php echo $inStock ? 'badge-success' : 'badge-danger'; ?>">
+                        <?php echo $this->escape((string) ($inStock ? str_replace('{stock}', (string) (int) $product['stock'], (string) ($detail['in_stock_label'] ?? 'In stock')) : ($detail['out_of_stock_label'] ?? 'Out of stock'))); ?>
+                    </span>
+                </div>
+
+                <p class="mt-5 text-base leading-7 text-desnky-muted"><?php echo $this->escape((string) $product['description']); ?></p>
+
+                <form id="add-to-cart-form" action="/shop/cart/add" method="POST" data-add-to-cart class="mt-8 flex flex-col gap-4 sm:flex-row sm:items-end">
+                    <input type="hidden" name="_token" value="<?php echo $this->escape($csrf); ?>">
+                    <input type="hidden" name="slug" value="<?php echo $this->escape((string) $product['slug']); ?>">
+                    <div x-data="{ qty: 1, max: <?php echo (int) max(1, $product['stock']); ?> }">
                         <span class="form-label">Quantity</span>
-                        <input type="number" name="quantity" min="1" max="<?php echo (int) max(1, $product['stock']); ?>" value="1" class="form-field" <?php echo !$product['in_stock'] ? 'disabled' : ''; ?>>
-                    </label>
-                    <div class="self-end">
-                        <button type="submit" class="btn-primary w-full" <?php echo !$product['in_stock'] ? 'disabled' : ''; ?>>
-                            Add to Cart
-                        </button>
+                        <div class="flex items-center rounded-md border border-gray-300">
+                            <button type="button" class="btn-icon" @click="qty = Math.max(1, qty - 1)" aria-label="Decrease quantity" <?php echo $inStock ? '' : 'disabled'; ?>><?php echo $this->partial('frontend/partials/icon', ['name' => 'minus', 'class' => 'h-5 w-5']); ?></button>
+                            <input type="number" name="quantity" x-model="qty" min="1" max="<?php echo (int) max(1, $product['stock']); ?>" class="w-14 border-0 bg-transparent p-0 text-center font-semibold text-desnky-dark focus:ring-0" <?php echo $inStock ? '' : 'disabled'; ?>>
+                            <button type="button" class="btn-icon" @click="qty = Math.min(max, qty + 1)" aria-label="Increase quantity" <?php echo $inStock ? '' : 'disabled'; ?>><?php echo $this->partial('frontend/partials/icon', ['name' => 'plus', 'class' => 'h-5 w-5']); ?></button>
+                        </div>
                     </div>
+                    <button type="submit" class="btn-primary flex-1" <?php echo $inStock ? '' : 'disabled'; ?>>
+                        <?php echo $this->partial('frontend/partials/icon', ['name' => 'cart', 'class' => 'h-5 w-5']); ?>
+                        <?php echo $this->escape((string) ($detail['add_to_cart_label'] ?? 'Add to cart')); ?>
+                    </button>
                 </form>
 
                 <div class="mt-8 border-t border-gray-200 pt-6">
-                    <h2 class="text-xl font-bold text-desnky-navy">Product details</h2>
+                    <h2 class="text-lg font-bold text-desnky-dark"><?php echo $this->escape((string) ($detail['details_heading'] ?? 'Product details')); ?></h2>
                     <dl class="mt-4 grid gap-3 text-sm">
-                        <div class="flex justify-between gap-4"><dt class="text-desnky-muted">SKU</dt><dd class="font-semibold text-desnky-navy"><?php echo $this->escape($product['sku']); ?></dd></div>
-                        <div class="flex justify-between gap-4"><dt class="text-desnky-muted">Category</dt><dd class="font-semibold text-desnky-navy"><?php echo $this->escape($product['category']); ?></dd></div>
-                        <div class="flex justify-between gap-4"><dt class="text-desnky-muted">Payment</dt><dd class="font-semibold text-desnky-navy">Bank transfer or pay on delivery</dd></div>
+                        <div class="flex justify-between gap-4 border-b border-gray-100 pb-2"><dt class="text-desnky-muted"><?php echo $this->escape((string) ($detail['sku_label'] ?? 'SKU')); ?></dt><dd class="font-semibold text-desnky-dark"><?php echo $this->escape((string) $product['sku']); ?></dd></div>
+                        <div class="flex justify-between gap-4 border-b border-gray-100 pb-2"><dt class="text-desnky-muted"><?php echo $this->escape((string) ($detail['category_label'] ?? 'Category')); ?></dt><dd class="font-semibold text-desnky-dark"><?php echo $this->escape((string) $product['category']); ?></dd></div>
+                        <div class="flex justify-between gap-4"><dt class="text-desnky-muted"><?php echo $this->escape((string) ($detail['payment_label'] ?? 'Payment')); ?></dt><dd class="font-semibold text-desnky-dark"><?php echo $this->escape((string) ($detail['payment_value'] ?? 'Pay on delivery / Bank transfer')); ?></dd></div>
                     </dl>
                 </div>
             </div>
@@ -58,34 +99,34 @@
 </section>
 
 <?php if (!empty($relatedProducts)) : ?>
-    <section class="section-band bg-desnky-surface">
-        <div class="container-page">
-            <h2 class="text-3xl font-bold text-desnky-navy">Related products</h2>
-            <div class="mt-8 grid gap-6 md:grid-cols-3">
-                <?php foreach (array_slice($relatedProducts, 0, 3) as $related) : ?>
-                    <a href="/shop/product/<?php echo $this->escape($related['slug']); ?>" class="block bg-white shadow-card">
-                        <img src="<?php echo $this->escape($related['image']); ?>" alt="<?php echo $this->escape($related['name']); ?>" class="h-44 w-full object-cover" loading="lazy">
-                        <div class="p-5">
-                            <h3 class="font-bold text-desnky-navy"><?php echo $this->escape($related['name']); ?></h3>
-                            <p class="mt-2 text-sm text-desnky-muted">NGN <?php echo number_format($related['price']); ?></p>
-                        </div>
-                    </a>
-                <?php endforeach; ?>
-            </div>
+<section class="section-band bg-desnky-surface">
+    <div class="container-page">
+        <h2 class="section-heading"><?php echo $this->escape((string) ($detail['related_heading'] ?? 'You may also like')); ?></h2>
+        <div class="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <?php foreach (array_slice($relatedProducts, 0, 3) as $related) : ?>
+                <a href="/shop/product/<?php echo $this->escape((string) $related['slug']); ?>" class="card-interactive block" data-reveal>
+                    <img src="<?php echo $this->escape((string) $related['image']); ?>" alt="<?php echo $this->escape((string) $related['name']); ?>" class="aspect-square w-full object-cover" loading="lazy">
+                    <div class="card-body">
+                        <h3 class="font-bold text-desnky-dark"><?php echo $this->escape((string) $related['name']); ?></h3>
+                        <p class="mt-2 text-base font-bold text-desnky-primary"><?php echo $this->escape($currency); ?> <?php echo number_format((float) $related['price']); ?></p>
+                    </div>
+                </a>
+            <?php endforeach; ?>
         </div>
-    </section>
+    </div>
+</section>
 <?php endif; ?>
 
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    submitForm('#add-to-cart-form', {
-        endpoint: '/shop/cart/add',
-        resetOnSuccess: false,
-        onSuccess: function () {
-            window.setTimeout(function () {
-                window.location.href = '/shop/cart';
-            }, 500);
-        }
-    });
-});
-</script>
+<!-- Sticky mobile add-to-cart bar (sits above the global action bar) -->
+<?php if ($inStock) : ?>
+<div class="fixed inset-x-0 bottom-16 z-40 flex items-center justify-between gap-3 border-t border-gray-200 bg-white px-4 py-3 shadow-[0_-8px_30px_rgba(29,18,40,0.12)] lg:hidden">
+    <div>
+        <p class="text-xs text-desnky-muted"><?php echo $this->escape((string) $product['name']); ?></p>
+        <p class="text-lg font-bold text-desnky-dark"><?php echo $this->escape($currency); ?> <?php echo number_format((float) $product['price']); ?></p>
+    </div>
+    <button type="submit" form="add-to-cart-form" class="btn-primary">
+        <?php echo $this->partial('frontend/partials/icon', ['name' => 'cart', 'class' => 'h-5 w-5']); ?>
+        Add to cart
+    </button>
+</div>
+<?php endif; ?>

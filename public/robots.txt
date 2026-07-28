@@ -6,6 +6,7 @@ Disallow: /vendor
 Disallow: /database
 Disallow: /config
 Disallow: /scripts
+Disallow: /blog/search
 Crawl-delay: 5
 
 Sitemap: https://www.desnkygroup.com/sitemap.xml

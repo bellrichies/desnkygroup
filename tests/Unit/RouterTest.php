@@ -5,6 +5,7 @@ namespace Tests\Unit;
 use PHPUnit\Framework\TestCase;
 use App\Router;
 use App\Route;
+use Tests\Fixtures\PreservesRouteParameterMiddleware;
 
 /**
  * RouterTest - Unit tests for Router class
@@ -107,5 +108,23 @@ class RouterTest extends TestCase
         
         $middleware = $route->getMiddleware();
         $this->assertContains('auth', $middleware);
+    }
+
+    /**
+     * Middleware parameters must not replace route parameters during dispatch.
+     */
+    public function testDispatchPreservesRouteParametersWhenMiddlewareHasParameters(): void
+    {
+        $container = new \App\Container();
+        $this->router->aliasMiddleware('test-scope', PreservesRouteParameterMiddleware::class);
+        $this->router
+            ->get('/items/{id}', static fn ($id) => $id)
+            ->middleware(['test-scope:items.edit']);
+
+        $match = $this->router->match('GET', '/items/42');
+
+        $this->assertIsArray($match);
+        $this->assertSame('42', $this->router->dispatch($match, $container));
+        $this->assertSame(['items.edit'], PreservesRouteParameterMiddleware::$parameters);
     }
 }

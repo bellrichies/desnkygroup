@@ -106,4 +106,29 @@ class ProjectRepository extends BaseRepository
 
         return true;
     }
+
+    /** @return array<int, array<string, mixed>> */
+    public function galleryImages(int $projectId): array
+    {
+        return $this->connection->query(
+            "SELECT * FROM project_images WHERE project_id = ? ORDER BY sort_order ASC",
+            [$projectId]
+        );
+    }
+
+    public function syncGallery(int $projectId, array $images): void
+    {
+        $this->connection->delete("DELETE FROM project_images WHERE project_id = ?", [$projectId]);
+
+        foreach ($images as $i => $img) {
+            $path = trim((string) ($img['path'] ?? ''));
+            if ($path === '') {
+                continue;
+            }
+            $this->connection->insert(
+                "INSERT INTO project_images (project_id, path, alt_text, sort_order) VALUES (?, ?, ?, ?)",
+                [$projectId, $path, $img['alt_text'] ?? null, (int) ($img['sort_order'] ?? $i)]
+            );
+        }
+    }
 }

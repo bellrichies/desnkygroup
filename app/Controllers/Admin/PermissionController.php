@@ -32,6 +32,7 @@ class PermissionController extends BaseController
             'title' => 'Permissions',
             'user' => $this->user(),
             'groupedPermissions' => $this->permissions->grouped(),
+            'permissions' => $this->permissions->all(),
             'csrf_token' => $this->csrf(),
             'breadcrumbs' => [['label' => 'Permissions']],
         ]);

@@ -3,8 +3,8 @@
 namespace App\Services;
 
 use App\Config;
-use App\Controllers\Frontend\ServiceController;
-use App\Controllers\Frontend\ShopController;
+use App\Repositories\BlogPostRepository;
+use App\Repositories\BlogTaxonomyRepository;
 use App\Repositories\ProductRepository;
 use App\Repositories\ProjectRepository;
 use App\Repositories\ServiceRepository;
@@ -29,6 +29,10 @@ class SitemapService extends BaseService
             $this->entry('/hse-policy', '0.7', 'monthly'),
             $this->entry('/contact', '0.8', 'monthly'),
             $this->entry('/shop', '0.8', 'weekly'),
+            $this->entry('/blog', '0.8', 'weekly'),
+            $this->entry('/privacy-policy', '0.4', 'yearly'),
+            $this->entry('/cookie-policy', '0.4', 'yearly'),
+            $this->entry('/terms-of-use', '0.4', 'yearly'),
         ];
 
         foreach ($this->serviceSlugs() as $slug) {
@@ -45,6 +49,18 @@ class SitemapService extends BaseService
 
         foreach ($this->projectSlugs() as $slug) {
             $entries[] = $this->entry('/projects/' . $slug, '0.65', 'monthly');
+        }
+
+        foreach ($this->blogPostSlugs() as $slug) {
+            $entries[] = $this->entry('/blog/' . $slug, '0.75', 'weekly');
+        }
+
+        foreach ($this->blogCategorySlugs() as $slug) {
+            $entries[] = $this->entry('/blog/category/' . $slug, '0.55', 'weekly');
+        }
+
+        foreach ($this->blogTagSlugs() as $slug) {
+            $entries[] = $this->entry('/blog/tag/' . $slug, '0.45', 'weekly');
         }
 
         return $this->uniqueEntries($entries);
@@ -80,6 +96,7 @@ class SitemapService extends BaseService
             'Disallow: /database',
             'Disallow: /config',
             'Disallow: /scripts',
+            'Disallow: /blog/search',
             'Crawl-delay: 5',
             '',
             'Sitemap: ' . $baseUrl . '/sitemap.xml',
@@ -121,7 +138,7 @@ class SitemapService extends BaseService
         } catch (Throwable) {
         }
 
-        return array_keys(ServiceController::services());
+        return [];
     }
 
     /**
@@ -129,7 +146,16 @@ class SitemapService extends BaseService
      */
     private function productSlugs(): array
     {
-        return array_keys(ShopController::products());
+        try {
+            $rows = (new ProductRepository(DatabaseFactory::make()))->activeForShop();
+
+            return array_values(array_filter(array_map(
+                static fn (array $row): string => (string) ($row['slug'] ?? ''),
+                $rows
+            )));
+        } catch (Throwable) {
+            return [];
+        }
     }
 
     /**
@@ -140,13 +166,13 @@ class SitemapService extends BaseService
         try {
             $rows = (new ProductRepository(DatabaseFactory::make()))->activeCategories();
 
-            if ($rows !== []) {
-                return array_map(static fn (array $row): string => (string) $row['slug'], $rows);
-            }
+            return array_values(array_filter(array_map(
+                static fn (array $row): string => (string) ($row['slug'] ?? ''),
+                $rows
+            )));
         } catch (Throwable) {
+            return [];
         }
-
-        return array_keys(ShopController::categories());
     }
 
     /**
@@ -159,6 +185,57 @@ class SitemapService extends BaseService
 
             return array_values(array_filter(array_map(
                 static fn (array $row): string => (string) ($row['slug'] ?? ''),
+                $rows
+            )));
+        } catch (Throwable) {
+            return [];
+        }
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    private function blogPostSlugs(): array
+    {
+        try {
+            $rows = (new BlogPostRepository(DatabaseFactory::make()))->publishedForSitemap();
+
+            return array_values(array_filter(array_map(
+                static fn (array $row): string => (string) ($row['slug'] ?? ''),
+                $rows
+            )));
+        } catch (Throwable) {
+            return [];
+        }
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    private function blogCategorySlugs(): array
+    {
+        try {
+            $rows = (new BlogTaxonomyRepository(DatabaseFactory::make()))->categories(false);
+
+            return array_values(array_filter(array_map(
+                static fn (array $row): string => (int) ($row['post_count'] ?? 0) > 0 ? (string) ($row['slug'] ?? '') : '',
+                $rows
+            )));
+        } catch (Throwable) {
+            return [];
+        }
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    private function blogTagSlugs(): array
+    {
+        try {
+            $rows = (new BlogTaxonomyRepository(DatabaseFactory::make()))->tags();
+
+            return array_values(array_filter(array_map(
+                static fn (array $row): string => (int) ($row['post_count'] ?? 0) > 0 ? (string) ($row['slug'] ?? '') : '',
                 $rows
             )));
         } catch (Throwable) {

@@ -900,6 +900,134 @@ Include active menu highlighting.
 
 ## Phase 5-11: Advanced Features
 
+### Prompt 5.x: Blog / Editorial CMS With TipTap
+
+```
+Build a complete blog/editorial CMS module for the Desnky PHP MVC application.
+
+Context:
+- PHP 8.1+ custom MVC architecture
+- Controllers must be thin
+- Business logic belongs in services
+- Data access belongs in repositories
+- Database: MySQL with PDO prepared statements
+- Admin UI: Tailwind CSS, Alpine.js/jQuery where needed
+- Editor: TipTap WYSIWYG
+- Existing RBAC, activity logs, SEO helper, sitemap generator, media library and admin layout are available
+
+Database:
+1. posts
+   - id, category_id, title, slug, excerpt
+   - content_json JSON as canonical TipTap document
+   - content_html LONGTEXT sanitized for frontend rendering
+   - featured_image_id, og_image_id
+   - author_id, reviewed_by, published_by
+   - status: draft, review, scheduled, published, archived
+   - visibility: public, private
+   - allow_indexing
+   - published_at, scheduled_at, archived_at
+   - meta_title, meta_description, meta_keywords, canonical_url
+   - reading_time_minutes
+   - timestamps, soft delete
+   - fulltext index on title/excerpt/content_html
+
+2. post_categories
+   - parent_id, name, slug, description, featured_image_id
+   - meta_title, meta_description, canonical_url
+   - sort_order, is_active
+   - created_by, updated_by, timestamps, soft delete
+
+3. post_tags
+   - name, slug, description
+   - meta_title, meta_description
+   - is_active, created_by, updated_by, timestamps, soft delete
+
+4. post_tag
+   - post_id, tag_id composite primary key
+
+5. post_media
+   - post_id, media_id, usage_type: featured, inline, og_image, gallery
+   - sort_order
+
+6. post_revisions
+   - post_id, title, excerpt, content_json, content_html, status, created_by, created_at
+
+Backend:
+1. Repositories:
+   - PostRepository
+   - PostCategoryRepository
+   - PostTagRepository
+   - MediaRepository extensions for usage lookup
+
+2. Services:
+   - PostService handles slugging, validation, TipTap JSON sanitation, HTML sanitation, status transitions, scheduled publishing, revision capture, reading-time calculation, sitemap/cache invalidation and activity logging.
+   - PostCategoryService handles hierarchy validation, duplicate prevention and safe delete.
+   - PostTagService handles duplicate prevention, normalization and safe delete.
+
+3. Controllers:
+   - Admin\PostController: index, create, store, edit, update, preview, publish, schedule, archive, destroy, restore
+   - Admin\PostCategoryController: CRUD
+   - Admin\PostTagController: CRUD
+   - Frontend\BlogController: index, show, category, tag, author, rss
+
+4. Routes:
+   - Public: /blog, /blog/{slug}, /blog/category/{slug}, /blog/tag/{slug}, /blog/rss.xml
+   - Admin: /admin/posts, /admin/post-categories, /admin/post-tags
+
+Frontend/Admin:
+1. Admin post index:
+   - Search, status/category/tag/author/date filters
+   - Bulk actions where safe
+   - Published/scheduled/draft badges
+
+2. Post create/edit:
+   - TipTap editor
+   - Autosave draft
+   - Featured image and inline media picker
+   - Category selector
+   - Tag selector with create-on-demand if permitted
+   - SEO preview with title/description counters
+   - Publish controls gated by RBAC
+   - Revision history panel
+
+3. Public blog:
+   - Blog index with pagination
+   - Post detail page
+   - Category and tag archive pages
+   - Related posts by category/tag
+   - Internal links to relevant services
+   - RSS feed
+
+Security:
+- CSRF on all state-changing routes
+- RBAC permissions:
+  posts.view/create/edit/delete/publish/schedule/restore
+  post_categories.view/create/edit/delete
+  post_tags.view/create/edit/delete
+  media.attach
+- Sanitize TipTap JSON against an allowlist of nodes and marks
+- Sanitize rendered HTML server-side
+- Escape all frontend output
+- Validate media type, size, dimensions and ownership/usage
+- Do not allow executable uploads
+
+SEO:
+- Unique title/description/canonical per post/category/tag
+- BlogPosting/Article schema for posts
+- Breadcrumb schema on all blog pages
+- ImageObject schema for featured media
+- Include published posts/categories/tags in sitemap
+- Exclude drafts, private posts and noindex posts
+
+Testing:
+- Unit tests for PostService, category/tag validation, TipTap sanitizer and reading-time calculation
+- Integration tests for admin CRUD, RBAC, CSRF, publish workflow, scheduled publishing and public rendering
+- E2E workflow tests for create draft -> preview -> publish -> archive
+- Media attachment tests
+
+Follow PSR-12, include PHPDoc, and use prepared statements only.
+```
+
 ### General Prompt Template for Remaining Phases
 
 ```

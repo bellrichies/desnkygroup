@@ -51,6 +51,14 @@ class OrderRepository extends BaseRepository
         return $this->connection->queryOne("SELECT * FROM orders WHERE id = ?", [$id]);
     }
 
+    public function findByNumber(string $orderNumber): ?array
+    {
+        return $this->connection->queryOne(
+            "SELECT * FROM orders WHERE order_number = ? LIMIT 1",
+            [$orderNumber]
+        );
+    }
+
     /**
      * @return array<int, array<string, mixed>>
      */

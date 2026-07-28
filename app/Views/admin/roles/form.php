@@ -9,10 +9,10 @@
     <section class="rounded bg-white p-5 shadow-sm ring-1 ring-gray-200">
         <h2 class="font-semibold text-gray-950">Role details</h2>
         <div class="mt-4 grid gap-4 md:grid-cols-3">
-            <input name="name" required value="<?php echo $this->escape((string) ($role['name'] ?? '')); ?>" class="rounded border-gray-300" placeholder="Role name">
-            <input name="slug" value="<?php echo $this->escape((string) ($role['slug'] ?? '')); ?>" class="rounded border-gray-300" placeholder="role-slug">
-            <input name="sort_order" type="number" value="<?php echo $this->escape((string) ($role['sort_order'] ?? 0)); ?>" class="rounded border-gray-300" placeholder="Sort order">
-            <textarea name="description" class="rounded border-gray-300 md:col-span-3" placeholder="Description"><?php echo $this->escape((string) ($role['description'] ?? '')); ?></textarea>
+            <label><span>Role name</span><input name="name" required value="<?php echo $this->escape((string) ($role['name'] ?? '')); ?>" class="rounded border-gray-300" placeholder="e.g. Content Manager"></label>
+            <label><span>Role slug</span><input name="slug" value="<?php echo $this->escape((string) ($role['slug'] ?? '')); ?>" class="rounded border-gray-300" placeholder="content-manager"></label>
+            <label><span>Display order</span><input name="sort_order" type="number" value="<?php echo $this->escape((string) ($role['sort_order'] ?? 0)); ?>" class="rounded border-gray-300" placeholder="0"></label>
+            <label class="md:col-span-3"><span>Description</span><textarea name="description" rows="3" class="rounded border-gray-300" placeholder="Explain the responsibilities assigned to this role."><?php echo $this->escape((string) ($role['description'] ?? '')); ?></textarea></label>
         </div>
     </section>
 

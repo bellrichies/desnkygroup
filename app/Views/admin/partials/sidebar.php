@@ -5,27 +5,48 @@ $groups = [
         ['label' => 'Dashboard', 'url' => '/admin/dashboard', 'icon' => 'grid'],
     ],
     'Content' => [
-        ['label' => 'Pages', 'url' => '/admin/pages', 'icon' => 'file', 'permission' => 'pages.view'],
-        ['label' => 'Services', 'url' => '/admin/services', 'icon' => 'briefcase', 'permission' => 'services.view'],
-        ['label' => 'Projects', 'url' => '/admin/projects', 'icon' => 'image', 'permission' => 'projects.view'],
-        ['label' => 'Media Library', 'url' => '/admin/media', 'icon' => 'image', 'permission' => 'media.view'],
+        ['label' => 'Homepage Hero', 'url' => '/admin/homepage-hero', 'permission' => 'settings.view'],
+        ['label' => 'Pages',        'url' => '/admin/pages',          'permission' => 'pages.view'],
+        ['label' => 'Services',     'url' => '/admin/services',       'permission' => 'services.view'],
+        ['label' => 'Projects',     'url' => '/admin/projects',       'permission' => 'projects.view'],
+        ['label' => 'Blog Posts',   'url' => '/admin/blog',           'permission' => 'blog.view'],
+        ['label' => 'Blog Taxonomy','url' => '/admin/blog/categories','permission' => 'blog.taxonomy'],
+        ['label' => 'Blog Authors', 'url' => '/admin/blog/authors',   'permission' => 'blog.edit'],
+        ['label' => 'Media Library','url' => '/admin/media',          'permission' => 'media.view'],
+    ],
+    'Engagement' => [
+        ['label' => 'Trusted Clients','url' => '/admin/trusted-clients','permission' => 'settings.view'],
+        ['label' => 'Inquiries',      'url' => '/admin/contacts',       'permission' => 'pages.view'],
+        ['label' => 'Subscribers',    'url' => '/admin/subscribers',    'permission' => 'pages.view'],
     ],
     'Ecommerce' => [
-        ['label' => 'Products', 'url' => '/admin/products', 'icon' => 'box', 'permission' => 'products.view'],
-        ['label' => 'Categories', 'url' => '/admin/product-categories', 'icon' => 'tag', 'permission' => 'products.view'],
-        ['label' => 'Orders', 'url' => '/admin/orders', 'icon' => 'receipt', 'permission' => 'orders.view'],
-        ['label' => 'Customers', 'url' => '/admin/customers', 'icon' => 'users', 'permission' => 'orders.view'],
+        ['label' => 'Products',    'url' => '/admin/products',          'permission' => 'products.view'],
+        ['label' => 'Categories',  'url' => '/admin/product-categories','permission' => 'products.view'],
+        ['label' => 'Orders',      'url' => '/admin/orders',            'permission' => 'orders.view'],
+        ['label' => 'Customers',   'url' => '/admin/customers',         'permission' => 'orders.view'],
     ],
     'Admin' => [
-        ['label' => 'Users', 'url' => '/admin/users', 'icon' => 'user', 'permission' => 'admins.view'],
-        ['label' => 'Roles', 'url' => '/admin/roles', 'icon' => 'shield', 'permission' => 'roles.view'],
-        ['label' => 'Permissions', 'url' => '/admin/permissions', 'icon' => 'key', 'permission' => 'permissions.view'],
-        ['label' => 'Activity Logs', 'url' => '/admin/activity-logs', 'icon' => 'clock', 'permission' => 'activity_logs.view'],
+        ['label' => 'Users',        'url' => '/admin/users',         'permission' => 'admins.view'],
+        ['label' => 'Roles',        'url' => '/admin/roles',         'permission' => 'roles.view'],
+        ['label' => 'Permissions',  'url' => '/admin/permissions',   'permission' => 'permissions.view'],
+        ['label' => 'Activity Logs','url' => '/admin/activity-logs', 'permission' => 'activity_logs.view'],
     ],
     'Settings' => [
-        ['label' => 'Site Settings', 'url' => '/admin/settings', 'icon' => 'settings'],
+        ['label' => 'Settings', 'url' => '/admin/settings', 'permission' => 'settings.view'],
+        ['label' => 'Blog Ads', 'url' => '/admin/blog/ads', 'permission' => 'blog.ads'],
     ],
 ];
+
+// Determine if a URL prefix is "active" (handles sub-paths like /admin/contacts/5).
+$isActive = static function (string $url) use ($currentPath): bool {
+    if ($url === '/admin/blog') {
+        return $currentPath === '/admin/blog'
+            || $currentPath === '/admin/blog/create'
+            || preg_match('#^/admin/blog/[0-9]+#', $currentPath) === 1;
+    }
+
+    return $currentPath === $url || str_starts_with($currentPath, $url . '/');
+};
 ?>
 
 <aside
@@ -36,9 +57,7 @@ $groups = [
     <div class="flex h-full flex-col">
         <div class="border-b border-white/10 px-6 py-5">
             <a href="/admin/dashboard" class="block text-xl font-bold">Desnky Admin</a>
-            <p class="mt-1 text-sm text-slate-300">
-                <?php echo $this->escape((string) (($user['role'] ?? 'admin'))); ?>
-            </p>
+            <p class="mt-1 text-sm text-slate-300"><?php echo $this->escape((string) ($user['role'] ?? 'admin')); ?></p>
         </div>
 
         <nav class="flex-1 space-y-6 overflow-y-auto px-4 py-6">
@@ -50,7 +69,7 @@ $groups = [
                     <div class="mt-2 space-y-1">
                         <?php foreach ($items as $item) : ?>
                             <?php if (!empty($item['permission']) && !$this->can($item['permission'])) { continue; } ?>
-                            <?php $active = $currentPath === $item['url']; ?>
+                            <?php $active = $isActive($item['url']); ?>
                             <a
                                 href="<?php echo $this->escape($item['url']); ?>"
                                 class="flex items-center gap-3 rounded px-3 py-2 text-sm font-medium transition <?php echo $active ? 'bg-blue-700 text-white' : 'text-slate-200 hover:bg-white/10 hover:text-white'; ?>"

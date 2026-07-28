@@ -86,6 +86,20 @@ class OrderService extends BaseService
         return $order;
     }
 
+    public function findByNumber(string $orderNumber, bool $withItems = true): ?array
+    {
+        $order = $this->orders->findByNumber(trim($orderNumber));
+        if ($order === null) {
+            return null;
+        }
+
+        if ($withItems) {
+            $order['items'] = $this->orders->items((int) $order['id']);
+        }
+
+        return $order;
+    }
+
     public function updateStatus(int $id, string $status): bool
     {
         if (!in_array($status, self::STATUSES, true)) {

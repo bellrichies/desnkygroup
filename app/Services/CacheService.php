@@ -106,6 +106,18 @@ class CacheService extends BaseService
         return $removed;
     }
 
+    public function flushAll(): int
+    {
+        $removed = 0;
+
+        foreach (glob($this->directory . '/*.json') ?: [] as $path) {
+            @unlink($path);
+            $removed++;
+        }
+
+        return $removed;
+    }
+
     private function path(string $key): string
     {
         return $this->directory . '/' . hash('sha256', $key) . '.json';

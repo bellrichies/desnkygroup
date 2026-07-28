@@ -1,14 +1,15 @@
-<div class="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+<div class="mb-5 flex flex-col gap-4 rounded-2xl bg-gradient-to-r from-slate-950 to-blue-950 p-5 text-white shadow-lg sm:flex-row sm:items-center sm:justify-between">
     <div>
-        <h1 class="text-2xl font-bold text-gray-900">Services</h1>
-        <p class="mt-1 text-sm text-gray-600">Manage service landing pages, icons, categories, ordering, and SEO.</p>
+        <p class="text-xs font-bold uppercase tracking-[.2em] text-blue-200">Content management</p>
+        <h1 class="mt-2 text-2xl font-bold">Services</h1>
+        <p class="mt-1 text-sm text-slate-300">Manage service pages and their database-driven hero experiences.</p>
     </div>
-    <a href="/admin/services/create" class="inline-flex items-center justify-center rounded bg-blue-700 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-800">
-        Create Service
+    <a href="/admin/services/create" class="inline-flex items-center justify-center rounded-xl bg-blue-500 px-4 py-2.5 text-sm font-bold text-white hover:bg-blue-400">
+        + Create service
     </a>
 </div>
 
-<div class="overflow-hidden rounded border border-gray-200 bg-white shadow-sm">
+<div class="overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm">
     <table class="min-w-full divide-y divide-gray-200 text-sm">
         <thead class="bg-gray-50 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
             <tr>
@@ -35,10 +36,11 @@
                     </td>
                     <td class="px-4 py-3">
                         <div class="flex justify-end gap-2">
-                            <a href="/admin/services/<?php echo (int) $service['id']; ?>/edit" class="rounded border border-gray-300 px-3 py-1.5 font-medium text-gray-700 hover:bg-gray-50">Edit</a>
+                            <a href="/admin/services/<?php echo (int) $service['id']; ?>/heroes" class="rounded-lg bg-violet-50 px-3 py-2 font-bold text-violet-700 hover:bg-violet-100">Hero</a>
+                            <a href="/admin/services/<?php echo (int) $service['id']; ?>/edit" class="rounded-lg border border-gray-300 px-3 py-2 font-bold text-gray-700 hover:bg-gray-50">Edit</a>
                             <form method="POST" action="/admin/services/<?php echo (int) $service['id']; ?>/delete" onsubmit="return confirm('Delete this service?');">
                                 <input type="hidden" name="_token" value="<?php echo $this->escape((string) ($_SESSION['csrf_token'] ?? '')); ?>">
-                                <button class="rounded border border-red-200 px-3 py-1.5 font-medium text-red-700 hover:bg-red-50">Delete</button>
+                                <button class="rounded-lg px-3 py-2 font-bold text-red-700 hover:bg-red-50">Delete</button>
                             </form>
                         </div>
                     </td>

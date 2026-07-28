@@ -14,9 +14,44 @@ define('STORAGE_PATH', BASE_PATH . '/storage');
 // Load Composer autoloader
 require_once BASE_PATH . '/vendor/autoload.php';
 
-// Load environment
+// Load environment. CI and container deployments may inject variables directly
+// and intentionally omit a local .env file.
 $dotenv = Dotenv\Dotenv::createImmutable(BASE_PATH);
-$dotenv->load();
+$dotenv->safeLoad();
+
+$requiredEnvironment = ['DB_HOST', 'DB_PORT', 'DB_DATABASE', 'DB_USERNAME', 'DB_PASSWORD'];
+$missingEnvironment = array_values(array_filter(
+    $requiredEnvironment,
+    static function (string $key): bool {
+        $isDefined = array_key_exists($key, $_ENV)
+            || array_key_exists($key, $_SERVER)
+            || getenv($key) !== false;
+
+        if (!$isDefined) {
+            return true;
+        }
+
+        // An empty password is valid for some local MySQL installations. All
+        // other connection values must contain a usable value.
+        if ($key === 'DB_PASSWORD') {
+            return false;
+        }
+
+        $value = $_ENV[$key] ?? $_SERVER[$key] ?? getenv($key);
+
+        return trim((string) $value) === '';
+    }
+));
+
+if ($missingEnvironment !== []) {
+    fwrite(
+        STDERR,
+        'Error: Missing required database environment variables: '
+        . implode(', ', $missingEnvironment)
+        . ". Copy .env.example to .env for local use or inject these variables in the runtime environment.\n"
+    );
+    exit(1);
+}
 
 // Load configuration
 \App\Config::load(BASE_PATH . '/config');

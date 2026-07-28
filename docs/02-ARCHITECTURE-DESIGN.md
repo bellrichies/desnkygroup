@@ -697,6 +697,133 @@ CREATE TABLE media (
     INDEX idx_mime (mime_type),
     INDEX idx_created_by (created_by)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Blog categories table
+CREATE TABLE post_categories (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    parent_id BIGINT UNSIGNED NULL,
+    name VARCHAR(150) NOT NULL,
+    slug VARCHAR(180) NOT NULL UNIQUE,
+    description TEXT NULL,
+    featured_image_id BIGINT UNSIGNED NULL,
+    meta_title VARCHAR(255) NULL,
+    meta_description VARCHAR(255) NULL,
+    canonical_url VARCHAR(255) NULL,
+    sort_order INT NOT NULL DEFAULT 0,
+    is_active TINYINT(1) NOT NULL DEFAULT 1,
+    created_by BIGINT UNSIGNED NOT NULL,
+    updated_by BIGINT UNSIGNED NULL,
+    created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP NULL,
+    FOREIGN KEY (parent_id) REFERENCES post_categories(id) ON DELETE SET NULL,
+    FOREIGN KEY (featured_image_id) REFERENCES media(id) ON DELETE SET NULL,
+    FOREIGN KEY (created_by) REFERENCES admin_users(id),
+    FOREIGN KEY (updated_by) REFERENCES admin_users(id),
+    INDEX idx_parent (parent_id),
+    INDEX idx_slug (slug),
+    INDEX idx_active_sort (is_active, sort_order)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Blog tags table
+CREATE TABLE post_tags (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(150) NOT NULL,
+    slug VARCHAR(180) NOT NULL UNIQUE,
+    description TEXT NULL,
+    meta_title VARCHAR(255) NULL,
+    meta_description VARCHAR(255) NULL,
+    is_active TINYINT(1) NOT NULL DEFAULT 1,
+    created_by BIGINT UNSIGNED NOT NULL,
+    updated_by BIGINT UNSIGNED NULL,
+    created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP NULL,
+    FOREIGN KEY (created_by) REFERENCES admin_users(id),
+    FOREIGN KEY (updated_by) REFERENCES admin_users(id),
+    INDEX idx_slug (slug),
+    INDEX idx_active (is_active)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Blog posts table
+CREATE TABLE posts (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    category_id BIGINT UNSIGNED NULL,
+    title VARCHAR(255) NOT NULL,
+    slug VARCHAR(255) NOT NULL UNIQUE,
+    excerpt TEXT NULL,
+    content_json JSON NOT NULL,
+    content_html LONGTEXT NOT NULL,
+    featured_image_id BIGINT UNSIGNED NULL,
+    author_id BIGINT UNSIGNED NOT NULL,
+    reviewed_by BIGINT UNSIGNED NULL,
+    published_by BIGINT UNSIGNED NULL,
+    status ENUM('draft', 'review', 'scheduled', 'published', 'archived') NOT NULL DEFAULT 'draft',
+    visibility ENUM('public', 'private') NOT NULL DEFAULT 'public',
+    allow_indexing TINYINT(1) NOT NULL DEFAULT 1,
+    published_at TIMESTAMP NULL,
+    scheduled_at TIMESTAMP NULL,
+    archived_at TIMESTAMP NULL,
+    meta_title VARCHAR(255) NULL,
+    meta_description VARCHAR(255) NULL,
+    meta_keywords VARCHAR(255) NULL,
+    canonical_url VARCHAR(255) NULL,
+    og_image_id BIGINT UNSIGNED NULL,
+    reading_time_minutes INT UNSIGNED NOT NULL DEFAULT 1,
+    created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP NULL,
+    FOREIGN KEY (category_id) REFERENCES post_categories(id) ON DELETE SET NULL,
+    FOREIGN KEY (featured_image_id) REFERENCES media(id) ON DELETE SET NULL,
+    FOREIGN KEY (og_image_id) REFERENCES media(id) ON DELETE SET NULL,
+    FOREIGN KEY (author_id) REFERENCES admin_users(id),
+    FOREIGN KEY (reviewed_by) REFERENCES admin_users(id) ON DELETE SET NULL,
+    FOREIGN KEY (published_by) REFERENCES admin_users(id) ON DELETE SET NULL,
+    FULLTEXT INDEX ft_posts_search (title, excerpt, content_html),
+    INDEX idx_slug (slug),
+    INDEX idx_status_published (status, published_at),
+    INDEX idx_category_status (category_id, status),
+    INDEX idx_author (author_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Blog post/tag mapping table
+CREATE TABLE post_tag (
+    post_id BIGINT UNSIGNED NOT NULL,
+    tag_id BIGINT UNSIGNED NOT NULL,
+    PRIMARY KEY (post_id, tag_id),
+    FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE,
+    FOREIGN KEY (tag_id) REFERENCES post_tags(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Blog post media usage table
+CREATE TABLE post_media (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    post_id BIGINT UNSIGNED NOT NULL,
+    media_id BIGINT UNSIGNED NOT NULL,
+    usage_type ENUM('featured', 'inline', 'og_image', 'gallery') NOT NULL DEFAULT 'inline',
+    sort_order INT NOT NULL DEFAULT 0,
+    created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE,
+    FOREIGN KEY (media_id) REFERENCES media(id) ON DELETE CASCADE,
+    UNIQUE KEY unique_post_media_usage (post_id, media_id, usage_type),
+    INDEX idx_post_usage (post_id, usage_type)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Blog post revisions table
+CREATE TABLE post_revisions (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    post_id BIGINT UNSIGNED NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    excerpt TEXT NULL,
+    content_json JSON NOT NULL,
+    content_html LONGTEXT NOT NULL,
+    status VARCHAR(50) NOT NULL,
+    created_by BIGINT UNSIGNED NOT NULL,
+    created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE,
+    FOREIGN KEY (created_by) REFERENCES admin_users(id),
+    INDEX idx_post_created (post_id, created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 ```
 
 #### Ecommerce Tables

@@ -1,43 +1,89 @@
-<section class="section-band bg-desnky-surface">
-    <div class="container-page">
-        <nav class="text-sm text-desnky-muted" aria-label="Breadcrumb">
-            <a href="/" class="hover:text-desnky-blue">Home</a> / <span>Services</span>
-        </nav>
-        <div class="mt-6 max-w-3xl">
-            <h1 class="text-4xl font-bold text-desnky-navy sm:text-5xl">Our Services</h1>
-            <p class="mt-5 text-lg leading-8 text-desnky-muted">
-                Explore our core service areas across engineering, energy, procurement, HSE, ICT and agro food
-                processing.
-            </p>
-        </div>
-    </div>
-</section>
+<?php
+$hero = $hero ?? [];
+$listing = $listing ?? [];
+$services = $services ?? [];
+$introText = (string) ($listing['text'] ?? $hero['text'] ?? '');
+
+$sectorIcons = [
+    'engineering' => 'cog',
+    'energy-solutions' => 'bolt',
+    'procurement' => 'truck',
+    'hse-safety' => 'shield-check',
+    'ict-solutions' => 'server',
+    'agro-food-processing' => 'leaf',
+];
+$iconFor = static fn (string $slug): string => $sectorIcons[$slug] ?? 'sparkles';
+
+$process = [
+    ['title' => 'Enquiry', 'text' => 'Share your requirement; we respond within one business day.'],
+    ['title' => 'Scope', 'text' => 'We define deliverables, timeline, HSE plan and a clear quotation.'],
+    ['title' => 'Deliver', 'text' => 'Qualified teams execute to standard, on schedule and safely.'],
+    ['title' => 'Support', 'text' => 'Ongoing maintenance, supply and advisory keep you running.'],
+];
+?>
 
 <section class="section-band">
     <div class="container-page">
-        <div class="mb-8 flex flex-wrap gap-3" aria-label="Service categories">
-            <a href="/services" class="rounded-md bg-desnky-navy px-4 py-2 text-sm font-semibold text-white">All Services</a>
-            <?php foreach ($services as $service) : ?>
-                <a href="/services/<?php echo $this->escape($service['slug']); ?>" class="rounded-md border border-gray-200 px-4 py-2 text-sm font-semibold text-desnky-navy hover:border-desnky-blue hover:text-desnky-blue">
-                    <?php echo $this->escape($service['title']); ?>
-                </a>
-            <?php endforeach; ?>
+        <div class="mb-10 max-w-3xl" data-reveal>
+            <p class="eyebrow">Services</p>
+            <h1 class="mt-3 section-heading"><?php echo $this->escape((string) ($listing['heading'] ?? $hero['heading'] ?? $title ?? 'Services')); ?></h1>
+            <?php if ($introText !== '') : ?>
+                <p class="section-lead"><?php echo $this->escape($introText); ?></p>
+            <?php endif; ?>
         </div>
 
-        <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            <?php foreach ($services as $service) : ?>
-                <article class="overflow-hidden border border-gray-200 bg-white shadow-card">
-                    <img src="<?php echo $this->escape($service['image']); ?>" alt="<?php echo $this->escape($service['title']); ?>" class="h-48 w-full object-cover" loading="lazy">
-                    <div class="p-6">
-                        <div class="flex h-11 w-11 items-center justify-center rounded-md bg-desnky-surface text-sm font-bold text-desnky-blue">
-                            <?php echo $this->escape($service['icon']); ?>
+        <?php if ($services !== []) : ?>
+            <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                <?php foreach ($services as $service) : ?>
+                    <article class="card-interactive flex flex-col" data-reveal>
+                        <?php if (!empty($service['image'])) : ?>
+                            <img src="<?php echo $this->escape((string) $service['image']); ?>" alt="<?php echo $this->escape((string) $service['title']); ?>" class="h-48 w-full object-cover" loading="lazy">
+                        <?php endif; ?>
+                        <div class="card-body flex flex-1 flex-col">
+                            <span class="icon-tile">
+                                <?php echo $this->partial('frontend/partials/icon', ['name' => $iconFor((string) $service['slug']), 'class' => 'h-6 w-6']); ?>
+                            </span>
+                            <h2 class="mt-5 text-xl font-bold text-desnky-dark"><?php echo $this->escape((string) $service['title']); ?></h2>
+                            <p class="mt-3 flex-1 text-sm leading-6 text-desnky-muted"><?php echo $this->escape((string) $service['summary']); ?></p>
+                            <a href="/services/<?php echo $this->escape((string) $service['slug']); ?>" class="btn-ghost mt-5">
+                                <?php echo $this->escape((string) ($listing['card_cta_label'] ?? 'Explore')); ?>
+                                <?php echo $this->partial('frontend/partials/icon', ['name' => 'arrow-right', 'class' => 'h-4 w-4']); ?>
+                            </a>
                         </div>
-                        <h2 class="mt-5 text-xl font-bold text-desnky-navy"><?php echo $this->escape($service['title']); ?></h2>
-                        <p class="mt-3 text-sm leading-6 text-desnky-muted"><?php echo $this->escape($service['summary']); ?></p>
-                        <a href="/services/<?php echo $this->escape($service['slug']); ?>" class="btn-primary mt-5">Learn More</a>
-                    </div>
-                </article>
-            <?php endforeach; ?>
+                    </article>
+                <?php endforeach; ?>
+            </div>
+        <?php endif; ?>
+    </div>
+</section>
+
+<!-- Process overview -->
+<section class="section-band bg-desnky-surface">
+    <div class="container-page">
+        <div class="max-w-3xl" data-reveal>
+            <p class="eyebrow">How we work</p>
+            <h2 class="mt-3 section-heading">One accountable partner, end to end</h2>
+            <p class="section-lead">A consistent delivery model across all six sectors — predictable, safe and measurable.</p>
         </div>
+        <ol class="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+            <?php foreach ($process as $index => $step) : ?>
+                <li class="relative rounded-lg border border-gray-200 bg-white p-6 shadow-card" data-reveal>
+                    <span class="text-2xl font-bold text-desnky-primary-200"><?php echo str_pad((string) ($index + 1), 2, '0', STR_PAD_LEFT); ?></span>
+                    <h3 class="mt-3 text-lg font-bold text-desnky-dark"><?php echo $this->escape($step['title']); ?></h3>
+                    <p class="mt-2 text-sm leading-6 text-desnky-muted"><?php echo $this->escape($step['text']); ?></p>
+                </li>
+            <?php endforeach; ?>
+        </ol>
+    </div>
+</section>
+
+<!-- CTA band -->
+<section class="bg-desnky-dark text-white">
+    <div class="container-page section-band flex flex-col items-start justify-between gap-6 md:flex-row md:items-center">
+        <div class="max-w-2xl">
+            <h2 class="text-3xl font-bold sm:text-4xl">Not sure which service you need?</h2>
+            <p class="mt-3 text-lg text-gray-200">Tell us your challenge and we'll route you to the right team.</p>
+        </div>
+        <a href="/contact" class="btn-on-dark">Discuss your requirements</a>
     </div>
 </section>

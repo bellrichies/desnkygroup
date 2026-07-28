@@ -21,11 +21,15 @@ class SecurityHeaders extends Middleware
             "form-action 'self'",
             "frame-ancestors 'none'",
             "object-src 'none'",
-            "script-src 'self' 'unsafe-inline' cdn.tailwindcss.com",
-            "style-src 'self' 'unsafe-inline' cdn.tailwindcss.com fonts.googleapis.com",
+            // 'unsafe-eval' is required by Alpine.js (public) and the Tailwind Play CDN (admin),
+            // both of which compile expressions at runtime via Function().
+            "script-src 'self' 'unsafe-inline' 'unsafe-eval' cdn.tailwindcss.com cdn.jsdelivr.net",
+            "style-src 'self' 'unsafe-inline' cdn.tailwindcss.com fonts.googleapis.com cdn.jsdelivr.net",
             "font-src 'self' fonts.gstatic.com data:",
             "img-src 'self' data: https:",
-            "connect-src 'self'",
+            "connect-src 'self' cdn.jsdelivr.net",
+            // Google Maps embed (contact page map facade).
+            "frame-src 'self' https://www.google.com https://maps.google.com",
         ];
         header('Content-Security-Policy: ' . implode('; ', $contentSecurityPolicy) . ';');
 
