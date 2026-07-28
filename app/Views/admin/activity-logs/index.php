@@ -2,6 +2,7 @@
     <h1 class="text-2xl font-bold text-gray-950">Activity Logs</h1>
     <p class="mt-1 text-sm text-gray-600">Audit trail for admin authentication, CRUD and permission changes.</p>
 </div>
+<?php echo $this->partial('admin/partials/pagination', ['pagination' => $pagination ?? [], 'filters' => $filters ?? []]); ?>
 
 <form method="get" class="mb-5 grid gap-3 rounded bg-white p-4 shadow-sm ring-1 ring-gray-200 md:grid-cols-3">
     <input name="q" value="<?php echo $this->escape((string) ($filters['q'] ?? '')); ?>" class="rounded border-gray-300" placeholder="Search logs">

@@ -20,10 +20,19 @@ class BlogController extends BaseController
 
     public function index(): string
     {
+        $page = max(1, (int) ($_GET['page'] ?? 1));
+        $allPosts = $this->blog->adminPosts($_GET);
+        $total = count($allPosts);
+
         return $this->view('admin/blog/index', [
             'title' => 'Blog Posts',
             'user' => $this->user(),
-            'posts' => $this->blog->adminPosts($_GET),
+            'posts' => array_slice($allPosts, ($page - 1) * 10, 10),
+            'pagination' => [
+                'page' => $page,
+                'total_pages' => max(1, (int) ceil($total / 10)),
+                'total' => $total,
+            ],
             'categories' => $this->blog->categories(),
             'stats' => $this->blog->stats(),
             'filters' => $_GET,
@@ -115,11 +124,18 @@ class BlogController extends BaseController
 
     public function taxonomy(): string
     {
+        $page = max(1, (int) ($_GET['page'] ?? 1));
+        $tab = ($_GET['tab'] ?? 'categories') === 'tags' ? 'tags' : 'categories';
+        $allCategories = $this->blog->categories();
+        $allTags = $this->blog->tags();
+        $total = $tab === 'tags' ? count($allTags) : count($allCategories);
         return $this->view('admin/blog/taxonomy', [
             'title' => 'Blog Categories & Tags',
             'user' => $this->user(),
-            'categories' => $this->blog->categories(),
-            'tags' => $this->blog->tags(),
+            'categories' => $tab === 'categories' ? array_slice($allCategories, ($page - 1) * 10, 10) : [],
+            'tags' => $tab === 'tags' ? array_slice($allTags, ($page - 1) * 10, 10) : [],
+            'pagination' => ['page' => $page, 'total_pages' => max(1, (int) ceil($total / 10)), 'total' => $total],
+            'filters' => $_GET,
             'csrf_token' => $this->csrf(),
             'breadcrumbs' => [
                 ['label' => 'Blog', 'url' => '/admin/blog'],
@@ -166,10 +182,15 @@ class BlogController extends BaseController
 
     public function authors(): string
     {
+        $allAuthors = $this->blog->authors();
+        $page = max(1, (int) ($_GET['page'] ?? 1));
+        $total = count($allAuthors);
         return $this->view('admin/blog/authors', [
             'title' => 'Blog Authors',
             'user' => $this->user(),
-            'authors' => $this->blog->authors(),
+            'authors' => array_slice($allAuthors, ($page - 1) * 10, 10),
+            'pagination' => ['page' => $page, 'total_pages' => max(1, (int) ceil($total / 10)), 'total' => $total],
+            'filters' => $_GET,
             'csrf_token' => $this->csrf(),
             'breadcrumbs' => [
                 ['label' => 'Blog', 'url' => '/admin/blog'],

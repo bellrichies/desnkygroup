@@ -3,7 +3,10 @@
         <h1 class="text-2xl font-bold text-gray-950">Products</h1>
         <p class="mt-1 text-sm text-gray-600">Manage ecommerce products, pricing and inventory.</p>
     </div>
-    <a href="/admin/products/create" class="rounded bg-blue-700 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-800">New product</a>
+    <div class="flex gap-2">
+        <button type="button" onclick="document.getElementById('csv-import').showModal()" class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold hover:bg-gray-50">Import CSV</button>
+        <a href="/admin/products/create" class="rounded-lg bg-blue-700 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-800">New product</a>
+    </div>
 </div>
 
 <form method="get" class="mb-5 grid gap-3 rounded bg-white p-4 shadow-sm ring-1 ring-gray-200 md:grid-cols-4">
@@ -43,8 +46,11 @@
             <?php foreach ($products as $product) : ?>
                 <tr>
                     <td class="px-4 py-3">
-                        <p class="font-semibold text-gray-950"><?php echo $this->escape((string) $product['name']); ?></p>
+                        <div class="flex items-center gap-3">
+                        <?php if (!empty($product['featured_image'])) : ?><img src="<?php echo $this->escape((string) $product['featured_image']); ?>" alt="" class="h-10 w-10 rounded-lg object-cover"><?php endif; ?>
+                        <div><p class="font-semibold text-gray-950"><?php echo $this->escape((string) $product['name']); ?></p>
                         <p class="text-xs text-gray-500"><?php echo $this->escape((string) $product['sku']); ?></p>
+                        </div></div>
                     </td>
                     <td class="px-4 py-3 text-gray-600"><?php echo $this->escape((string) ($product['category_name'] ?? 'Uncategorized')); ?></td>
                     <td class="px-4 py-3 text-gray-900">NGN <?php echo number_format((float) $product['price'], 2); ?></td>
@@ -66,11 +72,17 @@
     </table>
 </div>
 
-<details class="mt-6 rounded bg-white p-4 shadow-sm ring-1 ring-gray-200">
-    <summary class="cursor-pointer font-semibold text-gray-950">Bulk CSV upload</summary>
-    <form method="post" action="/admin/products/import" class="mt-4 space-y-3">
+<?php $pagination = $pagination ?? ['page' => 1, 'total_pages' => 1]; ?>
+<?php if ($pagination['total_pages'] > 1) : ?><nav class="mt-5 flex justify-center gap-2" aria-label="Products pagination"><?php for ($p = 1; $p <= $pagination['total_pages']; $p++) : $query = array_merge($filters, ['page' => $p]); ?><a href="?<?php echo $this->escape(http_build_query($query)); ?>" class="rounded-lg border px-3 py-2 text-sm <?php echo $p === $pagination['page'] ? 'bg-blue-700 text-white' : 'bg-white'; ?>"><?php echo $p; ?></a><?php endfor; ?></nav><?php endif; ?>
+
+<dialog id="csv-import" class="w-full max-w-lg rounded-2xl p-0 shadow-2xl backdrop:bg-slate-900/60">
+  <div class="p-6">
+    <div class="flex items-center justify-between"><h2 class="text-lg font-bold">Import products</h2><button type="button" onclick="this.closest('dialog').close()" aria-label="Close" class="text-2xl">&times;</button></div>
+    <p class="mt-2 text-sm text-gray-600">Upload a CSV with name, slug, SKU, price, stock, category ID, and description columns.</p>
+    <form method="post" action="/admin/products/import" enctype="multipart/form-data" class="mt-4 space-y-4">
         <input type="hidden" name="_token" value="<?php echo $this->escape($csrf_token); ?>">
-        <textarea name="csv" rows="5" class="w-full rounded border-gray-300 text-sm" placeholder="name,slug,sku,price,quantity_in_stock,category_id,description"></textarea>
-        <button class="rounded bg-slate-900 px-4 py-2 text-sm font-semibold text-white">Import products</button>
+        <input type="file" name="csv_file" required accept=".csv,text/csv" class="block w-full rounded-lg border border-gray-300 p-3 text-sm">
+        <button class="rounded-lg bg-blue-700 px-4 py-2 text-sm font-semibold text-white">Import CSV</button>
     </form>
-</details>
+  </div>
+</dialog>

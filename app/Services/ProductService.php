@@ -83,7 +83,10 @@ class ProductService extends BaseService
         $data = $this->prepare($data);
         $data['created_by'] = $data['created_by'] ?? 1;
 
-        return $this->products->create($data);
+        $id = $this->products->create($data);
+        $this->products->syncImages($id, $data['gallery']);
+
+        return $id;
     }
 
     /**
@@ -101,7 +104,11 @@ class ProductService extends BaseService
 
     public function update(int $id, array $data): bool
     {
-        return $this->products->update($id, $this->prepare($data));
+        $data = $this->prepare($data);
+        $updated = $this->products->update($id, $data);
+        $this->products->syncImages($id, $data['gallery']);
+
+        return $updated;
     }
 
     public function delete(int $id): bool
@@ -135,6 +142,14 @@ class ProductService extends BaseService
     }
 
     /**
+     * @return array<int, array<string, mixed>>
+     */
+    public function images(int $productId): array
+    {
+        return $this->products->imagesForProduct($productId);
+    }
+
+    /**
      * @return array<string, mixed>
      */
     private function prepare(array $data): array
@@ -150,6 +165,30 @@ class ProductService extends BaseService
             throw new \InvalidArgumentException('Product price must be greater than zero.');
         }
 
+        $featuredImage = trim((string) ($data['featured_image'] ?? ''));
+        $paths = is_array($data['gallery_paths'] ?? null) ? $data['gallery_paths'] : [];
+        $alts = is_array($data['gallery_alt_texts'] ?? null) ? $data['gallery_alt_texts'] : [];
+        $gallery = [];
+        $seen = [];
+        foreach ($paths as $index => $path) {
+            $path = trim((string) $path);
+            if ($path === '' || isset($seen[$path])) {
+                continue;
+            }
+            $seen[$path] = true;
+            $gallery[] = [
+                'path' => $path,
+                'alt_text' => trim((string) ($alts[$index] ?? '')) ?: $name,
+            ];
+        }
+        if ($featuredImage !== '' && !isset($seen[$featuredImage])) {
+            array_unshift($gallery, ['path' => $featuredImage, 'alt_text' => $name]);
+        }
+        usort($gallery, static fn (array $left, array $right): int =>
+            ($left['path'] === $featuredImage ? 0 : 1) <=> ($right['path'] === $featuredImage ? 0 : 1)
+        );
+        $gallery = array_slice($gallery, 0, 5);
+
         return [
             'name' => $name,
             'slug' => $this->slug((string) ($data['slug'] ?? $name)),
@@ -163,7 +202,8 @@ class ProductService extends BaseService
             'sku' => trim((string) ($data['sku'] ?? '')),
             'weight' => (float) ($data['weight'] ?? 0),
             'category_id' => (int) ($data['category_id'] ?? 0) ?: null,
-            'featured_image' => trim((string) ($data['featured_image'] ?? '')),
+            'featured_image' => $featuredImage,
+            'gallery' => $gallery,
             'meta_title' => trim((string) ($data['meta_title'] ?? '')),
             'meta_description' => trim((string) ($data['meta_description'] ?? '')),
             'is_active' => isset($data['is_active']),

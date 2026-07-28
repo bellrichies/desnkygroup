@@ -9,6 +9,7 @@ $cta             ??= [];
 $heroSlides      ??= [];
 $services        ??= [];
 $projects        ??= [];
+$blogPosts       ??= [];
 $trustedClients  ??= [];
 $clients           = $trustedClients;
 $testimonials    ??= [];
@@ -258,21 +259,22 @@ function heroSlider(slides) {
 <?php if ($statItems !== []) : ?>
 <section class="stats-band" aria-labelledby="home-stats-heading">
     <div class="container-page">
-        <div class="grid gap-8 lg:grid-cols-[0.95fr_1.3fr] lg:items-center">
-            <div data-reveal>
-                <p class="eyebrow-on-dark">Delivery confidence</p>
-                <h2 id="home-stats-heading" class="mt-3 text-3xl font-bold leading-tight text-white sm:text-4xl">Built for measurable, accountable execution</h2>
-                <p class="mt-4 max-w-xl text-base leading-7 text-white/75">A focused operating model across technical, procurement, HSE, ICT and agro support work.</p>
+        <div class="stats-band__layout">
+            <div class="stats-band__intro" data-reveal>
+                <p class="stats-band__eyebrow">Delivery at a glance</p>
+                <h2 id="home-stats-heading">Built for measurable, accountable execution</h2>
+                <p>A focused operating model delivering integrated solutions across Engineering, Energy, Procurement, Fire Safety & HSE, ICT, and Agro-support services.</p>
             </div>
-            <dl class="grid gap-4 sm:grid-cols-2">
-                <?php foreach ($statItems as $stat) : ?>
+            <dl class="stats-band__grid">
+                <?php foreach ($statItems as $statIndex => $stat) : ?>
                     <div class="stats-card" data-reveal>
                         <dd
-                            class="text-4xl font-extrabold leading-none text-white sm:text-5xl"
+                            class="stats-card__value"
                             data-countup="<?php echo $this->escape((string) ($stat['value'] ?? '0')); ?>"
                             data-countup-suffix="<?php echo $this->escape((string) ($stat['suffix'] ?? '')); ?>"
                         ><?php echo $this->escape((string) ($stat['value'] ?? '0') . ($stat['suffix'] ?? '')); ?></dd>
-                        <dt class="mt-3 text-sm font-semibold leading-6 text-white/78"><?php echo $this->escape((string) ($stat['label'] ?? '')); ?></dt>
+                        <dt class="stats-card__label"><?php echo $this->escape((string) ($stat['label'] ?? '')); ?></dt>
+                        <span class="stats-card__index" aria-hidden="true"><?php echo str_pad((string) ($statIndex + 1), 2, '0', STR_PAD_LEFT); ?></span>
                     </div>
                 <?php endforeach; ?>
             </dl>
@@ -400,14 +402,14 @@ function heroSlider(slides) {
                 </a>
             <?php endif; ?>
         </div>
-        <?php if (!empty($hseCommitment['image'])) : ?>
-            <img
-                src="<?php echo $this->escape((string) $hseCommitment['image']); ?>"
-                alt="<?php echo $this->escape((string) ($hseCommitment['image_alt'] ?? $hseCommitment['heading'] ?? '')); ?>"
-                class="h-72 w-full rounded-lg object-cover shadow-card lg:h-80"
-                loading="lazy"
-            >
-        <?php endif; ?>
+        <img
+            src="/assets/images/HSE-commitment.png"
+            alt="<?php echo $this->escape((string) ($hseCommitment['image_alt'] ?? 'DESNKY team demonstrating its health, safety and environmental commitment')); ?>"
+            class="h-72 w-full rounded-lg object-cover shadow-card lg:h-80"
+            loading="lazy"
+            width="843"
+            height="1264"
+        >
     </div>
 </section>
 <?php endif; ?>
@@ -445,6 +447,57 @@ function heroSlider(slides) {
                             <a href="/projects/<?php echo $this->escape((string) $project['slug']); ?>" class="hover:text-desnky-primary"><?php echo $this->escape((string) $project['title']); ?></a>
                         </h3>
                         <p class="mt-2 flex-1 text-sm leading-6 text-desnky-muted"><?php echo $this->escape((string) $project['summary']); ?></p>
+                    </div>
+                </article>
+            <?php endforeach; ?>
+        </div>
+    </div>
+</section>
+<?php endif; ?>
+
+<!-- Latest insights -->
+<?php if ($blogPosts !== []) : ?>
+<section class="home-insights" aria-labelledby="home-insights-heading">
+    <div class="container-page">
+        <div class="home-insights__header" data-reveal>
+            <div>
+                <p class="eyebrow">From our journal</p>
+                <h2 id="home-insights-heading" class="mt-2 section-heading">Ideas for safer, smarter operations</h2>
+                <p class="mt-3 max-w-2xl text-sm leading-6 text-desnky-muted sm:text-base">Practical perspectives across engineering, energy, procurement, HSE and business operations.</p>
+            </div>
+            <a href="/blog" class="btn-secondary home-insights__all">
+                View all articles
+                <?php echo $this->partial('frontend/partials/icon', ['name' => 'arrow-right', 'class' => 'h-4 w-4']); ?>
+            </a>
+        </div>
+
+        <div class="home-insights__grid">
+            <?php foreach (array_slice($blogPosts, 0, 3) as $post) : ?>
+                <?php
+                $postUrl = '/blog/' . rawurlencode((string) ($post['slug'] ?? ''));
+                $publishedAt = (string) ($post['published_at'] ?? '');
+                $timestamp = $publishedAt !== '' ? strtotime($publishedAt) : false;
+                ?>
+                <article class="home-insight-card group" data-reveal>
+                    <a href="<?php echo $this->escape($postUrl); ?>" class="home-insight-card__media" aria-label="Read <?php echo $this->escape((string) ($post['title'] ?? 'article')); ?>">
+                        <?php if (!empty($post['image'])) : ?>
+                            <img src="<?php echo $this->escape((string) $post['image']); ?>" alt="<?php echo $this->escape((string) ($post['image_alt'] ?? $post['title'] ?? '')); ?>" loading="lazy" width="720" height="450">
+                        <?php else : ?>
+                            <span class="home-insight-card__placeholder" aria-hidden="true">Insight</span>
+                        <?php endif; ?>
+                    </a>
+                    <div class="home-insight-card__body">
+                        <div class="home-insight-card__meta">
+                            <?php if (!empty($post['category_name'])) : ?><span><?php echo $this->escape((string) $post['category_name']); ?></span><?php endif; ?>
+                            <?php if ($timestamp !== false) : ?><time datetime="<?php echo date('Y-m-d', $timestamp); ?>"><?php echo date('M j, Y', $timestamp); ?></time><?php endif; ?>
+                            <span><?php echo (int) ($post['reading_time'] ?? 1); ?> min read</span>
+                        </div>
+                        <h3><a href="<?php echo $this->escape($postUrl); ?>"><?php echo $this->escape((string) ($post['title'] ?? '')); ?></a></h3>
+                        <?php if (!empty($post['excerpt'])) : ?><p><?php echo $this->escape((string) $post['excerpt']); ?></p><?php endif; ?>
+                        <a href="<?php echo $this->escape($postUrl); ?>" class="home-insight-card__link">
+                            Read article
+                            <?php echo $this->partial('frontend/partials/icon', ['name' => 'arrow-right', 'class' => 'h-4 w-4']); ?>
+                        </a>
                     </div>
                 </article>
             <?php endforeach; ?>

@@ -31,7 +31,7 @@ class CreateServiceHeroSlidesTable extends Migration
                 CONSTRAINT `service_hero_slides_service_fk`
                     FOREIGN KEY (`service_id`) REFERENCES `services` (`id`) ON DELETE CASCADE,
                 CONSTRAINT `service_hero_slides_created_by_fk`
-                    FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE SET NULL
+                    FOREIGN KEY (`created_by`) REFERENCES `admin_users` (`id`) ON DELETE SET NULL
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
         ");
 

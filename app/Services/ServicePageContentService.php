@@ -7,6 +7,7 @@ use App\Repositories\PageRepository;
 use App\Repositories\PageSectionRepository;
 use App\Repositories\ProjectRepository;
 use App\Repositories\ServiceRepository;
+use App\Repositories\ServiceHeroRepository;
 use App\Repositories\SiteSettingRepository;
 use App\Repositories\TrustedClientRepository;
 
@@ -22,7 +23,8 @@ class ServicePageContentService
         private SiteSettingRepository $settings,
         private ?ProjectRepository $projects = null,
         private ?TrustedClientRepository $trustedClients = null,
-        private ?ServiceDocumentationService $documentation = null
+        private ?ServiceDocumentationService $documentation = null,
+        private ?ServiceHeroRepository $serviceHeroes = null
     ) {
     }
 
@@ -69,11 +71,14 @@ class ServicePageContentService
             $this->publishedServices(),
             static fn (array $item): bool => $item['slug'] !== $slug
         ));
+        $managedHeroSlides = $this->managedHeroSlides($service);
 
         return [
             'title'          => (string) (($documentation['seo']['title'] ?? '') ?: $service['title']),
             'page'           => $page,
             'service'        => $service,
+            'heroSlides'     => $managedHeroSlides ?? $this->fallbackHeroSlides($service),
+            'heroManaged'    => $managedHeroSlides !== null,
             'documentation'  => $documentation,
             'detail'         => $sections['detail'] ?? [],
             'relatedServices'=> $related,
@@ -138,6 +143,7 @@ class ServicePageContentService
         $structured = $this->decodeBody((string) ($row['content'] ?? ''));
 
         return [
+            'id'              => (int) ($row['id'] ?? 0),
             'slug'            => (string) $row['slug'],
             'title'           => (string) $row['title'],
             'icon'            => (string) ($row['icon'] ?? 'SR'),
@@ -156,6 +162,32 @@ class ServicePageContentService
             'canonical_url'   => (string) ($row['canonical_url'] ?? ''),
             'og_image'        => (string) ($row['og_image'] ?? ''),
         ];
+    }
+
+    private function managedHeroSlides(array $service): ?array
+    {
+        if ($this->serviceHeroes !== null && (int) $service['id'] > 0) {
+            if ($this->serviceHeroes->forService((int) $service['id']) !== []) {
+                return $this->serviceHeroes->activeForService((int) $service['id']);
+            }
+        }
+
+        return null;
+    }
+
+    private function fallbackHeroSlides(array $service): array
+    {
+        return [[
+            'heading' => (string) $service['title'],
+            'subheading' => (string) $service['summary'],
+            'description' => '',
+            'media_type' => 'image',
+            'background_media' => (string) $service['image'],
+            'primary_cta_label' => 'Discuss your requirement',
+            'primary_cta_url' => '/contact?service=' . rawurlencode((string) $service['slug']) . '#contact-form',
+            'secondary_cta_label' => 'Explore capabilities',
+            'secondary_cta_url' => '#service-content',
+        ]];
     }
 
     /**

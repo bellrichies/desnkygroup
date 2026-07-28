@@ -6,10 +6,10 @@ $faqs       ??= [];
 $csrf_token ??= '';
 ?>
 
-<div class="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+<div class="mb-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
     <div>
         <h1 class="text-2xl font-bold text-gray-950">Settings</h1>
-        <p class="mt-1 text-sm text-gray-500">Manage site configuration and global content.</p>
+        <p class="mt-0.5 text-xs text-gray-500">Manage site configuration and global content.</p>
     </div>
     <form method="post" action="/admin/settings/cache-clear">
         <input type="hidden" name="_token" value="<?php echo $this->escape($csrf_token); ?>">
@@ -18,7 +18,7 @@ $csrf_token ??= '';
 </div>
 
 <!-- Tab bar -->
-<div class="mb-6 border-b border-gray-200">
+<div class="mb-3 border-b border-gray-200">
     <nav class="-mb-px flex gap-6 text-sm font-semibold" aria-label="Settings tabs">
         <a href="/admin/settings?tab=site"
            class="<?php echo $activeTab === 'site' ? 'border-b-2 border-blue-700 text-blue-700' : 'text-gray-500 hover:text-gray-800'; ?> pb-3">
@@ -33,13 +33,13 @@ $csrf_token ??= '';
 
 <?php if ($activeTab === 'site') : ?>
 <!-- ── Site Settings ──────────────────────────────────────────────────────── -->
-<form method="post" action="/admin/settings" class="space-y-6">
+<form method="post" action="/admin/settings" class="grid gap-3 xl:grid-cols-2">
     <input type="hidden" name="_token" value="<?php echo $this->escape($csrf_token); ?>">
 
     <?php foreach ($fieldGroups as $groupName => $fields) : ?>
-        <section class="rounded-lg bg-white p-5 shadow-sm ring-1 ring-gray-200">
+        <section class="rounded-xl bg-white p-4 shadow-sm ring-1 ring-gray-200">
             <h2 class="text-lg font-semibold text-gray-950"><?php echo $this->escape((string) $groupName); ?></h2>
-            <div class="mt-4 grid gap-4 lg:grid-cols-2">
+            <div class="mt-3 grid gap-3 lg:grid-cols-2">
                 <?php foreach ($fields as $field) : ?>
                     <?php
                     $key        = (string) $field['key'];
@@ -66,7 +66,7 @@ $csrf_token ??= '';
         </section>
     <?php endforeach; ?>
 
-    <div class="flex justify-end gap-3">
+    <div class="flex justify-end gap-3 xl:col-span-2">
         <a href="/admin/dashboard" class="rounded border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50">Cancel</a>
         <button class="rounded bg-blue-700 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-800">Save settings</button>
     </div>
@@ -74,12 +74,12 @@ $csrf_token ??= '';
 
 <?php else : ?>
 <!-- ── FAQs ───────────────────────────────────────────────────────────────── -->
-<div class="space-y-6">
+<div class="space-y-3">
 
     <!-- Add FAQ form -->
-    <section class="rounded-lg bg-white p-5 shadow-sm ring-1 ring-gray-200">
+    <section class="rounded-xl bg-white p-4 shadow-sm ring-1 ring-gray-200">
         <h2 class="font-semibold text-gray-950">Add new FAQ</h2>
-        <form method="POST" action="/admin/settings/faqs" class="mt-4 space-y-4">
+        <form method="POST" action="/admin/settings/faqs" class="mt-3 space-y-3">
             <input type="hidden" name="_token" value="<?php echo $this->escape($csrf_token); ?>">
             <div class="grid gap-4 md:grid-cols-3">
                 <label class="block">

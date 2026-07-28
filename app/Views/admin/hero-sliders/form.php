@@ -116,7 +116,7 @@ $image        = (string) ($slider['background_image'] ?? '');
 
         <section class="rounded-lg bg-white p-5 shadow-sm ring-1 ring-gray-200">
             <h2 class="font-semibold text-gray-900">Background image</h2>
-            <p class="mt-1 text-xs text-gray-400">Upload or select a wide JPG, PNG, or WebP. Recommended minimum: 1600px wide.</p>
+            <p class="mt-1 text-xs text-gray-400">Select a wide image from the Media Library. Recommended minimum: 1600px wide.</p>
 
             <div class="mt-4 space-y-3">
                 <img
@@ -126,16 +126,6 @@ $image        = (string) ($slider['background_image'] ?? '');
                     class="<?php echo $image ? '' : 'hidden'; ?> h-40 w-full rounded object-cover"
                 >
                 <input type="hidden" id="hero_background_image" name="background_image" value="<?php echo $this->escape($image); ?>">
-
-                <label class="block">
-                    <span class="text-xs font-semibold text-gray-600">Upload new image</span>
-                    <input
-                        name="background_image_upload"
-                        type="file"
-                        accept="image/jpeg,image/png,image/webp"
-                        class="mt-1 block w-full text-sm text-gray-600 file:mr-3 file:rounded file:border-0 file:bg-blue-50 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-blue-700 hover:file:bg-blue-100"
-                    >
-                </label>
 
                 <button
                     type="button"

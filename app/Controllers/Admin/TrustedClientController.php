@@ -25,11 +25,17 @@ class TrustedClientController extends BaseController
 
     public function index(): string
     {
+        $all = $this->clients->all();
+        $page = max(1, (int) ($_GET['page'] ?? 1));
+        $total = count($all);
         return $this->view('admin/trusted-clients/index', [
             'title' => 'Trusted Clients',
             'user' => $this->user(),
             'breadcrumbs' => $this->crumbs('Trusted Clients'),
-            'clients' => $this->clients->all(),
+            'clients' => array_slice($all, ($page - 1) * 10, 10),
+            'services' => $this->services->published(),
+            'pagination' => ['page' => $page, 'total_pages' => max(1, (int) ceil($total / 10)), 'total' => $total],
+            'filters' => $_GET,
             'csrf_token' => $this->csrf(),
         ]);
     }

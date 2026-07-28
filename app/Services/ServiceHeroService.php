@@ -97,12 +97,16 @@ class ServiceHeroService
             throw new InvalidArgumentException("{$name} CTA text is too long.");
         }
         if ($url !== null && !$this->allowedUrl($url)) {
-            throw new InvalidArgumentException("{$name} CTA link must be an internal path or a valid HTTP(S) URL.");
+            throw new InvalidArgumentException("{$name} CTA link must be an in-page anchor, internal path, or valid HTTP(S) URL.");
         }
     }
 
     private function allowedUrl(string $url): bool
     {
+        if (preg_match('/^#[A-Za-z][A-Za-z0-9_-]*$/', $url) === 1) {
+            return true;
+        }
+
         return (str_starts_with($url, '/') && !str_starts_with($url, '//'))
             || (filter_var($url, FILTER_VALIDATE_URL) !== false
                 && in_array(parse_url($url, PHP_URL_SCHEME), ['http', 'https'], true));

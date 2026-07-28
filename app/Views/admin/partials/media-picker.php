@@ -46,8 +46,15 @@ $mediaPickerRendered = true;
             </div>
         </div>
 
+        <div id="media-picker-filters" class="flex gap-1 overflow-x-auto border-b border-gray-200 bg-gray-50 px-5 py-2">
+            <button type="button" data-category="all" class="media-picker-filter rounded-lg bg-blue-700 px-3 py-1.5 text-xs font-bold text-white">All</button>
+            <button type="button" data-category="image" class="media-picker-filter rounded-lg px-3 py-1.5 text-xs font-bold text-gray-600 hover:bg-white">Images</button>
+            <button type="button" data-category="video" class="media-picker-filter rounded-lg px-3 py-1.5 text-xs font-bold text-gray-600 hover:bg-white">Videos</button>
+            <button type="button" data-category="document" class="media-picker-filter rounded-lg px-3 py-1.5 text-xs font-bold text-gray-600 hover:bg-white">Documents</button>
+        </div>
+
         <!-- Grid -->
-        <div id="media-picker-grid" class="grid flex-1 grid-cols-2 gap-3 overflow-y-auto p-5 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+        <div id="media-picker-grid" class="grid h-[58vh] flex-none auto-rows-[9.5rem] grid-cols-2 content-start gap-3 overflow-y-auto p-5 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
             <div id="media-picker-empty" class="col-span-full py-16 text-center text-sm text-gray-400 hidden">No images found.</div>
             <div id="media-picker-loading" class="col-span-full py-16 text-center text-sm text-gray-400">Loading…</div>
         </div>
@@ -56,6 +63,7 @@ $mediaPickerRendered = true;
         <div class="flex items-center justify-between border-t border-gray-200 px-6 py-4">
             <a href="/admin/media" target="_blank" class="text-sm font-medium text-blue-700 hover:underline">Upload new image ↗</a>
             <div class="flex items-center gap-3">
+                <button type="button" id="media-picker-more" class="hidden rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50">Load more</button>
                 <button type="button" id="media-picker-confirm" class="hidden rounded-md bg-blue-700 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-800 disabled:opacity-50">Add 0 images</button>
                 <button type="button" id="media-picker-close-btn" class="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50">Cancel</button>
             </div>
@@ -71,6 +79,8 @@ $mediaPickerRendered = true;
     const empty      = document.getElementById('media-picker-empty');
     const loading    = document.getElementById('media-picker-loading');
     const confirmBtn = document.getElementById('media-picker-confirm');
+    const moreBtn    = document.getElementById('media-picker-more');
+    const filters    = document.getElementById('media-picker-filters');
     const modalTitle = modal.querySelector('h2');
 
     let activeFieldId   = null;
@@ -78,6 +88,11 @@ $mediaPickerRendered = true;
     let searchTimer     = null;
     let multiMode       = false;
     let multiCallback   = null;
+    let selectionCallback = null;
+    let allowedTypes    = ['image'];
+    let activeCategory  = 'all';
+    let currentPage     = 1;
+    const escapeHtml = value => String(value ?? '').replace(/[&<>"']/g, character => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[character]));
     const selected      = new Map(); // path → alt
 
     function open(fieldId, previewId) {
@@ -85,8 +100,11 @@ $mediaPickerRendered = true;
         activePreviewId = previewId;
         modal.classList.remove('hidden');
         modal.classList.add('flex');
+        window.dispatchEvent(new CustomEvent('media-picker:opened'));
         search.value = '';
-        loadMedia('');
+        activeCategory = 'all';
+        updateFilters();
+        loadMedia('', 1, true);
         search.focus();
     }
 
@@ -97,41 +115,54 @@ $mediaPickerRendered = true;
         activePreviewId = null;
         multiMode       = false;
         multiCallback   = null;
+        selectionCallback = null;
+        allowedTypes = ['image'];
         selected.clear();
         confirmBtn.classList.add('hidden');
         modalTitle.textContent = 'Select Image';
+        window.dispatchEvent(new CustomEvent('media-picker:closed'));
     }
 
-    function loadMedia(q) {
+    function loadMedia(q, requestedPage = 1, reset = true) {
         loading.classList.remove('hidden');
         empty.classList.add('hidden');
-        Array.from(grid.children).forEach(el => {
-            if (el !== empty && el !== loading) el.remove();
-        });
+        if (reset) {
+            Array.from(grid.children).forEach(el => {
+                if (el !== empty && el !== loading) el.remove();
+            });
+        }
 
-        const url = '/admin/media/json' + (q ? '?q=' + encodeURIComponent(q) : '');
+        const url = `/admin/media/json?page=${requestedPage}&q=${encodeURIComponent(q)}&category=${encodeURIComponent(activeCategory)}`;
         fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
             .then(r => r.json())
             .then(data => {
                 loading.classList.add('hidden');
                 const items = data.media || [];
-                if (items.length === 0) { empty.classList.remove('hidden'); return; }
+                currentPage = data.page || requestedPage;
+                moreBtn.classList.toggle('hidden', !data.has_more);
+                if (items.length === 0 && reset) { empty.classList.remove('hidden'); return; }
                 items.forEach(item => {
                     const btn = document.createElement('button');
                     btn.type = 'button';
                     btn.dataset.path = item.path;
                     btn.dataset.alt  = item.alt;
                     const isSelected = multiMode && selected.has(item.path);
-                    btn.className = 'group relative overflow-hidden rounded-lg border-2 bg-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 ' +
+                    const selectable = allowedTypes.includes(item.media_type);
+                    btn.disabled = !selectable;
+                    btn.className = 'group relative h-[9.5rem] min-h-[9.5rem] overflow-hidden rounded-lg border-2 bg-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 ' +
+                        (!selectable ? 'cursor-not-allowed opacity-45 ' : '') +
                         (isSelected ? 'border-blue-600' : 'border-transparent hover:border-blue-500');
+                    const preview = item.media_type === 'image'
+                        ? `<img src="${escapeHtml(item.path)}" alt="${escapeHtml(item.alt)}" class="h-28 w-full object-cover transition group-hover:opacity-90">`
+                        : `<span class="flex h-28 items-center justify-center text-4xl text-gray-400">${item.media_type === 'video' ? '▷' : '▤'}</span>`;
                     btn.innerHTML = `
-                        <img src="${item.path}" alt="${item.alt}" class="h-28 w-full object-cover transition group-hover:opacity-90">
+                        ${preview}
                         <span class="check-mark absolute right-1.5 top-1.5 rounded-full bg-blue-600 p-0.5 text-white ${isSelected ? '' : 'hidden'}">
                             <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
                         </span>
-                        <p class="truncate px-2 py-1.5 text-xs text-gray-600">${item.name}</p>
+                        <p class="truncate px-2 py-1.5 text-xs text-gray-600">${escapeHtml(item.name)}</p>
                     `;
-                    btn.addEventListener('click', () => pick(item.path, item.alt, btn));
+                    btn.addEventListener('click', () => pick(item, btn));
                     grid.insertBefore(btn, loading);
                 });
             })
@@ -147,7 +178,9 @@ $mediaPickerRendered = true;
         confirmBtn.disabled = n === 0;
     }
 
-    function pick(path, alt, btn) {
+    function pick(item, btn) {
+        const path = item.path;
+        const alt = item.alt;
         if (multiMode) {
             if (selected.has(path)) {
                 selected.delete(path);
@@ -161,6 +194,12 @@ $mediaPickerRendered = true;
                 btn.querySelector('.check-mark').classList.remove('hidden');
             }
             updateConfirmLabel();
+            return;
+        }
+
+        if (selectionCallback) {
+            selectionCallback(item);
+            close();
             return;
         }
 
@@ -184,8 +223,25 @@ $mediaPickerRendered = true;
 
     search.addEventListener('input', () => {
         clearTimeout(searchTimer);
-        searchTimer = setTimeout(() => loadMedia(search.value.trim()), 400);
+        searchTimer = setTimeout(() => loadMedia(search.value.trim(), 1, true), 300);
     });
+
+    function updateFilters() {
+        filters.querySelectorAll('[data-category]').forEach(button => {
+            const active = button.dataset.category === activeCategory;
+            button.classList.toggle('bg-blue-700', active);
+            button.classList.toggle('text-white', active);
+            button.classList.toggle('text-gray-600', !active);
+        });
+    }
+    filters.addEventListener('click', event => {
+        const button = event.target.closest('[data-category]');
+        if (!button || button.dataset.category === activeCategory) return;
+        activeCategory = button.dataset.category;
+        updateFilters();
+        loadMedia(search.value.trim(), 1, true);
+    });
+    moreBtn.addEventListener('click', () => loadMedia(search.value.trim(), currentPage + 1, false));
 
     document.getElementById('media-picker-close').addEventListener('click', close);
     document.getElementById('media-picker-close-btn').addEventListener('click', close);
@@ -193,6 +249,13 @@ $mediaPickerRendered = true;
     document.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
 
     window.openMediaPicker = open;
+
+    window.openMediaPickerWithCallback = function (callback, types = ['image']) {
+        selectionCallback = callback;
+        allowedTypes = types;
+        modalTitle.textContent = 'Select Media';
+        open(null, null);
+    };
 
     window.openMediaPickerMulti = function (callback) {
         multiMode     = true;

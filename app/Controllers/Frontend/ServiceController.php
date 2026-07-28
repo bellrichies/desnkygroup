@@ -7,6 +7,7 @@ use App\Repositories\PageRepository;
 use App\Repositories\PageSectionRepository;
 use App\Repositories\ProjectRepository;
 use App\Repositories\ServiceRepository;
+use App\Repositories\ServiceHeroRepository;
 use App\Repositories\SiteSettingRepository;
 use App\Repositories\TrustedClientRepository;
 use App\Services\ServicePageContentService;
@@ -65,7 +66,9 @@ class ServiceController extends BaseController
             new ServiceRepository($db),
             new SiteSettingRepository($db),
             new ProjectRepository($db),
-            new TrustedClientRepository($db)
+            new TrustedClientRepository($db),
+            null,
+            new ServiceHeroRepository($db)
         );
     }
 }

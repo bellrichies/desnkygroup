@@ -6,6 +6,7 @@ use App\Helpers\SeoHelper;
 use App\Repositories\PageRepository;
 use App\Repositories\PageSectionRepository;
 use App\Repositories\ProjectRepository;
+use App\Repositories\BlogPostRepository;
 use App\Repositories\HeroSliderRepository;
 use App\Repositories\ServiceRepository;
 use App\Repositories\SiteSettingRepository;
@@ -23,7 +24,8 @@ class HomeContentService
         private ProjectRepository $projects,
         private SiteSettingRepository $settings,
         private ?HeroSliderRepository $heroSliders = null,
-        private ?TrustedClientRepository $trustedClients = null
+        private ?TrustedClientRepository $trustedClients = null,
+        private ?BlogPostRepository $blogPosts = null
     ) {
     }
 
@@ -53,6 +55,7 @@ class HomeContentService
             'cta'           => $sections['cta'] ?? [],
             'services'      => $this->publishedServices(),
             'projects'      => \array_slice($this->publishedProjects(), 0, 3),
+            'blogPosts'     => $this->recentBlogPosts(),
             'trustedClients'=> $this->activeTrustedClients(),
             'seo'           => $this->seoFromPage($page, $settings),
         ];
@@ -118,6 +121,39 @@ class HomeContentService
             ],
             $this->projects->published()
         );
+    }
+
+    /** @return array<int, array<string, mixed>> */
+    private function recentBlogPosts(): array
+    {
+        if ($this->blogPosts === null) {
+            return [];
+        }
+
+        try {
+            return array_map(static function (array $post): array {
+                $plainContent = trim(preg_replace('/\s+/', ' ', strip_tags((string) ($post['content'] ?? ''))) ?? '');
+                $excerpt = trim((string) ($post['excerpt'] ?? ''));
+                if ($excerpt === '' && $plainContent !== '') {
+                    $excerpt = mb_strlen($plainContent) > 145
+                        ? rtrim(mb_substr($plainContent, 0, 142)) . '...'
+                        : $plainContent;
+                }
+
+                return [
+                    'slug'          => (string) ($post['slug'] ?? ''),
+                    'title'         => (string) ($post['title'] ?? ''),
+                    'excerpt'       => $excerpt,
+                    'image'         => (string) ($post['featured_image'] ?? ''),
+                    'image_alt'     => (string) (($post['featured_image_alt'] ?? '') ?: ($post['title'] ?? '')),
+                    'category_name' => (string) ($post['category_name'] ?? ''),
+                    'published_at'  => (string) ($post['publish_date'] ?? $post['published_at'] ?? $post['created_at'] ?? ''),
+                    'reading_time'  => max(1, (int) ceil(str_word_count($plainContent) / 200)),
+                ];
+            }, $this->blogPosts->recent(3));
+        } catch (\Throwable) {
+            return [];
+        }
     }
 
     /** @return array<int, array<string, mixed>> */

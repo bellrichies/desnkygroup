@@ -589,6 +589,15 @@ class BlogPostRepository extends BaseRepository
             $params[] = $search;
         }
 
+        $excludeIds = array_values(array_filter(
+            array_map('intval', (array) ($filters['exclude_ids'] ?? [])),
+            static fn (int $id): bool => $id > 0
+        ));
+        if ($excludeIds !== []) {
+            $where[] = 'p.id NOT IN (' . $this->placeholders($excludeIds) . ')';
+            $params = array_merge($params, $excludeIds);
+        }
+
         return [$where, $params, $joins];
     }
 

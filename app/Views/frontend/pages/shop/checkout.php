@@ -24,11 +24,11 @@ $csrf = (string) ($csrf_token ?? '');
 
 <section class="section-band">
     <div class="container-page grid gap-8 lg:grid-cols-[1fr_24rem]">
-        <form id="checkout-form" action="/shop/checkout" method="POST" class="space-y-8" x-data="{ payment: '' }">
+        <form id="checkout-form" action="/shop/checkout" method="POST" class="space-y-6" x-data="{ payment: '' }">
             <input type="hidden" name="_token" value="<?php echo $this->escape($csrf); ?>">
 
-            <fieldset class="rounded-lg border border-gray-200 bg-white p-6 shadow-card">
-                <legend class="px-2 text-lg font-bold text-desnky-dark">Your details</legend>
+            <fieldset class="rounded-2xl border border-gray-200 bg-white p-5 shadow-card sm:p-7">
+                <legend class="rounded-full bg-desnky-primary-50 px-4 py-2 text-sm font-bold uppercase tracking-wide text-desnky-primary">1. Your details</legend>
                 <div class="grid gap-6 sm:grid-cols-2">
                     <div>
                         <label for="full_name" class="form-label"><?php echo $this->escape((string) ($checkout['full_name_label'] ?? 'Full name')); ?></label>
@@ -49,8 +49,8 @@ $csrf = (string) ($csrf_token ?? '');
                 </div>
             </fieldset>
 
-            <fieldset class="rounded-lg border border-gray-200 bg-white p-6 shadow-card">
-                <legend class="px-2 text-lg font-bold text-desnky-dark">Delivery</legend>
+            <fieldset class="rounded-2xl border border-gray-200 bg-white p-5 shadow-card sm:p-7">
+                <legend class="rounded-full bg-desnky-primary-50 px-4 py-2 text-sm font-bold uppercase tracking-wide text-desnky-primary">2. Delivery</legend>
                 <div>
                     <label for="delivery_address" class="form-label"><?php echo $this->escape((string) ($checkout['delivery_address_label'] ?? 'Delivery address')); ?></label>
                     <textarea id="delivery_address" name="delivery_address" required rows="3" class="form-field" autocomplete="street-address"></textarea>
@@ -61,12 +61,12 @@ $csrf = (string) ($csrf_token ?? '');
                 </div>
             </fieldset>
 
-            <fieldset class="rounded-lg border border-gray-200 bg-white p-6 shadow-card">
-                <legend class="px-2 text-lg font-bold text-desnky-dark"><?php echo $this->escape((string) ($checkout['payment_method_label'] ?? 'Payment method')); ?></legend>
+            <fieldset class="rounded-2xl border border-gray-200 bg-white p-5 shadow-card sm:p-7">
+                <legend class="rounded-full bg-desnky-primary-50 px-4 py-2 text-sm font-bold uppercase tracking-wide text-desnky-primary">3. <?php echo $this->escape((string) ($checkout['payment_method_label'] ?? 'Payment method')); ?></legend>
                 <div class="grid gap-3">
                     <?php foreach ($paymentMethods as $method) : ?>
                         <?php $value = (string) ($method['value'] ?? ''); ?>
-                        <label class="flex cursor-pointer items-start gap-3 rounded-md border p-4 transition-colors" :class='payment === <?php echo $this->escapeJson($value); ?> ? "border-desnky-primary bg-desnky-primary-50" : "border-gray-300 hover:border-desnky-primary"'>
+                        <label class="flex cursor-pointer items-start gap-3 rounded-xl border p-4 shadow-sm transition-all" :class='payment === <?php echo $this->escapeJson($value); ?> ? "border-desnky-primary bg-desnky-primary-50 ring-4 ring-desnky-primary/10" : "border-gray-200 hover:border-desnky-primary hover:bg-desnky-surface"'>
                             <input type="radio" name="payment_method" value="<?php echo $this->escape($value); ?>" x-model="payment" required class="mt-0.5 text-desnky-primary focus:ring-desnky-primary">
                             <span>
                                 <span class="block font-semibold text-desnky-dark"><?php echo $this->escape((string) ($method['label'] ?? '')); ?></span>
@@ -90,7 +90,7 @@ $csrf = (string) ($csrf_token ?? '');
             </button>
         </form>
 
-        <aside class="h-fit rounded-lg border border-gray-200 bg-desnky-surface p-6 lg:sticky lg:top-28">
+        <aside class="h-fit overflow-hidden rounded-2xl border border-gray-200 bg-white p-6 shadow-card lg:sticky lg:top-28">
             <h2 class="text-xl font-bold text-desnky-dark"><?php echo $this->escape((string) ($checkout['review_heading'] ?? 'Order review')); ?></h2>
             <?php if (empty($items)) : ?>
                 <p class="mt-4 text-sm text-desnky-muted"><?php echo $this->escape((string) ($checkout['empty_text'] ?? 'Your cart is empty.')); ?></p>
@@ -120,9 +120,7 @@ document.addEventListener('DOMContentLoaded', function () {
         endpoint: '/shop/checkout',
         resetOnSuccess: true,
         onSuccess: function (response) {
-            var message = response.order_number ? ' Order number: ' + response.order_number : '';
-            createToastNotification((response.message || 'Order received.') + message, 'success', 6000);
-            window.setTimeout(function () { window.location.href = '/shop'; }, 1500);
+            window.location.href = response.redirect_url || '/track-order?reference=' + encodeURIComponent(response.order_number || '');
         }
     });
 });

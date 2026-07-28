@@ -229,6 +229,17 @@ class ShopPageContentService
         $gallery = [];
         $seen = [];
 
+        // The explicitly selected Media Library image is the product's primary
+        // image. Legacy product_images rows remain available as secondary media.
+        $featuredImage = trim($featuredImage);
+        if ($featuredImage !== '') {
+            $seen[$featuredImage] = true;
+            $gallery[] = [
+                'path' => $featuredImage,
+                'alt_text' => $productName,
+            ];
+        }
+
         foreach ($this->products->imagesForProduct($productId) as $image) {
             $path = trim((string) ($image['path'] ?? ''));
             if ($path === '' || isset($seen[$path])) {
@@ -242,14 +253,7 @@ class ShopPageContentService
             ];
         }
 
-        if ($gallery === [] && $featuredImage !== '') {
-            $gallery[] = [
-                'path' => $featuredImage,
-                'alt_text' => $productName,
-            ];
-        }
-
-        return $gallery;
+        return array_slice($gallery, 0, 5);
     }
 
     /**

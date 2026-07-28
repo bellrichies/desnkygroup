@@ -25,20 +25,26 @@ $csrf = (string) ($csrf_token ?? '');
         <div class="grid gap-10 lg:grid-cols-2" x-data='{ "main": <?php echo $this->escapeJson($primaryImage); ?>, "alt": <?php echo $this->escapeJson($primaryAlt); ?> }'>
             <!-- Gallery -->
             <div>
-                <button type="button" class="block w-full overflow-hidden rounded-lg border border-gray-200" :data-lightbox="main" :data-lightbox-alt="alt" data-lightbox="<?php echo $this->escape($primaryImage); ?>" aria-label="Zoom product image">
-                    <img src="<?php echo $this->escape($primaryImage); ?>" :src="main" alt="<?php echo $this->escape($primaryAlt); ?>" :alt="alt" class="aspect-square w-full object-cover" loading="eager" fetchpriority="high">
-                </button>
+                <?php if ($primaryImage !== '') : ?>
+                    <button type="button" class="group block w-full overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-card" :data-lightbox="main" :data-lightbox-alt="alt" data-lightbox="<?php echo $this->escape($primaryImage); ?>" aria-label="Open larger product image">
+                        <img src="<?php echo $this->escape($primaryImage); ?>" :src="main" alt="<?php echo $this->escape($primaryAlt); ?>" :alt="alt" class="aspect-square w-full object-cover transition duration-slow group-hover:scale-[1.02]" width="800" height="800" loading="eager" fetchpriority="high" decoding="async">
+                    </button>
+                <?php else : ?>
+                    <div class="flex aspect-square w-full items-center justify-center rounded-2xl border border-gray-200 bg-desnky-surface text-sm font-bold text-desnky-muted">Product image unavailable</div>
+                <?php endif; ?>
                 <?php if (count($gallery) > 1) : ?>
-                    <div class="mt-4 grid grid-cols-4 gap-3">
+                    <div class="mt-4 grid grid-cols-4 gap-3 sm:grid-cols-5" role="group" aria-label="Product images">
                         <?php foreach ($gallery as $index => $image) : ?>
                             <?php $p = (string) ($image['path'] ?? ''); $a = (string) ($image['alt_text'] ?: $product['name']); ?>
                             <button
                                 type="button"
-                                class="overflow-hidden rounded-md border-2 transition-colors"
-                                :class='main === <?php echo $this->escapeJson($p); ?> ? "border-desnky-primary" : "border-transparent hover:border-gray-300"'
+                                class="overflow-hidden rounded-xl border-2 bg-white p-1 shadow-sm transition-all"
+                                :class='main === <?php echo $this->escapeJson($p); ?> ? "border-desnky-primary ring-4 ring-desnky-primary/10" : "border-gray-200 hover:border-desnky-primary/50"'
                                 @click='main = <?php echo $this->escapeJson($p); ?>; alt = <?php echo $this->escapeJson($a); ?>'
+                                :aria-pressed='main === <?php echo $this->escapeJson($p); ?>'
+                                aria-label="View product image <?php echo $index + 1; ?> of <?php echo count($gallery); ?>"
                             >
-                                <img src="<?php echo $this->escape($p); ?>" alt="<?php echo $this->escape($a); ?>" class="aspect-square w-full object-cover" loading="<?php echo $index === 0 ? 'eager' : 'lazy'; ?>">
+                                <img src="<?php echo $this->escape($p); ?>" alt="" class="aspect-square w-full rounded-lg object-cover" width="160" height="160" loading="<?php echo $index === 0 ? 'eager' : 'lazy'; ?>" decoding="async">
                             </button>
                         <?php endforeach; ?>
                     </div>

@@ -1,52 +1,36 @@
 # ICT Solutions
 
-## Practical Technology Solutions for Modern Business Operations
+## Smart ICT Solutions for Modern Business
 
-At **DESNKY Global Resources Limited**, we provide practical Information and Communication Technology solutions that help organisations improve connectivity, productivity, operational control, data accessibility, and customer service.
+At **DESNKY Global Resources Limited**, we deliver reliable ICT solutions that enhance connectivity, productivity, and business efficiency. Our services include **telecom services and network data integration**, business technology consulting, network and systems support, hardware procurement, ICT infrastructure deployment, digital workflow optimization, technical support, and custom desktop, mobile, and web application development.
 
-Our ICT services cover business technology advisory, network and systems support, hardware sourcing, infrastructure deployment, digital workflow improvement, technical user support, and custom desktop, mobile, and web application development.
-
-We work with corporate organisations, healthcare facilities, educational institutions, government establishments, industrial companies, professional service firms, small and medium-sized businesses, and growing enterprises that require reliable technology to support daily operations and long-term growth.
+We support corporate organizations, government agencies, healthcare providers, educational institutions, manufacturers, professional service firms, and SMEs with secure, scalable, and cost-effective technology solutions that drive digital transformation and sustainable growth.
 
 **Primary CTA:** Request an ICT Consultation
 **Secondary CTA:** Explore Our ICT Services
 
 ---
 
-## Integrated ICT Support for Business
+## End-to-End ICT Solutions
 
-Technology should simplify operations, improve communication, protect information, and help teams work more efficiently.
+DESNKY Global Resources Limited delivers reliable ICT solutions that enhance connectivity, security, productivity, and business performance. From assessment and infrastructure deployment to implementation and ongoing support, we help organizations build efficient, scalable, and future-ready technology environments.
 
-However, businesses often operate with disconnected systems, outdated equipment, unreliable networks, manual processes, and software that does not properly support their workflows.
+**Our services include:**
 
-DESNKY helps organisations assess their technology environment, identify operational gaps, design suitable solutions, deploy the required infrastructure, and support users after implementation.
-
-Our ICT services include:
-
-* Network and systems support
-* ICT infrastructure assessment
+* **Telecom services and network data integration**
 * Business technology advisory
-* Hardware and equipment sourcing
-* Network equipment procurement
-* Desktop and workstation deployment
-* Server and storage solutions
-* Internet and connectivity support
+* Network and systems support
+* ICT infrastructure deployment
+* Hardware and network equipment procurement
+* Server, storage, cloud, and data backup solutions
+* Internet and connectivity solutions
 * Software installation and configuration
-* Digital workflow improvement
-* Business process automation
-* Desktop application development
-* Mobile application development
-* Web application development
-* Website design and development
-* Database solutions
-* Cloud adoption support
-* Data backup solutions
-* User support and technical training
-* Preventive ICT maintenance
-* ICT project coordination
-* Ongoing managed support
+* Website, desktop, mobile, and web application development
+* Database solutions and business process automation
+* Technical support, preventive maintenance, user training, and ICT project management
 
-Whether the requirement involves a single office, multiple branches, a new digital product, or an organisation-wide technology upgrade, our team provides a structured approach from initial assessment to final handover.
+We provide end-to-end ICT support for businesses of all sizes, delivering integrated technology and telecommunications solutions that drive operational efficiency, digital transformation, and sustainable growth.
+
 
 ---
 

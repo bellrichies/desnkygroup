@@ -9,6 +9,7 @@ use App\Repositories\PageSectionRepository;
 use App\Repositories\ProjectRepository;
 use App\Repositories\ServiceRepository;
 use App\Repositories\SiteSettingRepository;
+use App\Repositories\TrustedClientRepository;
 use App\Services\AboutContentService;
 use App\Services\HseContentService;
 use App\Services\ProjectPageContentService;
@@ -54,6 +55,7 @@ class PageController extends BaseController
         return $this->view('frontend/pages/about', [
             'title' => $content['title'],
             'active' => 'about',
+            'trustedClients' => (new TrustedClientRepository(DatabaseFactory::make()))->active(),
         ] + $content);
     }
 

@@ -18,10 +18,13 @@ foreach ($categories as $category) {
 
 <section class="section-band bg-white">
     <div class="container-page" data-shop-page>
-        <div class="mb-8 max-w-3xl" data-reveal>
+        <div class="mb-8 flex flex-col gap-5 md:flex-row md:items-end md:justify-between" data-reveal>
+          <div class="max-w-3xl">
             <p class="eyebrow">Shop</p>
             <h1 class="mt-3 section-heading"><?php echo $this->escape((string) ($title ?? 'Shop')); ?></h1>
             <p class="section-lead"><?php echo $this->escape((string) ($listing['text'] ?? 'Browse practical products and supplies for business, site and field operations.')); ?></p>
+          </div>
+          <a href="/track-order" class="btn-secondary shrink-0">Track order</a>
         </div>
 
         <div class="grid gap-8 lg:grid-cols-[18rem_minmax(0,1fr)]">

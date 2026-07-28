@@ -46,12 +46,19 @@ class BlogService extends BaseService
         $query = $this->cleanText((string) ($filters['q'] ?? ''), 100);
         $categorySlug = $this->cleanSlug((string) ($filters['category_slug'] ?? ''));
         $tagSlug = $this->cleanSlug((string) ($filters['tag_slug'] ?? ''));
+        $isMainListing = $query === '' && $categorySlug === '' && $tagSlug === '';
+        $featuredRows = $isMainListing ? $this->cachedFeatured() : [];
+        if ($isMainListing && $featuredRows === []) {
+            $featuredRows = $this->posts->recent(1);
+        }
+        $featuredRow = $featuredRows[0] ?? null;
 
         $listing = $this->posts->paginatePublished([
             'q' => $query,
             'category_slug' => $categorySlug,
             'tag_slug' => $tagSlug,
-        ], $page, 9);
+            'exclude_ids' => $featuredRow !== null ? [(int) $featuredRow['id']] : [],
+        ], $page, 10);
 
         $contextTitle = 'Insights';
         $contextDescription = 'Practical updates, procurement guidance, engineering notes, HSE awareness and business operations insight from Desnky Global Resources Ltd.';
@@ -83,7 +90,9 @@ class BlogService extends BaseService
             'description' => $contextDescription,
             'active' => 'blog',
             'posts' => array_map([$this, 'decoratePostSummary'], $listing['items']),
-            'featuredPosts' => array_map([$this, 'decoratePostSummary'], $this->cachedFeatured()),
+            'featuredPosts' => $page === 1 && $featuredRow !== null
+                ? [$this->decoratePostSummary($featuredRow)]
+                : [],
             'recentPosts' => array_map([$this, 'decoratePostSummary'], $this->cachedRecent()),
             'popularPosts' => array_map([$this, 'decoratePostSummary'], $this->cachedPopular()),
             'categories' => $this->cachedCategories(),

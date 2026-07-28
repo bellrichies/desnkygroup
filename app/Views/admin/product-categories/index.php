@@ -5,6 +5,7 @@
     </div>
     <a href="/admin/product-categories/create" class="rounded bg-blue-700 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-800">New category</a>
 </div>
+<?php echo $this->partial('admin/partials/pagination', ['pagination' => $pagination ?? [], 'filters' => $filters ?? []]); ?>
 
 <div class="overflow-x-auto rounded bg-white shadow-sm ring-1 ring-gray-200">
     <table class="min-w-full divide-y divide-gray-200 text-sm">

@@ -6,6 +6,7 @@ use App\Controllers\BaseController;
 use App\Repositories\PageRepository;
 use App\Repositories\PageSectionRepository;
 use App\Repositories\ProjectRepository;
+use App\Repositories\BlogPostRepository;
 use App\Repositories\HeroSliderRepository;
 use App\Repositories\ServiceRepository;
 use App\Repositories\SiteSettingRepository;
@@ -53,7 +54,8 @@ class HomeController extends BaseController
             new ProjectRepository($connection),
             new SiteSettingRepository($connection),
             new HeroSliderRepository($connection),
-            new TrustedClientRepository($connection)
+            new TrustedClientRepository($connection),
+            new BlogPostRepository($connection)
         );
     }
 }

@@ -24,12 +24,17 @@ class ProductCategoryController extends BaseController
 
     public function index(): string
     {
+        $all = $this->categories->all();
+        $page = max(1, (int) ($_GET['page'] ?? 1));
+        $total = count($all);
         return $this->view('admin/product-categories/index', [
             'title' => 'Product Categories',
             'user' => $this->user(),
-            'categories' => $this->categories->all(),
+            'categories' => array_slice($all, ($page - 1) * 10, 10),
+            'pagination' => ['page' => $page, 'total_pages' => max(1, (int) ceil($total / 10)), 'total' => $total],
             'csrf_token' => $this->csrf(),
             'breadcrumbs' => [['label' => 'Product Categories']],
+            'filters' => $_GET,
         ]);
     }
 

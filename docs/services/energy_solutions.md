@@ -854,45 +854,61 @@ Clients can engage us for a standalone supply, equipment procurement, scheduled 
 
 # Frequently Asked Questions
 
-## What energy services does DESNKY provide?
+## What energy and infrastructure services does DESNKY provide?
 
-We provide power plant operation and maintenance, electrical equipment procurement, high-voltage and medium-voltage solutions, metering, SCADA, turnkey power engineering, petroleum product supply, LPG services, gas aggregation, truck rental, and natural gas infrastructure planning.
+DESNKY Energy and Infrastructure Ltd. provides solar and inverter installations, UPS and battery systems, industrial stabilizers, Battery Energy Storage Systems, load bank testing, anchor lifeline systems, power plant operation and maintenance, electrical equipment procurement, turnkey power engineering, petroleum product trading and distribution, LPG services, truck rental, and natural gas infrastructure planning.
 
-## Can DESNKY maintain an existing power plant?
+## Can you design a power solution for my facility?
 
-Yes. We provide preventive maintenance, corrective maintenance, equipment inspection, operational support, fault diagnosis, shutdown maintenance, spare-parts planning, and plant optimisation.
+Yes. We begin with your load profile, critical equipment, operating hours, available power sources, site conditions, expansion plans, and continuity requirements. We then recommend an appropriate solar, inverter, UPS, battery, BESS, generator, or hybrid configuration and define the installation and support scope.
 
-## What types of power equipment do you procure?
+## What is the difference between a UPS, inverter system, and BESS?
 
-We procure high-voltage and medium-voltage equipment, metering systems, SCADA components, electrical fittings, power insulators, switchgear components, control panels, cables, protection equipment, and maintenance spares.
+A UPS provides rapid, short-duration protection for sensitive or critical equipment. An inverter system supplies backup or hybrid power to a broader group of loads. A Battery Energy Storage System is typically designed for larger-scale storage, renewable-energy integration, peak management, load shifting, or facility-wide resilience. The right option depends on the required load, runtime, response time, and operating objective.
 
-## Do you provide complete turnkey power plant solutions?
+## Do you supply and install solar, inverter, and battery systems?
 
-Yes. Our turnkey services may cover site assessment, engineering, equipment procurement, installation, testing, commissioning, documentation, and operational support.
+Yes. Our service can cover assessment, system sizing, equipment selection, procurement, installation, configuration, testing, commissioning, user guidance, and planned maintenance. Final system capacity is confirmed after reviewing the intended loads and site conditions.
 
-## Which petroleum products do you supply?
+## Can DESNKY test our generators, UPS units, or battery systems?
 
-We supply Automotive Gas Oil, Premium Motor Spirit, Dual Purpose Kerosene, and Low Pour Fuel Oil, subject to availability, location, volume, and applicable requirements.
+Yes. We provide load bank testing to evaluate how generators, UPS units, and supported battery systems perform under controlled electrical load. The test scope may include load acceptance, stability, operating readings, runtime observations, fault identification, and a documented summary of findings.
 
-## Who can purchase petroleum products from DESNKY?
+## What are industrial stabilizers used for?
 
-We supply corporate organisations, manufacturers, banks, hospitals, filling stations, churches, private businesses, institutional users, and approved individual bulk buyers.
+Industrial stabilizers regulate unstable incoming voltage and help protect machinery, controls, laboratory equipment, ICT systems, and other sensitive assets. We assess the connected load, voltage conditions, operating environment, and future capacity before recommending a suitable stabilizer.
 
-## Do you supply LPG cooking gas?
+## Do you install anchor lifeline systems?
 
-Yes. We provide bulk and commercial LPG supply for residential, commercial, institutional, hospitality, retail, and industrial users.
+Yes. We support permanent or temporary horizontal and vertical lifeline systems for work-at-height environments. Delivery may include site-risk assessment, system planning, component selection, installation, testing, documentation, and inspection guidance, subject to the structure and applicable safety requirements.
 
-## Can you support the development of an LPG refilling plant?
+## Can DESNKY operate and maintain an existing power plant?
 
-Yes. We can support technical planning, equipment procurement, installation, metering, piping, valves, safety systems, testing, commissioning, maintenance planning, and operational support.
+Yes. Support can include routine operation, preventive and corrective maintenance, equipment inspections, troubleshooting, shutdown maintenance, performance monitoring, repairs, spare-parts planning, testing, recommissioning, and technical reporting. The service model can cover selected equipment or a broader plant scope.
 
-## Do you rent LPG trucks?
+## Do you provide turnkey power engineering and electrical equipment procurement?
 
-Yes. LPG truck rental and transportation support can be provided based on truck availability, required capacity, route, duration, and operating conditions.
+Yes. Turnkey delivery may cover site assessment, engineering design, equipment specification, procurement, installation, integration, testing, commissioning, documentation, and handover. We can also procure standalone electrical equipment and spares against an approved technical specification.
 
-## Does DESNKY develop natural gas pipeline networks?
+## Which petroleum and LPG services are available?
 
-We support the feasibility assessment, planning, engineering coordination, procurement, construction support, commissioning, and expansion planning of natural gas distribution networks.
+We coordinate approved petroleum product trading, bulk supply, scheduled distribution, LPG supply, and related logistics for commercial, industrial, and institutional clients. Product type, volume, delivery location, storage arrangements, scheduling, availability, and applicable regulatory requirements are reviewed before confirmation.
+
+## Is truck rental available for energy-product logistics?
+
+Yes. Truck rental and transport support can be arranged based on the product, required capacity, route, delivery schedule, rental duration, site-access conditions, vehicle availability, and applicable safety and regulatory requirements.
+
+## Can you support an LPG facility or natural gas infrastructure project?
+
+Yes. We can support LPG storage or refilling projects and natural gas infrastructure through demand assessment, feasibility input, technical planning, equipment procurement, engineering coordination, distribution-network planning, testing strategy, maintenance planning, and future expansion guidance. Project scope depends on site conditions, approvals, supply availability, and technical feasibility.
+
+## What information should I provide when requesting a quotation?
+
+Share your organisation and contact details, the service or product required, project or delivery location, estimated load, capacity, quantity or runtime, preferred schedule, existing equipment details, and any drawings or specifications available. For power projects, an equipment list or recent energy data can help us prepare a more accurate assessment.
+
+## How does DESNKY begin an energy project?
+
+We start with a requirement review and, where necessary, a site and technical assessment. We then define the solution, scope, equipment or product specification, commercial terms, delivery programme, safety requirements, and acceptance criteria before mobilisation.
 
 ---
 

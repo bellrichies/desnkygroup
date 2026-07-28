@@ -8,6 +8,7 @@ $popularPosts = $popularPosts ?? [];
 $filters = $filters ?? [];
 $pagination = $pagination ?? ['page' => 1, 'total_pages' => 1, 'total' => 0];
 $adPlacements = $adPlacements ?? [];
+$featuredPost = $featuredPosts[0] ?? null;
 
 $pageUrl = static function (int $page) use ($filters): string {
     $path = '/blog';
@@ -92,19 +93,15 @@ $card = function (array $post, bool $large = false): string {
                     <button class="btn-primary">Search</button>
                 </form>
 
-                <?php if ($featuredPosts !== [] && empty($filters['q']) && empty($filters['category_slug']) && empty($filters['tag_slug'])) : ?>
+                <?php if ($featuredPost !== null) : ?>
                     <div class="mt-12">
                         <div class="mb-5 flex items-end justify-between gap-4">
                             <div>
-                                <p class="eyebrow">Featured</p>
-                                <h2 class="mt-2 text-2xl font-bold text-desnky-dark">Highlighted articles</h2>
+                                <p class="eyebrow">Featured article</p>
+                                <h2 class="mt-2 text-2xl font-bold text-desnky-dark">Editor’s spotlight</h2>
                             </div>
                         </div>
-                        <div class="grid gap-5 lg:grid-cols-2">
-                            <?php foreach (array_slice($featuredPosts, 0, 2) as $post) : ?>
-                                <?php echo $card($post, true); ?>
-                            <?php endforeach; ?>
-                        </div>
+                        <?php echo $card($featuredPost, true); ?>
                     </div>
                 <?php endif; ?>
 
@@ -123,7 +120,7 @@ $card = function (array $post, bool $large = false): string {
                     </div>
 
                     <?php if ($posts !== []) : ?>
-                        <div class="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+                        <div class="grid gap-5 md:grid-cols-2">
                             <?php foreach ($posts as $post) : ?>
                                 <?php echo $card($post); ?>
                             <?php endforeach; ?>

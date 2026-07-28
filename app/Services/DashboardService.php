@@ -68,7 +68,7 @@ class DashboardService extends BaseService
      * @param int $limit Number of rows.
      * @return array<int, array<string, mixed>>
      */
-    public function getRecentActivities(int $limit = 10): array
+    public function getRecentActivities(int $limit = 5): array
     {
         return $this->activityLogService->recent($limit);
     }

@@ -1,5 +1,7 @@
 <?php
 $service          ??= [];
+$heroSlides       ??= [];
+$heroManaged      ??= false;
 $detail           ??= [];
 $relatedServices  ??= [];
 $featuredProjects ??= [];
@@ -281,28 +283,136 @@ if ($contactSection !== null) {
 }
 $navItems = array_slice(array_filter($navItems, static fn (array $item): bool => $item['id'] !== ''), 0, 9);
 
-$heroText = $plainText($introBlocks, 2);
-$pageTitle = (string) (($documentation['title'] ?? '') ?: ($service['title'] ?? ''));
+$redesignedNavItems = [
+    'energy-solutions' => [
+        ['id' => 'overview', 'label' => 'Overview'],
+        ['id' => 'renewable-and-backup-power', 'label' => 'Power systems'],
+        ['id' => 'power-quality-and-storage', 'label' => 'Storage & testing'],
+        ['id' => 'plant-engineering-and-maintenance', 'label' => 'Plant engineering'],
+        ['id' => 'petroleum-and-logistics', 'label' => 'Fuel & logistics'],
+        ['id' => 'lpg-and-natural-gas', 'label' => 'Gas infrastructure'],
+        ['id' => 'our-service-delivery-process', 'label' => 'Our process'],
+        ['id' => 'faqs', 'label' => 'FAQs'],
+    ],
+    'procurement' => [
+        ['id' => 'overview', 'label' => 'Overview'],
+        ['id' => 'our-procurement-capabilities', 'label' => 'Capabilities'],
+        ['id' => 'specialist-and-general-supply', 'label' => 'Supply range'],
+        ['id' => 'local-and-international-sourcing', 'label' => 'Sourcing'],
+        ['id' => 'our-procurement-process', 'label' => 'Our process'],
+    ],
+    'ict-solutions' => [
+        ['id' => 'overview', 'label' => 'Overview'],
+        ['id' => 'our-ict-capabilities', 'label' => 'Infrastructure'],
+        ['id' => 'digital-workflow-support', 'label' => 'Workflows'],
+        ['id' => 'application-development', 'label' => 'Applications'],
+        ['id' => 'our-ict-delivery-process', 'label' => 'Our process'],
+    ],
+    'agro-food-processing' => [
+        ['id' => 'overview', 'label' => 'Overview'],
+        ['id' => 'our-agro-capabilities', 'label' => 'Capabilities'],
+        ['id' => 'food-processing-support', 'label' => 'Processing'],
+        ['id' => 'market-linkage-and-logistics', 'label' => 'Market linkage'],
+        ['id' => 'our-agro-delivery-process', 'label' => 'Our process'],
+    ],
+    'hse-safety' => [
+        ['id' => 'overview', 'label' => 'Overview'],
+        ['id' => 'hse-support-and-ppe-supply', 'label' => 'HSE & PPE'],
+        ['id' => 'fire-extinguishers', 'label' => 'Extinguishers'],
+        ['id' => 'hydrant-and-sprinkler-systems', 'label' => 'Hydrant & sprinkler'],
+        ['id' => 'clean-agent-fire-suppression', 'label' => 'Suppression'],
+        ['id' => 'fire-alarm-systems', 'label' => 'Fire alarms'],
+        ['id' => 'fire-safety-delivery-process', 'label' => 'Our process'],
+    ],
+];
+if (isset($redesignedNavItems[$slug])) {
+    $navItems = $redesignedNavItems[$slug];
+}
+
+$pageTitle = (string) ($service['title'] ?? '');
 $introHeading = (string) (($documentation['intro_heading'] ?? '') ?: ($service['summary'] ?? ''));
 $heroImage = (string) ($service['image'] ?? '');
+if ($slug === 'energy-solutions') {
+    $introHeading = 'Integrated power and energy infrastructure built for dependable operations';
+    $introBlocks = [
+        [
+            'type' => 'paragraph',
+            'text' => 'DESNKY Energy and Infrastructure Ltd. (CAC Registered) delivers integrated energy and infrastructure solutions that help organisations maintain reliable, efficient and sustainable power systems.',
+        ],
+        [
+            'type' => 'paragraph',
+            'text' => 'Our capability spans solar and inverter installations, UPS and battery systems, industrial stabilizers, Battery Energy Storage Systems (BESS), load bank testing and anchor lifeline systems, alongside power plant operation and maintenance, equipment procurement and turnkey power engineering.',
+        ],
+        [
+            'type' => 'paragraph',
+            'text' => 'We also coordinate petroleum product trading and distribution, LPG services, truck rental and natural gas infrastructure planning—giving clients one practical partner from requirement assessment and supply through installation, testing, maintenance and long-term development.',
+        ],
+        [
+            'type' => 'list',
+            'items' => [
+                'Reliable power generation, backup and storage',
+                'Integrated engineering, procurement and maintenance',
+                'Coordinated petroleum, LPG and transport services',
+                'Scalable infrastructure planned for long-term performance',
+            ],
+        ],
+    ];
+    $heroImage = '/assets/images/services/energy.webp';
+}
+if ($slug === 'hse-safety') {
+    $introHeading = 'Complete fire-safety protection for people, assets and operations';
+    $introBlocks = [
+        [
+            'type' => 'paragraph',
+            'text' => 'DESNKY delivers integrated HSE and fire-safety services that help organisations prevent incidents, detect threats early and maintain dependable emergency-response systems.',
+        ],
+        [
+            'type' => 'paragraph',
+            'text' => 'From PPE and portable extinguishers to hydrants, sprinklers, clean-agent suppression and fire alarms, we coordinate supply, installation, testing and planned maintenance around the risks within your facility.',
+        ],
+        [
+            'type' => 'list',
+            'items' => [
+                'Risk-informed equipment and system selection',
+                'Professional installation and commissioning',
+                'Routine servicing, testing and maintenance',
+                'Clear documentation and ongoing readiness support',
+            ],
+        ],
+    ];
+    $heroImage = '/assets/images/services/hse-safety.webp';
+}
+if (!$heroManaged && $heroSlides === []) {
+$heroSlides = [[
+    'heading' => $pageTitle,
+    'subheading' => (string) ($service['summary'] ?? ''),
+    'description' => '',
+    'media_type' => 'image',
+    'background_media' => (string) ($service['image'] ?? ''),
+    'primary_cta_label' => 'Discuss your requirement',
+    'primary_cta_url' => $contactHref,
+    'secondary_cta_label' => 'Explore capabilities',
+    'secondary_cta_url' => '#' . $firstContentSection,
+]];
+}
 ?>
 
 <article
     class="service-page"
     style="--service-accent: <?php echo $this->escape($theme['accent']); ?>; --service-accent-2: <?php echo $this->escape($theme['accent2']); ?>;"
 >
-    <section class="service-hero relative isolate overflow-hidden bg-desnky-dark text-white">
-        <?php if ($heroImage !== '') : ?>
-            <img
-                src="<?php echo $this->escape($heroImage); ?>"
-                alt="<?php echo $this->escape($pageTitle . ' service operations'); ?>"
-                class="absolute inset-0 -z-20 h-full w-full object-cover"
-                loading="eager"
-                fetchpriority="high"
-            >
-        <?php endif; ?>
+    <?php if ($heroSlides !== []) : ?>
+    <section class="service-hero relative isolate overflow-hidden bg-desnky-dark text-white" x-data="{ activeHero: 0 }">
+        <?php foreach ($heroSlides as $slideIndex => $slide) : ?>
+            <div x-show="activeHero === <?php echo $slideIndex; ?>" x-transition.opacity class="absolute inset-0 -z-20">
+                <?php if (!empty($slide['background_media']) && ($slide['media_type'] ?? 'image') === 'video') : ?>
+                    <video src="<?php echo $this->escape((string) $slide['background_media']); ?>" class="h-full w-full object-cover" autoplay muted loop playsinline preload="metadata"></video>
+                <?php elseif (!empty($slide['background_media'])) : ?>
+                    <img src="<?php echo $this->escape((string) $slide['background_media']); ?>" alt="" class="h-full w-full object-cover" <?php echo $slideIndex === 0 ? 'loading="eager" fetchpriority="high"' : 'loading="lazy"'; ?>>
+                <?php endif; ?>
+            </div>
+        <?php endforeach; ?>
         <div class="service-hero__overlay absolute inset-0 -z-10"></div>
-
         <div class="container-page py-16 sm:py-20 lg:py-28">
             <nav class="text-sm text-white/75" aria-label="Breadcrumb">
                 <ol class="flex flex-wrap items-center gap-2">
@@ -314,33 +424,35 @@ $heroImage = (string) ($service['image'] ?? '');
                 </ol>
             </nav>
 
-            <div class="mt-10 grid gap-10 lg:grid-cols-[minmax(0,1fr)_25rem] lg:items-end">
+            <?php foreach ($heroSlides as $slideIndex => $slide) : ?>
+            <div x-show="activeHero === <?php echo $slideIndex; ?>" x-transition class="mt-10 grid gap-10 lg:grid-cols-[minmax(0,1fr)_25rem] lg:items-end">
                 <div class="max-w-4xl">
                     <span class="service-hero__mark" aria-hidden="true">
                         <?php echo $this->partial('frontend/partials/icon', ['name' => $icon, 'class' => 'h-8 w-8']); ?>
                     </span>
                     <p class="mt-6 text-sm font-bold uppercase tracking-wide text-white/75"><?php echo $this->escape((string) ($service['category'] ?? 'Service')); ?></p>
                     <h1 class="mt-4 max-w-4xl text-4xl font-extrabold leading-tight sm:text-5xl lg:text-6xl">
-                        <?php echo $this->escape($pageTitle); ?>
+                        <?php echo $this->escape((string) $slide['heading']); ?>
                     </h1>
-                    <?php if ($introHeading !== '') : ?>
+                    <?php if (!empty($slide['subheading'])) : ?>
                         <p class="mt-5 max-w-3xl text-2xl font-semibold leading-snug text-white sm:text-3xl">
-                            <?php echo $this->escape($introHeading); ?>
+                            <?php echo $this->escape((string) $slide['subheading']); ?>
                         </p>
                     <?php endif; ?>
-                    <?php if ($heroText !== '') : ?>
+                    <?php if (!empty($slide['description'])) : ?>
                         <p class="mt-5 max-w-3xl text-base leading-8 text-white/85 sm:text-lg">
-                            <?php echo $renderInline($heroText); ?>
+                            <?php echo $this->escape((string) $slide['description']); ?>
                         </p>
                     <?php endif; ?>
                     <div class="mt-8 flex flex-col gap-3 sm:flex-row">
-                        <a href="<?php echo $this->escape($contactHref); ?>" class="btn-on-dark" data-analytics-event="service_cta">
-                            <?php echo $this->escape((string) ($primaryCta['label'] ?? 'Discuss your requirement')); ?>
-                        </a>
-                        <a href="<?php echo $this->escape($secondaryHref($secondaryCta)); ?>" class="btn-secondary-on-dark">
-                            <?php echo $this->escape((string) ($secondaryCta['label'] ?? 'Explore capabilities')); ?>
-                        </a>
+                        <?php if (!empty($slide['primary_cta_label']) && !empty($slide['primary_cta_url'])) : ?><a href="<?php echo $this->escape((string) $slide['primary_cta_url']); ?>" class="btn-on-dark" data-analytics-event="service_cta"><?php echo $this->escape((string) $slide['primary_cta_label']); ?></a><?php endif; ?>
+                        <?php if (!empty($slide['secondary_cta_label']) && !empty($slide['secondary_cta_url'])) : ?><a href="<?php echo $this->escape((string) $slide['secondary_cta_url']); ?>" class="btn-secondary-on-dark"><?php echo $this->escape((string) $slide['secondary_cta_label']); ?></a><?php endif; ?>
                     </div>
+                    <?php if (count($heroSlides) > 1) : ?>
+                        <div class="mt-8 flex items-center gap-2" aria-label="Choose hero slide">
+                            <?php foreach ($heroSlides as $dotIndex => $_slide) : ?><button type="button" @click="activeHero = <?php echo $dotIndex; ?>" class="h-2.5 rounded-full bg-white transition-all" :class="activeHero === <?php echo $dotIndex; ?> ? 'w-8' : 'w-2.5 opacity-50'" aria-label="Show slide <?php echo $dotIndex + 1; ?>"></button><?php endforeach; ?>
+                        </div>
+                    <?php endif; ?>
                 </div>
 
                 <?php if ($capabilityPills !== []) : ?>
@@ -357,8 +469,10 @@ $heroImage = (string) ($service['image'] ?? '');
                     </aside>
                 <?php endif; ?>
             </div>
+            <?php endforeach; ?>
         </div>
     </section>
+    <?php endif; ?>
 
     <?php if (count($navItems) > 1) : ?>
         <div class="service-subnav sticky top-20 z-30 hidden border-b border-gray-200 bg-white/95 backdrop-blur lg:block">
@@ -419,6 +533,11 @@ $heroImage = (string) ($service['image'] ?? '');
         </div>
     </section>
 
+    <?php if ($slug === 'engineering') : ?>
+        <?php echo $this->partial('frontend/pages/services/partials/engineering-details'); ?>
+    <?php elseif (in_array($slug, ['energy-solutions', 'procurement', 'ict-solutions', 'agro-food-processing', 'hse-safety'], true)) : ?>
+        <?php echo $this->partial('frontend/pages/services/partials/modern-service-details', ['slug' => $slug]); ?>
+    <?php else : ?>
     <?php foreach ($mainSections as $index => $section) : ?>
         <?php
         $title = (string) ($section['title'] ?? '');
@@ -476,6 +595,7 @@ $heroImage = (string) ($service['image'] ?? '');
             </div>
         </section>
     <?php endforeach; ?>
+    <?php endif; ?>
 
     <?php if ($featuredProjects !== []) : ?>
         <section id="projects" class="section-band bg-white scroll-mt-28">
@@ -512,27 +632,58 @@ $heroImage = (string) ($service['image'] ?? '');
     <?php endif; ?>
 
     <?php if ($trustedClients !== []) : ?>
-        <section id="clients" class="section-band bg-desnky-surface scroll-mt-28">
+        <section id="clients" class="section-band engineering-clients scroll-mt-28">
             <div class="container-page">
-                <div class="text-center" data-reveal>
-                    <p class="eyebrow">Trusted by</p>
-                    <h2 class="mt-3 section-heading">Organisations we've served</h2>
+                <div class="mx-auto max-w-3xl text-center" data-reveal>
+                    <p class="eyebrow">Client confidence</p>
+                    <h2 class="mt-3 section-heading">Trusted by leading organisations</h2>
+                    <p class="mt-4 text-base leading-7 text-desnky-muted">Supporting organisations with dependable engineering, maintenance and project delivery.</p>
                 </div>
-                <div class="mt-10 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-                    <?php foreach ($trustedClients as $client) : ?>
-                        <?php $tag = !empty($client['website_url']) ? 'a' : 'div'; ?>
-                        <<?php echo $tag; ?>
-                            <?php if (!empty($client['website_url'])) : ?>href="<?php echo $this->escape((string) $client['website_url']); ?>" target="_blank" rel="noopener noreferrer"<?php endif; ?>
-                            class="flex min-h-28 flex-col items-center justify-center gap-3 rounded-lg border border-gray-200 bg-white px-4 py-5 transition hover:border-desnky-primary hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-desnky-primary"
-                            data-reveal
-                        >
-                            <?php if (!empty($client['logo'])) : ?>
-                                <img src="<?php echo $this->escape((string) $client['logo']); ?>" alt="<?php echo $this->escape((string) $client['name']); ?>" class="h-12 w-auto max-w-[8rem] object-contain grayscale transition hover:grayscale-0" loading="lazy">
-                            <?php else : ?>
-                                <span class="text-center text-sm font-semibold text-desnky-muted"><?php echo $this->escape((string) $client['name']); ?></span>
-                            <?php endif; ?>
-                        </<?php echo $tag; ?>>
-                    <?php endforeach; ?>
+                <?php
+                $clientItems = array_values($trustedClients);
+                $clientRows = [[], []];
+                foreach ($clientItems as $clientIndex => $client) {
+                    $clientRows[$clientIndex % 2][] = $client;
+                }
+                if ($clientRows[1] === []) {
+                    $clientRows[1] = $clientRows[0];
+                }
+                $renderServiceClient = function (array $client, bool $duplicate = false): void {
+                    $name = (string) ($client['name'] ?? '');
+                    $logo = (string) ($client['logo'] ?? '');
+                    $url = (string) ($client['website_url'] ?? '');
+                    $hidden = $duplicate ? ' aria-hidden="true"' : '';
+                    $hiddenLink = $duplicate ? ' aria-hidden="true" tabindex="-1"' : '';
+                    ?>
+                    <?php if ($url !== '') : ?>
+                        <a href="<?php echo $this->escape($url); ?>" target="_blank" rel="noopener noreferrer" class="trusted-client-card"<?php echo $hiddenLink; ?>>
+                    <?php else : ?>
+                        <div class="trusted-client-card"<?php echo $hidden; ?>>
+                    <?php endif; ?>
+                        <?php if ($logo !== '') : ?>
+                            <img src="<?php echo $this->escape($logo); ?>" alt="<?php echo $this->escape($name); ?>" class="trusted-client-logo" loading="lazy">
+                        <?php else : ?>
+                            <span class="trusted-client-name"><?php echo $this->escape($name); ?></span>
+                        <?php endif; ?>
+                    <?php if ($url !== '') : ?></a><?php else : ?></div><?php endif; ?>
+                    <?php
+                };
+                ?>
+                <div class="trusted-carousel mt-10" aria-label="Trusted clients carousel" data-reveal>
+                    <div class="trusted-carousel__mobile">
+                        <div class="trusted-carousel__track">
+                            <?php foreach ($clientItems as $client) { $renderServiceClient($client); } ?>
+                            <?php foreach ($clientItems as $client) { $renderServiceClient($client, true); } ?>
+                        </div>
+                    </div>
+                    <div class="trusted-carousel__desktop">
+                        <?php foreach ($clientRows as $rowIndex => $row) : ?>
+                            <div class="trusted-carousel__track <?php echo $rowIndex === 1 ? 'trusted-carousel__track--reverse' : ''; ?>">
+                                <?php foreach ($row as $client) { $renderServiceClient($client); } ?>
+                                <?php foreach ($row as $client) { $renderServiceClient($client, true); } ?>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
                 </div>
             </div>
         </section>

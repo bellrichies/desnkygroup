@@ -44,6 +44,9 @@ $router->post('/shop/cart/update', 'Frontend\CartController@update')->middleware
 $router->post('/shop/cart/remove', 'Frontend\CartController@remove')->middleware(['csrf']);
 $router->get('/shop/checkout', 'Frontend\CheckoutController@index');
 $router->post('/shop/checkout', 'Frontend\CheckoutController@store')->middleware(['csrf']);
+$router->get('/shop/order-confirmation/{reference}', 'Frontend\CheckoutController@confirmation');
+$router->get('/shop/order-confirmation/{reference}/receipt.pdf', 'Frontend\CheckoutController@receipt');
+$router->get('/track-order', 'Frontend\CheckoutController@track');
 
 $router->get('/services.html', 'Frontend\PageController@redirectToServices');
 $router->get('/contact.html', 'Frontend\PageController@redirectToContact');
@@ -93,8 +96,10 @@ $router->group('/admin', function ($router) {
 
     $router->get('/media', 'Admin\MediaController@index')->middleware(['auth', 'permission:media.view']);
     $router->get('/media/json', 'Admin\MediaController@listJson')->middleware(['auth', 'permission:media.view']);
+    $router->get('/media/{id}/json', 'Admin\MediaController@detailsJson')->middleware(['auth', 'permission:media.view']);
     $router->post('/media', 'Admin\MediaController@store')->middleware(['auth', 'csrf', 'permission:media.upload']);
     $router->post('/media/{id}', 'Admin\MediaController@update')->middleware(['auth', 'csrf', 'permission:media.edit']);
+    $router->post('/media/{id}/replace', 'Admin\MediaController@replace')->middleware(['auth', 'csrf', 'permission:media.edit']);
     $router->post('/media/{id}/delete', 'Admin\MediaController@destroy')->middleware(['auth', 'csrf', 'permission:media.delete']);
 
     $router->get('/homepage-hero', 'Admin\HeroSliderController@index')->middleware(['auth', 'permission:settings.view']);

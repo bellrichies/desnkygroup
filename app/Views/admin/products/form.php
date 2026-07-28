@@ -3,6 +3,23 @@ $product    ??= [];
 $history    ??= [];
 $categories ??= [];
 $csrf_token ??= '';
+$gallery ??= [];
+$galleryItems = [];
+$featuredPath = (string) ($product['featured_image'] ?? '');
+if ($featuredPath !== '') {
+    $galleryItems[] = ['path' => $featuredPath, 'alt' => (string) ($product['name'] ?? 'Product image')];
+}
+foreach ($gallery as $galleryImage) {
+    $path = trim((string) ($galleryImage['path'] ?? ''));
+    if ($path === '' || in_array($path, array_column($galleryItems, 'path'), true)) {
+        continue;
+    }
+    $galleryItems[] = [
+        'path' => $path,
+        'alt' => (string) ($galleryImage['alt_text'] ?? $product['name'] ?? 'Product image'),
+    ];
+}
+$galleryItems = array_slice($galleryItems, 0, 5);
 ?>
 
 <div class="mb-6 flex items-center justify-between">
@@ -59,6 +76,46 @@ $csrf_token ??= '';
             </div>
         </section>
 
+        <!-- Search and social presentation -->
+        <section class="rounded-lg bg-white p-5 shadow-sm ring-1 ring-gray-200">
+            <div class="flex items-start gap-3">
+                <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-violet-50 text-sm font-bold text-violet-700">02</span>
+                <div>
+                    <h2 class="font-semibold text-gray-950">Search &amp; social</h2>
+                    <p class="mt-1 text-xs text-gray-500">Control how this product appears in search results and when shared.</p>
+                </div>
+            </div>
+            <div class="mt-5 grid gap-4 md:grid-cols-2">
+                <label class="block md:col-span-2">
+                    <span class="text-sm font-semibold text-gray-700">SEO title</span>
+                    <input name="meta_title" maxlength="255" value="<?php echo $this->escape((string) ($product['meta_title'] ?? '')); ?>" class="mt-1 w-full rounded border-gray-300 shadow-sm focus:border-blue-600 focus:ring-blue-600" placeholder="Leave blank to use the product name">
+                    <span class="mt-1 block text-xs text-gray-500">Use a concise, descriptive title of approximately 50–60 characters.</span>
+                </label>
+                <label class="block md:col-span-2">
+                    <span class="text-sm font-semibold text-gray-700">Meta description</span>
+                    <textarea name="meta_description" rows="3" maxlength="180" class="mt-1 w-full rounded border-gray-300 shadow-sm focus:border-blue-600 focus:ring-blue-600" placeholder="Summarize the product for search results."><?php echo $this->escape((string) ($product['meta_description'] ?? '')); ?></textarea>
+                    <span class="mt-1 block text-xs text-gray-500">Recommended length: 140–160 characters.</span>
+                </label>
+                <div class="md:col-span-2">
+                    <span class="text-sm font-semibold text-gray-700">Social sharing image</span>
+                    <?php $seoImg = (string) ($product['og_image'] ?? ''); ?>
+                    <div class="mt-2 grid gap-4 rounded-xl border border-gray-200 bg-gray-50 p-4 sm:grid-cols-[9rem_1fr] sm:items-center">
+                        <div class="flex h-24 items-center justify-center overflow-hidden rounded-xl border border-gray-200 bg-white">
+                            <img id="seo_img_preview" src="<?php echo $this->escape($seoImg); ?>" alt="Social sharing preview" class="<?php echo $seoImg ? '' : 'hidden'; ?> h-full w-full object-cover">
+                            <span id="seo_img_empty" class="<?php echo $seoImg ? 'hidden ' : ''; ?>px-3 text-center text-xs text-gray-400">No social image selected</span>
+                        </div>
+                        <div>
+                            <input type="hidden" id="og_image" name="og_image" value="<?php echo $this->escape($seoImg); ?>">
+                            <button type="button" onclick="openMediaPicker('og_image','seo_img_preview');document.getElementById('seo_img_empty').classList.add('hidden')" class="rounded-xl border border-gray-300 bg-white px-3 py-2 text-sm font-semibold text-gray-700 hover:border-blue-400 hover:text-blue-700">
+                                <?php echo $seoImg ? 'Change social image' : 'Select from Media Library'; ?>
+                            </button>
+                            <p class="mt-2 text-xs text-gray-500">Optional. The featured product image is used as the fallback.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <!-- Inventory history (edit mode only) -->
         <?php if (!empty($product['id'])) : ?>
             <section class="rounded-lg bg-white p-5 shadow-sm ring-1 ring-gray-200">
@@ -86,75 +143,42 @@ $csrf_token ??= '';
         <section class="rounded-lg bg-white p-5 shadow-sm ring-1 ring-gray-200">
             <h2 class="font-semibold text-gray-950">Publishing</h2>
             <div class="mt-4 space-y-3">
+                <label class="block">
+                    <span class="text-xs font-semibold text-gray-600">Product status</span>
                 <select name="status" class="w-full rounded border-gray-300 shadow-sm focus:border-blue-600 focus:ring-blue-600">
                     <?php foreach (['active' => 'Active', 'inactive' => 'Inactive', 'discontinued' => 'Discontinued'] as $val => $label) : ?>
                         <option value="<?php echo $val; ?>" <?php echo ($product['status'] ?? 'active') === $val ? 'selected' : ''; ?>><?php echo $label; ?></option>
                     <?php endforeach; ?>
                 </select>
-                <label class="flex items-center gap-2 text-sm text-gray-700">
-                    <input type="checkbox" name="is_active" value="1" <?php echo ($product['is_active'] ?? 1) ? 'checked' : ''; ?> class="rounded border-gray-300 text-blue-700"> Active
                 </label>
-                <label class="flex items-center gap-2 text-sm text-gray-700">
-                    <input type="checkbox" name="is_featured" value="1" <?php echo !empty($product['is_featured']) ? 'checked' : ''; ?> class="rounded border-gray-300 text-blue-700"> Featured
-                </label>
+                <div class="grid grid-cols-2 gap-2">
+                    <label class="flex items-center gap-2 py-1 text-sm font-semibold text-gray-700">
+                        <input type="checkbox" name="is_active" value="1" <?php echo ($product['is_active'] ?? 1) ? 'checked' : ''; ?> class="rounded border-gray-300 text-blue-700"> Active
+                    </label>
+                    <label class="flex items-center gap-2 py-1 text-sm font-semibold text-gray-700">
+                        <input type="checkbox" name="is_featured" value="1" <?php echo !empty($product['is_featured']) ? 'checked' : ''; ?> class="rounded border-gray-300 text-blue-700"> Featured
+                    </label>
+                </div>
             </div>
             <button class="mt-5 w-full rounded bg-blue-700 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-800">Save product</button>
         </section>
 
-        <!-- 2. SEO -->
+        <!-- 2. Media -->
         <section class="rounded-lg bg-white p-5 shadow-sm ring-1 ring-gray-200">
-            <h2 class="font-semibold text-gray-950">SEO</h2>
-            <div class="mt-4 space-y-3">
-                <label class="block">
-                    <span class="text-xs font-semibold text-gray-600">SEO title</span>
-                    <input name="meta_title" value="<?php echo $this->escape((string) ($product['meta_title'] ?? '')); ?>" class="mt-1 w-full rounded border-gray-300 text-sm shadow-sm focus:border-blue-600 focus:ring-blue-600" placeholder="Leave blank to use product name">
-                </label>
-                <label class="block">
-                    <span class="text-xs font-semibold text-gray-600">Meta description</span>
-                    <textarea name="meta_description" rows="3" class="mt-1 w-full rounded border-gray-300 text-sm shadow-sm focus:border-blue-600 focus:ring-blue-600" placeholder="Up to 160 characters"><?php echo $this->escape((string) ($product['meta_description'] ?? '')); ?></textarea>
-                </label>
-                <label class="block">
-                    <span class="text-xs font-semibold text-gray-600">SEO image</span>
-                    <?php $seoImg = (string) ($product['og_image'] ?? ''); ?>
-                    <img id="seo_img_preview" src="<?php echo $this->escape($seoImg); ?>" alt="" class="<?php echo $seoImg ? '' : 'hidden'; ?> mb-2 mt-1 w-full rounded object-cover" style="max-height:100px">
-                    <input type="hidden" id="og_image" name="og_image" value="<?php echo $this->escape($seoImg); ?>">
-                    <button type="button" onclick="openMediaPicker('og_image','seo_img_preview')" class="w-full rounded border border-gray-300 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50">
-                        <?php echo $seoImg ? 'Change SEO image' : 'Select SEO image'; ?>
-                    </button>
-                </label>
+            <div class="flex items-start justify-between gap-3">
+                <div><h2 class="font-semibold text-gray-950">Product gallery</h2><p class="mt-1 text-xs text-gray-500">Select up to five images and choose one featured image.</p></div>
+                <span id="gallery-count" class="rounded-full bg-blue-50 px-2.5 py-1 text-xs font-bold text-blue-700">0 / 5</span>
             </div>
+            <input type="hidden" id="featured_image" name="featured_image" value="<?php echo $this->escape($featuredPath); ?>">
+            <div id="product-gallery" class="mt-4 overflow-hidden rounded-xl border border-gray-200"></div>
+            <button type="button" id="select-gallery-images" class="mt-4 w-full rounded-xl bg-blue-700 px-3 py-2.5 text-sm font-bold text-white shadow-sm hover:bg-blue-800">Select images from Media Library</button>
+            <p id="gallery-error" role="alert" class="mt-2 hidden text-xs font-semibold text-red-600"></p>
         </section>
 
-        <!-- 3. Media -->
-        <section class="rounded-lg bg-white p-5 shadow-sm ring-1 ring-gray-200">
-            <h2 class="font-semibold text-gray-950">Product image</h2>
-            <div class="mt-4 space-y-3">
-                <?php $fi = (string) ($product['featured_image'] ?? ''); ?>
-                <img
-                    id="featured_img_preview"
-                    src="<?php echo $this->escape($fi); ?>"
-                    alt="Product image preview"
-                    class="<?php echo $fi ? '' : 'hidden'; ?> w-full rounded object-cover"
-                    style="max-height:160px"
-                >
-                <input type="hidden" id="featured_image" name="featured_image" value="<?php echo $this->escape($fi); ?>">
-                <button
-                    type="button"
-                    onclick="openMediaPicker('featured_image','featured_img_preview')"
-                    class="w-full rounded border border-gray-300 px-3 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50"
-                >
-                    <?php echo $fi ? 'Change image' : 'Select from library'; ?>
-                </button>
-                <?php if ($fi) : ?>
-                    <button type="button" onclick="document.getElementById('featured_image').value='';document.getElementById('featured_img_preview').classList.add('hidden');" class="w-full rounded border border-red-200 px-3 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50">Remove image</button>
-                <?php endif; ?>
-            </div>
-        </section>
-
-        <!-- 4. Pricing and stock -->
+        <!-- 3. Pricing and stock -->
         <section class="rounded-lg bg-white p-5 shadow-sm ring-1 ring-gray-200">
             <h2 class="font-semibold text-gray-950">Pricing &amp; stock</h2>
-            <div class="mt-4 space-y-3">
+            <div class="mt-4 grid grid-cols-2 gap-3">
                 <label class="block">
                     <span class="text-xs font-semibold text-gray-600">Regular price <span class="text-red-600">*</span></span>
                     <input name="price" type="number" step="0.01" min="0" required value="<?php echo $this->escape((string) ($product['price'] ?? '')); ?>" class="mt-1 w-full rounded border-gray-300 shadow-sm focus:border-blue-600 focus:ring-blue-600" placeholder="0.00">
@@ -205,5 +229,81 @@ $csrf_token ??= '';
         if (!slugEdited) slugInput.value = toSlug(nameInput.value);
     });
     slugInput.addEventListener('input', () => { slugEdited = slugInput.value !== ''; });
+
+    const galleryRoot = document.getElementById('product-gallery');
+    const featuredInput = document.getElementById('featured_image');
+    const galleryCount = document.getElementById('gallery-count');
+    const galleryError = document.getElementById('gallery-error');
+    let galleryImages = <?php echo json_encode($galleryItems, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>;
+
+    const escapeHtml = value => String(value || '').replace(/[&<>"']/g, character => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'
+    })[character]);
+
+    function renderGallery() {
+        if (galleryImages.length > 0 && !galleryImages.some(image => image.path === featuredInput.value)) {
+            featuredInput.value = galleryImages[0].path;
+        }
+        if (galleryImages.length === 0) {
+            featuredInput.value = '';
+            galleryRoot.innerHTML = '<div class="bg-gray-50 p-5 text-center text-xs text-gray-500">No product images selected.</div>';
+        } else {
+            galleryRoot.innerHTML = `
+                <div class="grid grid-cols-[3.25rem_1fr] items-center gap-3 border-b border-gray-200 bg-gray-50 px-3 py-2 text-[10px] font-bold uppercase tracking-wide text-gray-500">
+                    <span>Image</span><span class="text-right">Actions</span>
+                </div>
+                <div class="divide-y divide-gray-100">
+                    ${galleryImages.map((image, index) => `
+                        <article class="grid grid-cols-[3.25rem_1fr] items-center gap-3 px-3 py-2.5 ${image.path === featuredInput.value ? 'bg-blue-50/70' : 'bg-white'}">
+                            <img src="${escapeHtml(image.path)}" alt="${escapeHtml(image.alt)}" class="h-11 w-11 rounded-lg border ${image.path === featuredInput.value ? 'border-blue-500 ring-2 ring-blue-100' : 'border-gray-200'} object-cover">
+                            <div class="flex items-center justify-end gap-1.5">
+                                <label class="cursor-pointer rounded-lg border px-2 py-1.5 text-[10px] font-bold ${image.path === featuredInput.value ? 'border-blue-200 bg-blue-100 text-blue-700' : 'border-gray-200 bg-white text-gray-600 hover:border-blue-300'}" title="Set as featured image">
+                                    <input type="radio" name="featured_choice" value="${escapeHtml(image.path)}" ${image.path === featuredInput.value ? 'checked' : ''} data-feature-index="${index}" class="sr-only">
+                                    ${image.path === featuredInput.value ? '✓' : 'Set'}
+                                </label>
+                                <button type="button" data-remove-index="${index}" class="rounded-lg border border-red-100 bg-red-50 px-2 py-1.5 text-[10px] font-bold text-red-600 hover:bg-red-100" title="Remove image">Remove</button>
+                            </div>
+                            <input type="hidden" name="gallery_paths[]" value="${escapeHtml(image.path)}">
+                            <input type="hidden" name="gallery_alt_texts[]" value="${escapeHtml(image.alt)}">
+                        </article>
+                    `).join('')}
+                </div>
+            `;
+        }
+        galleryCount.textContent = `${galleryImages.length} / 5`;
+        galleryError.classList.add('hidden');
+    }
+
+    galleryRoot.addEventListener('change', event => {
+        const radio = event.target.closest('[data-feature-index]');
+        if (!radio) return;
+        featuredInput.value = galleryImages[Number(radio.dataset.featureIndex)].path;
+        renderGallery();
+    });
+    galleryRoot.addEventListener('click', event => {
+        const button = event.target.closest('[data-remove-index]');
+        if (!button) return;
+        galleryImages.splice(Number(button.dataset.removeIndex), 1);
+        renderGallery();
+    });
+    document.getElementById('select-gallery-images').addEventListener('click', () => {
+        openMediaPickerMulti(items => {
+            const existing = new Set(galleryImages.map(image => image.path));
+            const newItems = items.filter(item => !existing.has(item.path));
+            const exceeded = newItems.length > (5 - galleryImages.length);
+            items.forEach(item => {
+                if (!existing.has(item.path) && galleryImages.length < 5) {
+                    galleryImages.push({ path: item.path, alt: item.alt || nameInput.value || 'Product image' });
+                    existing.add(item.path);
+                }
+            });
+            renderGallery();
+            if (exceeded) {
+                galleryError.textContent = 'A product can have a maximum of five images.';
+                galleryError.classList.remove('hidden');
+            }
+        });
+    });
+    renderGallery();
 })();
 </script>

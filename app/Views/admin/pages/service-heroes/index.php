@@ -8,7 +8,7 @@
         </div>
         <div class="flex flex-wrap gap-2">
             <a href="/services/<?php echo $this->escape((string) $service['slug']); ?>" target="_blank" class="rounded-lg border border-white/20 px-4 py-2 text-sm font-semibold hover:bg-white/10">Preview page</a>
-            <a href="/admin/services/<?php echo $serviceId; ?>/heroes/create" class="rounded-lg bg-blue-500 px-4 py-2 text-sm font-bold text-white hover:bg-blue-400">+ Add slide</a>
+            <a href="/admin/services/<?php echo $serviceId; ?>/heroes/create" class="inline-flex h-9 items-center rounded-lg bg-blue-500 px-3 py-1.5 text-xs font-bold text-white hover:bg-blue-400">+ Add slide</a>
         </div>
     </header>
 
@@ -21,7 +21,7 @@
         </div>
     <?php else : ?>
         <form method="POST" action="/admin/services/<?php echo $serviceId; ?>/heroes/reorder" class="space-y-3">
-            <?php echo $this->csrfField(); ?>
+            <input type="hidden" name="_token" value="<?php echo $this->escape((string) ($_SESSION['csrf_token'] ?? '')); ?>">
             <div class="flex items-center justify-between">
                 <p class="text-sm text-slate-500"><?php echo count($heroes); ?> slide<?php echo count($heroes) === 1 ? '' : 's'; ?> · lower order appears first</p>
                 <button class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-bold text-slate-700 hover:bg-slate-50">Save order</button>
@@ -60,8 +60,8 @@
             </div>
         </form>
         <?php foreach ($heroes as $hero) : ?>
-            <form id="toggle-<?php echo (int) $hero['id']; ?>" method="POST" action="/admin/services/<?php echo $serviceId; ?>/heroes/<?php echo (int) $hero['id']; ?>/toggle"><?php echo $this->csrfField(); ?></form>
-            <form id="delete-<?php echo (int) $hero['id']; ?>" method="POST" action="/admin/services/<?php echo $serviceId; ?>/heroes/<?php echo (int) $hero['id']; ?>/delete" onsubmit="return confirm('Delete this hero slide permanently?')"><?php echo $this->csrfField(); ?></form>
+            <form id="toggle-<?php echo (int) $hero['id']; ?>" method="POST" action="/admin/services/<?php echo $serviceId; ?>/heroes/<?php echo (int) $hero['id']; ?>/toggle"><input type="hidden" name="_token" value="<?php echo $this->escape((string) ($_SESSION['csrf_token'] ?? '')); ?>"></form>
+            <form id="delete-<?php echo (int) $hero['id']; ?>" method="POST" action="/admin/services/<?php echo $serviceId; ?>/heroes/<?php echo (int) $hero['id']; ?>/delete" onsubmit="return confirm('Delete this hero slide permanently?')"><input type="hidden" name="_token" value="<?php echo $this->escape((string) ($_SESSION['csrf_token'] ?? '')); ?>"></form>
         <?php endforeach; ?>
     <?php endif; ?>
 </div>

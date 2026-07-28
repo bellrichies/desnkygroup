@@ -1,6 +1,7 @@
 # IDE and Editor
 .vscode/
 .idea/
+.github/
 *.swp
 *.swo
 *~
@@ -26,6 +27,7 @@ storage/uploads/*
 !storage/uploads/.gitkeep
 
 # Testing
+tests/
 tests/reports/
 coverage/
 phpunit.xml.dist

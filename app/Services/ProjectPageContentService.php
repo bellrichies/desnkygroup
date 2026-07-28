@@ -54,7 +54,11 @@ class ProjectPageContentService
             return null;
         }
 
+        $projectId = (int) ($project['id'] ?? 0);
         $project = $this->normalizeProject($project);
+        $project['gallery'] = $this->normalizeGallery(
+            $this->projects->galleryImages($projectId)
+        );
 
         return [
             'title' => $project['title'],
@@ -102,6 +106,7 @@ class ProjectPageContentService
      */
     private function decodeBody(string $body): array
     {
+        $body = trim($body);
         if ($body === '') {
             return [];
         }
@@ -111,7 +116,28 @@ class ProjectPageContentService
             return $decoded;
         }
 
-        return ['overview' => $body];
+        // WYSIWYG editors may wrap a structured JSON payload in paragraph tags
+        // or encode its quotation marks. Normalize that representation before
+        // falling back to ordinary prose.
+        $plainBody = html_entity_decode(
+            strip_tags(
+                (string) preg_replace(
+                    '/<(?:br)\s*\/?>|<\/(?:p|div|li|h[1-6])>/i',
+                    "\n",
+                    $body
+                )
+            ),
+            ENT_QUOTES | ENT_HTML5,
+            'UTF-8'
+        );
+        $plainBody = trim($plainBody, "\xEF\xBB\xBF \t\n\r\0\x0B");
+
+        $decoded = json_decode($plainBody, true);
+        if (is_array($decoded)) {
+            return $decoded;
+        }
+
+        return ['overview' => preg_replace("/\n{3,}/", "\n\n", $plainBody) ?? $plainBody];
     }
 
     /**
@@ -147,6 +173,29 @@ class ProjectPageContentService
             'canonical_url' => (string) ($row['canonical_url'] ?? ''),
             'og_image' => (string) ($row['og_image'] ?? ''),
         ];
+    }
+
+    /**
+     * @param array<int, array<string, mixed>> $rows
+     * @return array<int, array{path: string, alt_text: string}>
+     */
+    private function normalizeGallery(array $rows): array
+    {
+        $images = [];
+
+        foreach ($rows as $row) {
+            $path = trim((string) ($row['path'] ?? ''));
+            if ($path === '') {
+                continue;
+            }
+
+            $images[] = [
+                'path' => $path,
+                'alt_text' => trim((string) ($row['alt_text'] ?? '')),
+            ];
+        }
+
+        return $images;
     }
 
     /**

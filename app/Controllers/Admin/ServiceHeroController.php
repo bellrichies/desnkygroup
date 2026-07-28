@@ -6,7 +6,6 @@ use App\Controllers\BaseController;
 use App\Repositories\MediaRepository;
 use App\Repositories\ServiceHeroRepository;
 use App\Repositories\ServiceRepository;
-use App\Services\MediaService;
 use App\Services\ServiceHeroService;
 use App\Support\DatabaseFactory;
 
@@ -14,14 +13,14 @@ class ServiceHeroController extends BaseController
 {
     private ServiceRepository $services;
     private ServiceHeroService $heroes;
-    private MediaService $media;
+    private MediaRepository $media;
 
     public function __construct()
     {
         $db = DatabaseFactory::make();
         $this->services = new ServiceRepository($db);
         $this->heroes = new ServiceHeroService(new ServiceHeroRepository($db));
-        $this->media = new MediaService(new MediaRepository($db));
+        $this->media = new MediaRepository($db);
     }
 
     public function index(string $serviceId): string
@@ -43,9 +42,9 @@ class ServiceHeroController extends BaseController
         return $this->form($this->service((int) $serviceId), 'Create hero slide');
     }
 
-    public function store(string $serviceId): void
+    public function store(string $serviceId)
     {
-        $this->save((int) $serviceId);
+        return $this->save((int) $serviceId);
     }
 
     public function edit(string $serviceId, string $id): string
@@ -59,9 +58,9 @@ class ServiceHeroController extends BaseController
         return $this->form($service, 'Edit hero slide', $hero);
     }
 
-    public function update(string $serviceId, string $id): void
+    public function update(string $serviceId, string $id)
     {
-        $this->save((int) $serviceId, (int) $id);
+        return $this->save((int) $serviceId, (int) $id);
     }
 
     public function destroy(string $serviceId, string $id): void
@@ -85,7 +84,7 @@ class ServiceHeroController extends BaseController
         $this->redirect('/admin/services/' . $serviceId . '/heroes');
     }
 
-    private function save(int $serviceId, ?int $id = null): void
+    private function save(int $serviceId, ?int $id = null)
     {
         try {
             $payload = $_POST;
@@ -94,34 +93,41 @@ class ServiceHeroController extends BaseController
             $payload['is_active'] = isset($_POST['is_active']) ? 1 : 0;
             $payload['created_by'] = (int) ($this->user()['id'] ?? 0) ?: null;
 
-            if (!empty($_POST['remove_background_media'])) {
-                $payload['background_media'] = '';
-            }
-
-            $file = $_FILES['background_upload'] ?? null;
-            if (is_array($file) && (int) ($file['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE) {
-                if (($payload['media_type'] ?? 'image') !== 'image') {
-                    throw new \InvalidArgumentException('Direct upload currently supports optimized images. Use a media URL for video.');
+            $payload['background_media'] = trim((string) ($payload['background_media'] ?? ''));
+            if ($payload['background_media'] !== '') {
+                $media = $this->media->findByPath($payload['background_media']);
+                if ($media === null || !in_array($media['media_type'] ?? null, ['image', 'video'], true)) {
+                    throw new \InvalidArgumentException('Select an image or video from the Media Library.');
                 }
-                $mediaId = $this->media->upload($file, [
-                    'title' => $payload['heading'] ?? 'Service hero',
-                    'alt_text' => $payload['heading'] ?? 'Service hero background',
-                ], isset($this->user()['id']) ? (int) $this->user()['id'] : null);
-                $media = $this->media->getById($mediaId);
-                $payload['background_media'] = (string) ($media['path'] ?? '');
+                $payload['media_type'] = (string) $media['media_type'];
             }
 
             if ($id === null) {
-                $this->heroes->create($payload);
+                $id = $this->heroes->create($payload);
                 $message = 'Hero slide created.';
             } else {
                 $this->heroes->update($id, $serviceId, $payload);
                 $message = 'Hero slide updated.';
             }
 
+            if ($this->wantsJson()) {
+                return $this->json([
+                    'success' => true,
+                    'message' => $message,
+                    'id' => $id,
+                    'edit_url' => '/admin/services/' . $serviceId . '/heroes/' . $id . '/edit',
+                    'update_url' => '/admin/services/' . $serviceId . '/heroes/' . $id,
+                ]);
+            }
             $this->flash('success', $message);
             $this->redirect('/admin/services/' . $serviceId . '/heroes');
         } catch (\Throwable $exception) {
+            if ($this->wantsJson()) {
+                return $this->json([
+                    'success' => false,
+                    'message' => $exception->getMessage(),
+                ], 422);
+            }
             $this->flash('error', $exception->getMessage());
             $destination = '/admin/services/' . $serviceId . '/heroes'
                 . ($id === null ? '/create' : '/' . $id . '/edit');
@@ -129,14 +135,26 @@ class ServiceHeroController extends BaseController
         }
     }
 
+    private function wantsJson(): bool
+    {
+        return str_contains(strtolower((string) ($_SERVER['HTTP_ACCEPT'] ?? '')), 'application/json')
+            || strtolower((string) ($_SERVER['HTTP_X_REQUESTED_WITH'] ?? '')) === 'xmlhttprequest';
+    }
+
     private function form(array $service, string $title, ?array $hero = null): string
     {
+        $selectedMedia = null;
+        if (!empty($hero['background_media'])) {
+            $selectedMedia = $this->media->findByPath((string) $hero['background_media']);
+        }
+
         return $this->view('admin/pages/service-heroes/form', [
             'title' => $title,
             'user' => $this->user(),
             'breadcrumbs' => $this->breadcrumbs($service, $title),
             'service' => $service,
             'hero' => $hero,
+            'selectedMedia' => $selectedMedia,
             'csrf_token' => $this->csrf(),
             'action' => '/admin/services/' . $service['id'] . '/heroes'
                 . ($hero ? '/' . $hero['id'] : ''),

@@ -4,21 +4,21 @@ $galleryImages ??= [];
 $action        ??= '/admin/projects';
 ?>
 
-<div class="mb-6 flex items-center justify-between">
+<div class="mb-3 flex items-center justify-between">
     <h1 class="text-2xl font-bold text-gray-900"><?php echo $this->escape($title); ?></h1>
     <a href="/admin/projects" class="text-sm font-semibold text-blue-700">← Back to projects</a>
 </div>
 
-<form method="POST" action="<?php echo $this->escape($action); ?>" id="project-form" class="grid gap-6 lg:grid-cols-[1fr_22rem]">
+<form method="POST" action="<?php echo $this->escape($action); ?>" id="project-form" class="grid gap-3 lg:grid-cols-[1fr_20rem]">
     <input type="hidden" name="_token" value="<?php echo $this->escape((string) ($_SESSION['csrf_token'] ?? '')); ?>">
 
     <!-- ── Main column ───────────────────────────────────────────────────── -->
-    <div class="space-y-6">
+    <div class="space-y-3">
 
         <!-- Title + Slug + Category -->
-        <section class="rounded-lg bg-white p-5 shadow-sm ring-1 ring-gray-200">
+        <section class="rounded-xl bg-white p-4 shadow-sm ring-1 ring-gray-200">
             <h2 class="font-semibold text-gray-900">Project details</h2>
-            <div class="mt-4 grid gap-4 sm:grid-cols-2">
+            <div class="mt-3 grid gap-3 sm:grid-cols-2">
                 <label class="block sm:col-span-2">
                     <span class="text-sm font-semibold text-gray-700">Title <span class="text-red-600">*</span></span>
                     <input
@@ -53,7 +53,7 @@ $action        ??= '/admin/projects';
         </section>
 
         <!-- Description – WYSIWYG -->
-        <section class="rounded-lg bg-white p-5 shadow-sm ring-1 ring-gray-200">
+        <section class="rounded-xl bg-white p-4 shadow-sm ring-1 ring-gray-200">
             <h2 class="font-semibold text-gray-900">Description</h2>
             <div class="mt-4">
                 <!-- Quill toolbar target -->
@@ -76,20 +76,22 @@ $action        ??= '/admin/projects';
                         <button class="ql-clean"></button>
                     </span>
                 </div>
-                <div id="quill-editor" class="min-h-[14rem] rounded-b border border-t-0 border-gray-300 bg-white px-3 py-2 text-sm leading-relaxed"></div>
+                <div id="quill-editor" class="min-h-[10rem] rounded-b border border-t-0 border-gray-300 bg-white px-3 py-2 text-sm leading-relaxed"></div>
                 <!-- Hidden textarea submitted with the form -->
                 <textarea name="description" id="project-description" class="hidden"><?php echo $this->escape((string) ($project['description'] ?? '')); ?></textarea>
             </div>
         </section>
 
+        <div id="project-seo-destination"></div>
+
         <!-- Image gallery -->
-        <section class="rounded-lg bg-white p-5 shadow-sm ring-1 ring-gray-200" id="gallery-section">
+        <section class="rounded-xl bg-white p-4 shadow-sm ring-1 ring-gray-200" id="gallery-section">
             <div class="flex items-center justify-between">
                 <h2 class="font-semibold text-gray-900">Gallery images</h2>
                 <button type="button" id="add-gallery-image" class="rounded bg-blue-50 px-3 py-1.5 text-sm font-semibold text-blue-700 hover:bg-blue-100">+ Add images</button>
             </div>
             <p class="mt-1 text-xs text-gray-400">Drag rows to reorder. Each image can have optional alt text.</p>
-            <div id="gallery-list" class="mt-4 space-y-3">
+            <div id="gallery-list" class="mt-3 space-y-2">
                 <?php foreach ($galleryImages as $i => $img) : ?>
                     <div class="gallery-row flex items-center gap-3 rounded border border-gray-200 bg-gray-50 p-3" data-index="<?php echo $i; ?>">
                         <span class="cursor-move select-none text-gray-400" aria-hidden="true">⠿</span>
@@ -113,10 +115,10 @@ $action        ??= '/admin/projects';
     </div><!-- /main column -->
 
     <!-- ── Sidebar ───────────────────────────────────────────────────────── -->
-    <aside class="space-y-5">
+    <aside class="space-y-3">
 
         <!-- Publishing -->
-        <section class="rounded-lg bg-white p-5 shadow-sm ring-1 ring-gray-200">
+        <section class="rounded-xl bg-white p-4 shadow-sm ring-1 ring-gray-200">
             <h2 class="font-semibold text-gray-900">Publishing</h2>
             <label class="mt-4 flex items-center gap-3 text-sm font-medium text-gray-700">
                 <input type="checkbox" name="is_published" value="1" <?php echo !empty($project['is_published']) ? 'checked' : ''; ?> class="rounded border-gray-300 text-blue-700 focus:ring-blue-600">
@@ -129,7 +131,7 @@ $action        ??= '/admin/projects';
         </section>
 
         <!-- Featured image -->
-        <section class="rounded-lg bg-white p-5 shadow-sm ring-1 ring-gray-200">
+        <section class="rounded-xl bg-white p-4 shadow-sm ring-1 ring-gray-200">
             <h2 class="font-semibold text-gray-900">Featured image</h2>
             <div class="mt-4 space-y-3">
                 <?php $fi = (string) ($project['featured_image'] ?? ''); ?>
@@ -138,7 +140,7 @@ $action        ??= '/admin/projects';
                     src="<?php echo $this->escape($fi); ?>"
                     alt="Featured image preview"
                     class="<?php echo $fi ? '' : 'hidden'; ?> w-full rounded object-cover"
-                    style="max-height:160px"
+                    style="max-height:120px"
                 >
                 <input type="hidden" id="featured_image" name="featured_image" value="<?php echo $this->escape($fi); ?>">
                 <button
@@ -155,7 +157,7 @@ $action        ??= '/admin/projects';
         </section>
 
         <!-- Client / date / sort -->
-        <section class="rounded-lg bg-white p-5 shadow-sm ring-1 ring-gray-200">
+        <section class="rounded-xl bg-white p-4 shadow-sm ring-1 ring-gray-200">
             <h2 class="font-semibold text-gray-900">Project meta</h2>
             <div class="mt-4 space-y-3">
                 <label class="block">
@@ -174,10 +176,10 @@ $action        ??= '/admin/projects';
         </section>
 
         <!-- SEO -->
-        <section class="rounded-lg bg-white p-5 shadow-sm ring-1 ring-gray-200">
+        <section id="project-seo-card" class="rounded-xl bg-white p-4 shadow-sm ring-1 ring-gray-200">
             <h2 class="font-semibold text-gray-900">SEO</h2>
-            <div class="mt-4 space-y-3">
-                <label class="block">
+            <div class="mt-3 grid gap-3 md:grid-cols-2">
+                <label class="block md:col-span-2">
                     <span class="text-xs font-semibold text-gray-600">SEO title</span>
                     <input name="meta_title" value="<?php echo $this->escape((string) ($project['meta_title'] ?? '')); ?>" placeholder="Leave blank to use project title" class="mt-1 w-full rounded border-gray-300 text-sm shadow-sm focus:border-blue-600 focus:ring-blue-600">
                 </label>
@@ -210,6 +212,9 @@ $action        ??= '/admin/projects';
 
 <!-- Media picker modal (rendered once per page) -->
 <?php echo $this->partial('admin/partials/media-picker'); ?>
+<script>
+document.getElementById('project-seo-destination')?.append(document.getElementById('project-seo-card'));
+</script>
 
 <!-- Gallery row template (cloned by JS) -->
 <template id="gallery-row-tpl">

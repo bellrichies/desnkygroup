@@ -4,9 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo $this->escape($title ?? 'Admin Panel'); ?> - Desnky</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/assets/css/main.min.css?v=<?php echo (string) @filemtime(dirname(__DIR__, 4) . '/public/assets/css/main.min.css'); ?>">
+    <link rel="stylesheet" href="/assets/css/admin.css?v=<?php echo (string) @filemtime(dirname(__DIR__, 4) . '/public/assets/css/admin.css'); ?>">
 </head>
-<body class="bg-gray-100 text-gray-900">
+<body class="admin-body bg-gray-100 text-gray-900">
     <?php if (str_starts_with($_SERVER['REQUEST_URI'] ?? '', '/admin/login')) : ?>
         <?php echo $content ?? ''; ?>
     <?php else : ?>
@@ -20,13 +21,22 @@
                     'csrf_token' => $_SESSION['csrf_token'] ?? '',
                 ]); ?>
 
-                <main class="flex-1 bg-gray-50 px-4 py-6 sm:px-6 lg:px-8">
+                <main class="admin-main flex-1 bg-gray-50 px-4 py-6 sm:px-6 lg:px-8">
                     <?php echo $this->partial('admin/partials/breadcrumbs', [
                         'breadcrumbs' => $breadcrumbs ?? [],
                     ]); ?>
 
                     <?php foreach ($_SESSION['flash'] ?? [] as $flash) : ?>
-                        <div class="mb-4 rounded border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-800">
+                        <?php
+                        $flashType = (string) ($flash['type'] ?? 'info');
+                        $flashClass = match ($flashType) {
+                            'success' => 'border-emerald-200 bg-emerald-50 text-emerald-800',
+                            'error' => 'border-red-200 bg-red-50 text-red-800',
+                            'warning' => 'border-amber-200 bg-amber-50 text-amber-800',
+                            default => 'border-blue-200 bg-blue-50 text-blue-800',
+                        };
+                        ?>
+                        <div role="<?php echo $flashType === 'error' ? 'alert' : 'status'; ?>" class="mb-4 rounded-xl border px-4 py-3 text-sm font-semibold <?php echo $flashClass; ?>">
                             <?php echo $this->escape((string) ($flash['message'] ?? '')); ?>
                         </div>
                     <?php endforeach; ?>
