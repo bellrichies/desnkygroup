@@ -9,6 +9,31 @@ on:
 jobs:
   phpunit:
     runs-on: ubuntu-latest
+    env:
+      APP_ENV: testing
+      APP_DEBUG: 'false'
+      APP_URL: http://127.0.0.1:8000
+      DB_DRIVER: mysql
+      DB_HOST: 127.0.0.1
+      DB_PORT: 3306
+      DB_DATABASE: desnkygroup_test
+      DB_USERNAME: desnkygroup
+      DB_PASSWORD: test_password
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_DATABASE: desnkygroup_test
+          MYSQL_USER: desnkygroup
+          MYSQL_PASSWORD: test_password
+          MYSQL_ROOT_PASSWORD: root_password
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping --host=127.0.0.1 --user=root --password=root_password"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
     steps:
       - uses: actions/checkout@v4
       - name: Setup PHP
@@ -18,6 +43,8 @@ jobs:
           extensions: mbstring, pdo_mysql
       - name: Install dependencies
         run: composer install --no-progress --no-suggest --prefer-dist
+      - name: Create test environment file
+        run: cp .env.example .env
       - name: Run migrations
         run: php scripts/migrate.php
       - name: Seed minimal data
