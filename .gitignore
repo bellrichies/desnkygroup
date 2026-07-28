@@ -33,7 +33,7 @@ coverage/
 phpunit.xml.dist
 
 # github
-.github/
+.github/*
 .phpunit.cache/
 
 # Build/Dist
