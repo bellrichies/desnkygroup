@@ -30,6 +30,8 @@ class Router
     private array $middlewareAliases = [
         'auth' => \App\Middleware\AuthMiddleware::class,
         'admin' => \App\Middleware\RequireAdmin::class,
+        'permission' => \App\Middleware\PermissionMiddleware::class,
+        'role' => \App\Middleware\RoleMiddleware::class,
         'csrf' => \App\Middleware\VerifyCsrfToken::class,
         'security' => \App\Middleware\SecurityHeaders::class,
     ];
@@ -198,8 +200,12 @@ class Router
 
         // Process middleware
         foreach ($route->getMiddleware() as $middlewareClass) {
-            $middlewareClass = $this->resolveMiddlewareClass((string) $middlewareClass);
+            [$middlewareClass, $parameters] = $this->parseMiddleware((string) $middlewareClass);
+            $middlewareClass = $this->resolveMiddlewareClass($middlewareClass);
             $middleware = $container->make($middlewareClass);
+            if (method_exists($middleware, 'setParameters')) {
+                $middleware->setParameters($parameters);
+            }
             $response = $middleware->handle();
             if ($response !== null) {
                 return $response;
@@ -239,5 +245,22 @@ class Router
     private function resolveMiddlewareClass(string $middleware): string
     {
         return $this->middlewareAliases[$middleware] ?? $middleware;
+    }
+
+    /**
+     * Split middleware strings such as "permission:users.view".
+     *
+     * @param string $middleware Middleware definition.
+     * @return array{0: string, 1: array<int, string>}
+     */
+    private function parseMiddleware(string $middleware): array
+    {
+        if (!str_contains($middleware, ':')) {
+            return [$middleware, []];
+        }
+
+        [$name, $parameterString] = explode(':', $middleware, 2);
+
+        return [$name, array_filter(array_map('trim', explode(',', $parameterString)))];
     }
 }

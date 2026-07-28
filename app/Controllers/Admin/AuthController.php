@@ -80,6 +80,7 @@ class AuthController extends BaseController
         if ($user !== null) {
             session_regenerate_id(true);
             $this->setUser($user->toSessionArray());
+            $this->adminUserService->rememberCurrentSession($user->id);
             $this->activityLogService->record($user->id, 'login', 'auth', 'Admin login successful.');
 
             return $this->json([
@@ -111,6 +112,7 @@ class AuthController extends BaseController
             'auth',
             'Admin logout.'
         );
+        $this->adminUserService->forgetCurrentSession();
 
         $this->clearUser();
         session_regenerate_id(true);

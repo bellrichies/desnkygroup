@@ -3,6 +3,9 @@
 namespace App\Middleware;
 
 use App\Exceptions\AuthorizationException;
+use App\Repositories\AdminUserRepository;
+use App\Services\AuthorizationService;
+use App\Support\DatabaseFactory;
 
 /**
  * RequireAdmin - Admin-only middleware
@@ -37,11 +40,12 @@ class RequireAdmin extends Middleware
             return false;
         }
 
-        $user = $_SESSION['admin_user'];
-        if (is_array($user)) {
-            return ($user['role'] ?? null) === 'super_admin';
+        $userId = (int) ($_SESSION['admin_user']['id'] ?? 0);
+        if ($userId <= 0) {
+            return false;
         }
 
-        return isset($user->role) && $user->role === 'super_admin';
+        return (new AuthorizationService(new AdminUserRepository(DatabaseFactory::make())))
+            ->isSuperAdmin($userId);
     }
 }

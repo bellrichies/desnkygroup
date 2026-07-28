@@ -45,4 +45,16 @@ class ActivityLogService extends BaseService
             return [];
         }
     }
+
+    /**
+     * @return array<int, array<string, mixed>>
+     */
+    public function filter(array $filters = []): array
+    {
+        try {
+            return $this->activityLogRepository->filter($filters);
+        } catch (\Throwable) {
+            return [];
+        }
+    }
 }

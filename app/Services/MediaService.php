@@ -52,7 +52,7 @@ class MediaService extends BaseService
             'image/webp' => 'webp',
             default => 'jpg',
         };
-        $directory = BASE_PATH . '/public/uploads/media';
+        $directory = $this->basePath() . '/public/uploads/media';
         if (!is_dir($directory)) {
             mkdir($directory, 0775, true);
         }
@@ -85,12 +85,17 @@ class MediaService extends BaseService
     {
         $row = $this->media->find($id);
         if ($row !== null) {
-            $path = BASE_PATH . '/public' . (string) $row['path'];
+            $path = $this->basePath() . '/public' . (string) $row['path'];
             if (is_file($path)) {
                 unlink($path);
             }
         }
 
         return $this->media->delete($id);
+    }
+
+    private function basePath(): string
+    {
+        return defined('BASE_PATH') ? BASE_PATH : dirname(__DIR__, 2);
     }
 }
