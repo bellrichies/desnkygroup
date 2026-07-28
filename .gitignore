@@ -1,7 +1,6 @@
 # IDE and Editor
 .vscode/
 .idea/
-.github/
 *.swp
 *.swo
 *~
@@ -34,6 +33,8 @@ phpunit.xml.dist
 
 # github
 .github/*
+!.github/workflows/
+!.github/workflows/**
 .phpunit.cache/
 
 # Build/Dist
