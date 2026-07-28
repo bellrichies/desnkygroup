@@ -8,6 +8,7 @@ $groups = [
         ['label' => 'Pages', 'url' => '/admin/pages', 'icon' => 'file'],
         ['label' => 'Services', 'url' => '/admin/services', 'icon' => 'briefcase'],
         ['label' => 'Projects', 'url' => '/admin/projects', 'icon' => 'image'],
+        ['label' => 'Media Library', 'url' => '/admin/media', 'icon' => 'image'],
     ],
     'Ecommerce' => [
         ['label' => 'Products', 'url' => '/admin/products', 'icon' => 'box'],

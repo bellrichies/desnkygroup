@@ -19,8 +19,13 @@
     <div class="container-page grid gap-10 lg:grid-cols-[1fr_22rem]">
         <div>
             <h2 class="text-3xl font-bold text-desnky-navy">Service features</h2>
+            <?php if (!empty($service['content'])) : ?>
+                <div class="prose mt-6 max-w-none text-desnky-muted">
+                    <?php echo nl2br($this->escape((string) $service['content'])); ?>
+                </div>
+            <?php endif; ?>
             <div class="mt-6 grid gap-4 sm:grid-cols-2">
-                <?php foreach ($service['features'] as $feature) : ?>
+                <?php foreach (($service['features'] ?? []) as $feature) : ?>
                     <div class="border border-gray-200 p-5">
                         <span class="text-sm font-bold text-desnky-blue">Feature</span>
                         <p class="mt-2 font-semibold text-desnky-navy"><?php echo $this->escape($feature); ?></p>
@@ -28,21 +33,23 @@
                 <?php endforeach; ?>
             </div>
 
-            <h2 class="mt-12 text-3xl font-bold text-desnky-navy">Our process</h2>
-            <div class="mt-6 grid gap-4 md:grid-cols-4">
-                <?php foreach ($service['process'] as $index => $step) : ?>
-                    <div class="bg-desnky-surface p-5">
-                        <span class="text-sm font-bold text-desnky-blue">0<?php echo $index + 1; ?></span>
-                        <p class="mt-3 font-semibold text-desnky-navy"><?php echo $this->escape($step); ?></p>
-                    </div>
-                <?php endforeach; ?>
-            </div>
+            <?php if (!empty($service['process'])) : ?>
+                <h2 class="mt-12 text-3xl font-bold text-desnky-navy">Our process</h2>
+                <div class="mt-6 grid gap-4 md:grid-cols-4">
+                    <?php foreach ($service['process'] as $index => $step) : ?>
+                        <div class="bg-desnky-surface p-5">
+                            <span class="text-sm font-bold text-desnky-blue">0<?php echo $index + 1; ?></span>
+                            <p class="mt-3 font-semibold text-desnky-navy"><?php echo $this->escape($step); ?></p>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
         </div>
 
         <aside class="bg-desnky-surface p-6">
             <h2 class="text-xl font-bold text-desnky-navy">Why choose this service</h2>
             <ul class="mt-5 space-y-3 text-sm leading-6 text-desnky-muted">
-                <?php foreach ($service['benefits'] as $benefit) : ?>
+                <?php foreach (($service['benefits'] ?? []) as $benefit) : ?>
                     <li class="flex gap-3"><span class="font-bold text-desnky-green">&check;</span><?php echo $this->escape($benefit); ?></li>
                 <?php endforeach; ?>
             </ul>
