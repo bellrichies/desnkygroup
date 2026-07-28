@@ -26,7 +26,15 @@ class ServiceController extends BaseController
             'seo' => [
                 'title' => 'Services | Desnky Global Resources Ltd',
                 'description' => 'Explore Desnky Global Resources services in engineering, energy, procurement, HSE, ICT and agro food processing across Nigeria.',
+                'keywords' => 'engineering services Nigeria, energy solutions Nigeria, procurement services Lagos, HSE safety services Nigeria, ICT solutions Nigeria',
                 'canonical' => 'https://www.desnkygroup.com/services',
+                'schema' => [
+                    SeoHelper::organizationSchema(),
+                    SeoHelper::breadcrumbSchema([
+                        'Home' => 'https://www.desnkygroup.com/',
+                        'Services' => 'https://www.desnkygroup.com/services',
+                    ]),
+                ],
             ],
         ]);
     }
@@ -56,7 +64,19 @@ class ServiceController extends BaseController
                 'description' => $service['seo_description'],
                 'canonical' => 'https://www.desnkygroup.com/services/' . $slug,
                 'image' => $service['image'],
-                'schema' => SeoHelper::serviceSchema($service),
+                'keywords' => $service['seo_keywords'] ?? $service['title'] . ', services Nigeria, Desnky Global',
+                'schema' => [
+                    SeoHelper::serviceSchema($service),
+                    SeoHelper::breadcrumbSchema([
+                        'Home' => 'https://www.desnkygroup.com/',
+                        'Services' => 'https://www.desnkygroup.com/services',
+                        $service['title'] => 'https://www.desnkygroup.com/services/' . $slug,
+                    ]),
+                    SeoHelper::faqSchema([
+                        'Does Desnky Global provide ' . $service['title'] . ' in Nigeria?' => 'Yes. Desnky Global Resources Ltd supports Nigerian organizations with ' . strtolower($service['title']) . ' and related business services.',
+                        'How can I request this service?' => 'Use the contact form or request a quote so the team can review your requirement and respond with next steps.',
+                    ]),
+                ],
             ],
         ]);
     }
@@ -176,9 +196,9 @@ class ServiceController extends BaseController
                 'content' => (string) ($row['content'] ?? ''),
                 'seo_title' => (string) ($row['meta_title'] ?? $row['title']),
                 'seo_description' => (string) ($row['meta_description'] ?? $row['summary'] ?? ''),
+                'seo_keywords' => (string) ($row['meta_keywords'] ?? ''),
             ];
         }
-
         return $services;
     }
 }

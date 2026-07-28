@@ -19,12 +19,16 @@ class ProjectRepository extends BaseRepository
 
     public function find(int $id): ?array
     {
-        return $this->connection->queryOne(
-            "SELECT * FROM projects WHERE id = ? AND deleted_at IS NULL",
-            [$id]
-        );
+        return $this->connection->queryOne("SELECT * FROM projects WHERE id = ? AND deleted_at IS NULL", [$id]);
     }
 
+    public function findPublishedBySlug(string $slug): ?array
+    {
+        return $this->connection->queryOne("SELECT *
+             FROM projects
+             WHERE slug = ? AND is_published = 1 AND deleted_at IS NULL
+             LIMIT 1", [$slug]);
+    }
     /**
      * @return array<int, array>
      */

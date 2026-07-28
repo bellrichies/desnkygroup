@@ -51,6 +51,11 @@ class ProjectService extends BaseService
         return $this->projects->find($id);
     }
 
+    public function getPublishedBySlug(string $slug): ?array
+    {
+        return $this->projects->findPublishedBySlug($slug);
+    }
+
     public function create(array $data): int
     {
         $data['slug'] = $this->slug($data['slug'] ?? $data['title'] ?? '');
