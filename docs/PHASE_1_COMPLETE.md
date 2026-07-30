@@ -471,7 +471,7 @@ mysql -u root -p -e "CREATE DATABASE desnkygroup CHARACTER SET utf8mb4 COLLATE u
 php scripts/migrate.php
 
 # 6. Start development server
-php -S localhost:8000 -t public/
+php -S localhost:8000 -t public public/index.php
 
 # 7. Run tests
 composer test

@@ -39,6 +39,7 @@
         }
     },
     "scripts": {
+        "serve": "php -S 127.0.0.1:8000 -t public public/index.php",
         "test": "phpunit",
         "test-coverage": "phpunit --coverage-html coverage",
         "qa": "phpunit && phpstan analyze app --level 5 && php scripts/qa_audit.php",

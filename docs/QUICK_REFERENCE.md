@@ -81,7 +81,7 @@ nano .env
 php scripts/migrate.php
 
 # Start development server
-php -S localhost:8000 -t public/
+php -S localhost:8000 -t public public/index.php
 
 # Run all tests
 composer test
@@ -432,7 +432,7 @@ class MyTest extends TestCase
 | vendor/ not found | Run `composer install` |
 | Permission errors | Run `chmod -R 755 storage/` |
 | Tests won't run | Run `composer test` (phpunit.xml configured) |
-| Port 8000 in use | Use `php -S localhost:8001 -t public/` |
+| Port 8000 in use | Use `php -S localhost:8001 -t public public/index.php` |
 | Route not matching | Check regex pattern in Route class |
 | DI won't resolve | Verify class exists and type hint is correct |
 | Migrations fail | Check database exists and credentials are correct |

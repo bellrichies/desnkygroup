@@ -135,7 +135,7 @@ php scripts/migrate.php --refresh
 
 ```bash
 # Start development server
-php -S localhost:8000 -t public/
+php -S localhost:8000 -t public public/index.php
 
 # Open in browser: http://localhost:8000
 ```
@@ -259,7 +259,7 @@ Error: The port 8000 is already in use
 **Solution:**
 ```bash
 # Use a different port
-php -S localhost:8001 -t public/
+php -S localhost:8001 -t public public/index.php
 ```
 
 ---
@@ -408,7 +408,7 @@ composer analysis
 
 ```bash
 # Start development server
-php -S localhost:8000 -t public/
+php -S localhost:8000 -t public public/index.php
 
 # Run migrations
 php scripts/migrate.php

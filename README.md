@@ -69,7 +69,7 @@ mysql -u root -p -e "CREATE DATABASE desnkygroup CHARACTER SET utf8mb4 COLLATE u
 php scripts/migrate.php
 
 # 7. Start development server
-php -S localhost:8000 -t public/
+php -S localhost:8000 -t public public/index.php
 
 # 8. Open browser
 # http://localhost:8000
@@ -273,7 +273,7 @@ php scripts/migrate.php --rollback      # Rollback last batch
 php scripts/migrate.php --refresh       # Rollback all + re-run
 
 # Development server
-php -S localhost:8000 -t public/
+php -S localhost:8000 -t public public/index.php
 
 # Code analysis
 vendor/bin/phpcs --standard=PSR12 app/

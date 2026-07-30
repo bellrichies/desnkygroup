@@ -992,7 +992,7 @@ npm install
 ```bash
 cp .env.example .env
 # Edit .env with local settings
-php -S localhost:8000 -t public
+php -S localhost:8000 -t public public/index.php
 ```
 
 #### Step 5: Setup Database
@@ -1016,7 +1016,7 @@ npm run build    # Production build
 
 ```bash
 # PHP built-in server
-php -S localhost:8000 -t public
+php -S localhost:8000 -t public public/index.php
 
 # With Ngrok for mobile testing
 ngrok http 8000

@@ -99,6 +99,23 @@ class RouterTest extends TestCase
     }
 
     /**
+     * Static-looking XML paths must still be handled by application routes.
+     */
+    public function testRouteMatchingXmlFeedPath(): void
+    {
+        $this->router->get('/blog/feed.xml', 'Frontend\BlogController@feed');
+        $this->router->get('/blog/{slug}', 'Frontend\BlogController@show');
+
+        $match = $this->router->match('GET', '/blog/feed.xml');
+
+        $this->assertIsArray($match);
+        $this->assertSame(
+            'Frontend\BlogController@feed',
+            $match['route']->getAction()
+        );
+    }
+
+    /**
      * Test route with middleware
      */
     public function testRouteWithMiddleware(): void

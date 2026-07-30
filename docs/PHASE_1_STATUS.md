@@ -229,7 +229,7 @@ composer install
 ### 3. Verify Installation
 ```bash
 # Check if PHP can load the application
-php -S localhost:8000 -t public/
+php -S localhost:8000 -t public public/index.php
 ```
 
 ### 4. Access Application
