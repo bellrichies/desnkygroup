@@ -509,12 +509,6 @@ $aboutSections = [
                     'image_alt' => 'Blessing Desmond, Business Director',
                 ],
                 [
-                    'name' => 'Virenra Bhardwai',
-                    'role' => 'Executive Director',
-                    'image' => 'https://www.desnkygroup.com/images/user1.jpg',
-                    'image_alt' => 'Virenra Bhardwai, Executive Director',
-                ],
-                [
                     'name' => 'Charles Mofunanya',
                     'role' => 'Project Director',
                     'image' => 'https://www.desnkygroup.com/images/user1.jpg',

@@ -72,6 +72,11 @@ $router->group('/admin', function ($router) {
     $router->post('/pages/{id}', 'Admin\PageController@update')->middleware(['auth', 'csrf', 'permission:pages.edit']);
     $router->post('/pages/{id}/delete', 'Admin\PageController@destroy')->middleware(['auth', 'csrf', 'permission:pages.delete']);
 
+    $router->get('/team-members', 'Admin\TeamMemberController@index')->middleware(['auth', 'permission:pages.view']);
+    $router->post('/team-members', 'Admin\TeamMemberController@store')->middleware(['auth', 'csrf', 'permission:pages.edit']);
+    $router->post('/team-members/{index}', 'Admin\TeamMemberController@update')->middleware(['auth', 'csrf', 'permission:pages.edit']);
+    $router->post('/team-members/{index}/delete', 'Admin\TeamMemberController@destroy')->middleware(['auth', 'csrf', 'permission:pages.delete']);
+
     $router->get('/services', 'Admin\ServiceController@index')->middleware(['auth', 'permission:services.view']);
     $router->get('/services/create', 'Admin\ServiceController@create')->middleware(['auth', 'permission:services.create']);
     $router->post('/services', 'Admin\ServiceController@store')->middleware(['auth', 'csrf', 'permission:services.create']);

@@ -7,6 +7,7 @@ $groups = [
     'Content' => [
         ['label' => 'Homepage Hero', 'url' => '/admin/homepage-hero', 'permission' => 'settings.view'],
         ['label' => 'Pages',        'url' => '/admin/pages',          'permission' => 'pages.view'],
+        ['label' => 'Team Members', 'url' => '/admin/team-members',   'permission' => 'pages.view'],
         ['label' => 'Services',     'url' => '/admin/services',       'permission' => 'services.view'],
         ['label' => 'Projects',     'url' => '/admin/projects',       'permission' => 'projects.view'],
         ['label' => 'Blog Posts',   'url' => '/admin/blog',           'permission' => 'blog.view'],

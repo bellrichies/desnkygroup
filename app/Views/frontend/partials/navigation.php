@@ -16,7 +16,7 @@ $sectors = [
     ['label' => 'Engineering Services', 'href' => '/services/engineering', 'icon' => 'cog', 'desc' => 'Electrical, mechanical & civil project delivery.'],
     ['label' => 'Energy Solutions', 'href' => '/services/energy-solutions', 'icon' => 'bolt', 'desc' => 'Power, oil & gas and renewable energy support.'],
     ['label' => 'Procurement Services', 'href' => '/services/procurement', 'icon' => 'truck', 'desc' => 'Sourcing, logistics & supply-chain management.'],
-    ['label' => 'Safety / HSE Services', 'href' => '/services/hse-safety', 'icon' => 'shield-check', 'desc' => 'HSE consulting, training & safety equipment.'],
+    ['label' => 'Fire Safety / HSE Services', 'href' => '/services/hse-safety', 'icon' => 'shield-check', 'desc' => 'HSE consulting, training & safety equipment.'],
     ['label' => 'ICT Solutions', 'href' => '/services/ict-solutions', 'icon' => 'server', 'desc' => 'Infrastructure, networks & digital systems.'],
     ['label' => 'Agro Products & Food', 'href' => '/services/agro-food-processing', 'icon' => 'leaf', 'desc' => 'Agro products & food-processing solutions.'],
 ];

@@ -13,6 +13,7 @@ return [
             'username' => env('MAIL_USERNAME', ''),
             'password' => env('MAIL_PASSWORD', ''),
             'encryption' => env('MAIL_ENCRYPTION', 'tls'),
+            'timeout' => (int) env('MAIL_TIMEOUT', 10),
         ],
     ],
 ];

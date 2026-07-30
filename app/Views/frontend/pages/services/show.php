@@ -357,7 +357,14 @@ if ($slug === 'energy-solutions') {
             ],
         ],
     ];
-    $heroImage = '/assets/images/services/energy.webp';
+    $heroImage = '/assets/images/services/energy.png';
+
+    foreach ($heroSlides as &$energyHeroSlide) {
+        if (($energyHeroSlide['media_type'] ?? 'image') === 'image') {
+            $energyHeroSlide['background_media'] = '/assets/images/services/energy.png';
+        }
+    }
+    unset($energyHeroSlide);
 }
 if ($slug === 'hse-safety') {
     $introHeading = 'Complete fire-safety protection for people, assets and operations';
@@ -380,7 +387,14 @@ if ($slug === 'hse-safety') {
             ],
         ],
     ];
-    $heroImage = '/assets/images/services/hse-safety.webp';
+    $heroImage = '/assets/images/services/hse_1.jpg';
+
+    foreach ($heroSlides as &$hseHeroSlide) {
+        if (($hseHeroSlide['media_type'] ?? 'image') === 'image') {
+            $hseHeroSlide['background_media'] = '/assets/images/services/hse_1.jpg';
+        }
+    }
+    unset($hseHeroSlide);
 }
 if (!$heroManaged && $heroSlides === []) {
 $heroSlides = [[

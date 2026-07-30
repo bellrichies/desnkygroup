@@ -2,8 +2,8 @@
 $year = date('Y');
 $site = $site ?? [];
 $brandName = (string) ($site['name'] ?? 'Desnky Global Resources Ltd');
-$phone = '+2348034145957';
-$phoneDisplay = '+(234) 803-414-5957';
+$phone = '+2348084908747';
+$phoneDisplay = '+(234) 808 490 8747';
 $email = (string) ($site['email'] ?? 'info@desnkygroup.com');
 $address = '5, Olaniyi Street, Egbeda, Lagos';
 $csrf = (string) ($csrf_token ?? '');

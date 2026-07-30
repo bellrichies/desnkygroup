@@ -85,25 +85,7 @@ class MailService
     private function sendAdminMail(string $subject, string $body, string $replyTo = ''): bool
     {
         try {
-            $mail = new PHPMailer(true);
-            $mail->isSMTP();
-            $mail->Host = (string) Config::get('mail.mailers.smtp.host', 'localhost');
-            $mail->Port = (int) Config::get('mail.mailers.smtp.port', 587);
-
-            $username = (string) Config::get('mail.mailers.smtp.username', '');
-            $password = (string) Config::get('mail.mailers.smtp.password', '');
-
-            if ($username !== '') {
-                $mail->SMTPAuth = true;
-                $mail->Username = $username;
-                $mail->Password = $password;
-            }
-
-            $encryption = (string) Config::get('mail.mailers.smtp.encryption', '');
-            if ($encryption !== '') {
-                $mail->SMTPSecure = $encryption;
-            }
-
+            $mail = $this->mailer();
             $fromAddress = (string) Config::get('mail.from.address', 'noreply@desnkygroup.com');
             $fromName = (string) Config::get('mail.from.name', 'Desnky Global Resources');
             $adminAddress = (string) Config::get('mail.admin.address', 'info@desnkygroup.com');
@@ -137,23 +119,7 @@ class MailService
         }
 
         try {
-            $mail = new PHPMailer(true);
-            $mail->isSMTP();
-            $mail->Host = (string) Config::get('mail.mailers.smtp.host', 'localhost');
-            $mail->Port = (int) Config::get('mail.mailers.smtp.port', 587);
-
-            $username = (string) Config::get('mail.mailers.smtp.username', '');
-            if ($username !== '') {
-                $mail->SMTPAuth = true;
-                $mail->Username = $username;
-                $mail->Password = (string) Config::get('mail.mailers.smtp.password', '');
-            }
-
-            $encryption = (string) Config::get('mail.mailers.smtp.encryption', '');
-            if ($encryption !== '') {
-                $mail->SMTPSecure = $encryption;
-            }
-
+            $mail = $this->mailer();
             $mail->setFrom(
                 (string) Config::get('mail.from.address', 'noreply@desnkygroup.com'),
                 (string) Config::get('mail.from.name', 'Desnky Global Resources')
@@ -173,5 +139,30 @@ class MailService
 
             return false;
         }
+    }
+
+    private function mailer(): PHPMailer
+    {
+        $mail = new PHPMailer(true);
+        $mail->isSMTP();
+        $mail->Host = (string) Config::get('mail.mailers.smtp.host', 'localhost');
+        $mail->Port = (int) Config::get('mail.mailers.smtp.port', 587);
+        $timeout = max(1, (int) Config::get('mail.mailers.smtp.timeout', 10));
+        $mail->Timeout = $timeout;
+        $username = (string) Config::get('mail.mailers.smtp.username', '');
+        if ($username !== '') {
+            $mail->SMTPAuth = true;
+            $mail->Username = $username;
+            $mail->Password = (string) Config::get('mail.mailers.smtp.password', '');
+        }
+
+        $encryption = strtolower(trim((string) Config::get('mail.mailers.smtp.encryption', '')));
+        if ($encryption === 'ssl' || $encryption === 'smtps') {
+            $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+        } elseif ($encryption === 'tls' || $encryption === 'starttls') {
+            $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+        }
+
+        return $mail;
     }
 }

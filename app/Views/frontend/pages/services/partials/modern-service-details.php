@@ -1,7 +1,16 @@
 <?php
 $modernServiceContent = [
     'hse-safety' => [
-        'image' => '/assets/images/services/hse-safety.webp',
+        'images' => [
+            '/assets/images/services/hse_2.jpg',
+            '/assets/images/services/hse_3.jpg',
+            '/assets/images/services/hse_4.jpg',
+            '/assets/images/services/hse_5.jpg',
+            '/assets/images/services/hse_1.jpg',
+        ],
+        'section_images' => [
+            'fire-safety-delivery-process' => '/assets/images/services/hse_6.png',
+        ],
         'alt' => 'HSE professionals inspecting industrial fire alarm and suppression equipment',
         'sections' => [
             ['hse-support-and-ppe-supply', 'HSE readiness', 'HSE Support and PPE Supply', 'We help organisations strengthen everyday safety through risk-aware HSE support and dependable personal protective equipment supply.', 'shield-check', [
@@ -51,7 +60,16 @@ $modernServiceContent = [
         ],
     ],
     'energy-solutions' => [
-        'image' => '/assets/images/services/energy.webp',
+        'images' => [
+            '/assets/images/services/energy_01.png',
+            '/assets/images/services/energy_02.png',
+            '/assets/images/services/energy_03.png',
+            '/assets/images/services/energy_04.png',
+            '/assets/images/services/energy_05.png',
+            '/assets/images/services/energy_06.png',
+            '/assets/images/services/energy_07.png',
+            '/assets/images/services/energy_08.png',
+        ],
         'alt' => 'Energy engineers inspecting an integrated power and energy infrastructure facility',
         'sections' => [
             ['renewable-and-backup-power', 'Reliable power', 'Renewable and backup systems engineered around your load', 'We assess demand, operating hours and critical equipment before designing dependable primary, backup or hybrid power systems for commercial, industrial and institutional facilities.', 'bolt', [
@@ -252,12 +270,20 @@ if ($modernPage === null) {
 
 <div class="engineering-details modern-service-details">
     <?php foreach ($modernPage['sections'] as $sectionIndex => $modernSection) : ?>
-        <?php [$sectionId, $eyebrow, $heading, $intro, $sectionIcon, $items] = $modernSection; $steps = $modernSection[6] ?? []; ?>
+        <?php
+        [$sectionId, $eyebrow, $heading, $intro, $sectionIcon, $items] = $modernSection;
+        $steps = $modernSection[6] ?? [];
+        $sectionImages = $modernPage['images'] ?? [];
+        $sectionImage = $modernPage['section_images'][$sectionId]
+            ?? ($sectionImages !== []
+                ? $sectionImages[$sectionIndex % count($sectionImages)]
+                : $modernPage['image']);
+        ?>
         <section id="<?php echo $this->escape($sectionId); ?>" class="engineering-feature scroll-mt-28">
             <div class="container-page">
                 <div class="engineering-feature__layout <?php echo $sectionIndex % 2 === 1 ? 'engineering-feature__layout--reverse' : ''; ?>">
                     <div class="engineering-feature__visual" data-reveal>
-                        <img src="<?php echo $this->escape($modernPage['image']); ?>" alt="<?php echo $this->escape($modernPage['alt']); ?>" loading="lazy" width="1536" height="1024">
+                        <img src="<?php echo $this->escape($sectionImage); ?>" alt="<?php echo $this->escape($modernPage['alt']); ?>" loading="lazy" width="1536" height="1024">
                         <span class="engineering-feature__icon" aria-hidden="true"><?php echo $this->partial('frontend/partials/icon', ['name' => $sectionIcon, 'class' => 'h-6 w-6']); ?></span>
                     </div>
                     <div class="engineering-feature__content" data-reveal>
