@@ -121,6 +121,7 @@ $router->group('/admin', function ($router) {
     $router->get('/blog/create', 'Admin\BlogController@create')->middleware(['auth', 'permission:blog.create']);
     $router->post('/blog', 'Admin\BlogController@store')->middleware(['auth', 'csrf', 'permission:blog.create']);
     $router->post('/blog/bulk-status', 'Admin\BlogController@bulkStatus')->middleware(['auth', 'csrf', 'permission:blog.publish']);
+    $router->post('/blog/bulk-delete', 'Admin\BlogController@bulkDelete')->middleware(['auth', 'csrf', 'permission:blog.delete']);
     $router->get('/blog/categories', 'Admin\BlogController@taxonomy')->middleware(['auth', 'permission:blog.taxonomy']);
     $router->post('/blog/categories', 'Admin\BlogController@categoryStore')->middleware(['auth', 'csrf', 'permission:blog.taxonomy']);
     $router->post('/blog/categories/{id}', 'Admin\BlogController@categoryUpdate')->middleware(['auth', 'csrf', 'permission:blog.taxonomy']);

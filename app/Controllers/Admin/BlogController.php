@@ -122,6 +122,24 @@ class BlogController extends BaseController
         $this->redirect('/admin/blog');
     }
 
+    public function bulkDelete(): void
+    {
+        try {
+            $count = $this->blog->bulkDeletePosts($_POST['ids'] ?? []);
+            $this->activityLog->record(
+                (int) ($this->user()['id'] ?? 0),
+                'blog_posts_bulk_deleted',
+                'blog',
+                'Soft deleted ' . $count . ' blog posts.'
+            );
+            $this->flash('success', $count . ' post' . ($count === 1 ? '' : 's') . ' moved to deleted items.');
+        } catch (Throwable $exception) {
+            $this->flash('error', $exception->getMessage());
+        }
+
+        $this->redirect('/admin/blog');
+    }
+
     public function taxonomy(): string
     {
         $page = max(1, (int) ($_GET['page'] ?? 1));

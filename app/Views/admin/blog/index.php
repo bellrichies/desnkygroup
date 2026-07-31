@@ -55,22 +55,25 @@ $csrf = (string) ($csrf_token ?? '');
 </form>
 
 <div class="overflow-hidden rounded bg-white shadow-sm ring-1 ring-gray-200">
-    <form id="blog-bulk-status" method="post" action="/admin/blog/bulk-status" class="flex flex-col gap-2 border-b border-gray-200 px-4 py-2.5 sm:flex-row sm:items-center">
+    <form id="blog-bulk-status" method="post" action="/admin/blog/bulk-status" class="flex flex-col gap-2 border-b border-gray-200 px-4 py-3 sm:flex-row sm:items-center">
         <input type="hidden" name="_token" value="<?php echo $this->escape($csrf); ?>">
         <select name="status" class="w-full rounded border-gray-300 text-sm sm:w-36">
             <?php foreach ($statuses as $status) : ?>
                 <option value="<?php echo $this->escape($status); ?>"><?php echo ucfirst($status); ?></option>
             <?php endforeach; ?>
         </select>
-        <button class="shrink-0 rounded bg-slate-900 px-4 py-2 text-sm font-semibold text-white">Apply to the selected</button>
-        <p class="text-xs text-gray-500">Bulk updates are audited and never affect deleted posts.</p>
+        <button type="submit" data-bulk-action class="shrink-0 rounded bg-slate-900 px-4 py-2 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50" disabled>Apply status</button>
+        <button type="submit" data-bulk-action data-bulk-delete formaction="/admin/blog/bulk-delete" class="shrink-0 rounded border border-red-200 bg-red-50 px-4 py-2 text-sm font-semibold text-red-700 hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-50" disabled>Delete selected</button>
+        <p id="blog-selection-count" class="text-xs font-medium text-gray-500" aria-live="polite">No posts selected</p>
     </form>
 
     <div class="overflow-x-auto">
         <table class="min-w-full divide-y divide-gray-200 text-sm">
             <thead class="bg-gray-50 text-left text-xs font-semibold uppercase text-gray-500">
                 <tr>
-                    <th class="w-10 px-3 py-2"><span class="sr-only">Select</span></th>
+                    <th class="w-10 px-3 py-2">
+                        <input id="select-all-posts" type="checkbox" class="rounded border-gray-300 text-blue-700 focus:ring-blue-600" aria-label="Select all posts on this page">
+                    </th>
                     <th class="px-3 py-2">Post</th>
                     <th class="px-3 py-2">Author</th>
                     <th class="px-3 py-2">Category</th>
@@ -83,10 +86,10 @@ $csrf = (string) ($csrf_token ?? '');
             <tbody class="divide-y divide-gray-100">
                 <?php foreach ($posts as $post) : ?>
                     <?php $deleted = !empty($post['deleted_at']); ?>
-                    <tr class="<?php echo $deleted ? 'bg-red-50/50' : ''; ?>">
+                    <tr class="<?php echo $deleted ? 'bg-red-50/50' : ''; ?>" data-post-row>
                         <td class="px-3 py-2">
                             <?php if (!$deleted) : ?>
-                                <input form="blog-bulk-status" type="checkbox" name="ids[]" value="<?php echo (int) $post['id']; ?>" class="rounded border-gray-300 text-blue-700">
+                                <input form="blog-bulk-status" type="checkbox" name="ids[]" value="<?php echo (int) $post['id']; ?>" class="blog-post-checkbox rounded border-gray-300 text-blue-700 focus:ring-blue-600" aria-label="Select <?php echo $this->escape((string) $post['title']); ?>">
                             <?php endif; ?>
                         </td>
                         <td class="px-3 py-2">
@@ -128,3 +131,57 @@ $csrf = (string) ($csrf_token ?? '');
     </div>
 </div>
 <?php echo $this->partial('admin/partials/pagination', ['pagination' => $pagination ?? [], 'filters' => $filters]); ?>
+
+<script>
+(() => {
+    const form = document.getElementById('blog-bulk-status');
+    const selectAll = document.getElementById('select-all-posts');
+    const checkboxes = Array.from(document.querySelectorAll('.blog-post-checkbox'));
+    const actionButtons = Array.from(form.querySelectorAll('[data-bulk-action]'));
+    const countLabel = document.getElementById('blog-selection-count');
+
+    const updateSelection = () => {
+        const selected = checkboxes.filter(checkbox => checkbox.checked);
+        const count = selected.length;
+
+        selectAll.checked = count > 0 && count === checkboxes.length;
+        selectAll.indeterminate = count > 0 && count < checkboxes.length;
+        selectAll.disabled = checkboxes.length === 0;
+        actionButtons.forEach(button => button.disabled = count === 0);
+        countLabel.textContent = count === 0
+            ? 'No posts selected'
+            : `${count} post${count === 1 ? '' : 's'} selected`;
+
+        checkboxes.forEach(checkbox => {
+            checkbox.closest('[data-post-row]')?.classList.toggle('bg-blue-50/60', checkbox.checked);
+        });
+    };
+
+    selectAll.addEventListener('change', () => {
+        checkboxes.forEach(checkbox => checkbox.checked = selectAll.checked);
+        updateSelection();
+    });
+
+    checkboxes.forEach(checkbox => checkbox.addEventListener('change', updateSelection));
+
+    form.addEventListener('submit', event => {
+        const selectedCount = checkboxes.filter(checkbox => checkbox.checked).length;
+        if (selectedCount === 0) {
+            event.preventDefault();
+            updateSelection();
+            return;
+        }
+
+        if (event.submitter?.hasAttribute('data-bulk-delete')) {
+            const confirmed = window.confirm(
+                `Move ${selectedCount} selected post${selectedCount === 1 ? '' : 's'} to deleted items?`
+            );
+            if (!confirmed) {
+                event.preventDefault();
+            }
+        }
+    });
+
+    updateSelection();
+})();
+</script>

@@ -128,6 +128,15 @@ $modernServiceContent = [
     'procurement' => [
         'image' => '/assets/images/services/procurement.webp',
         'alt' => 'Procurement professionals inspecting industrial equipment in a warehouse',
+        'images' => [
+            '/assets/images/services/procurement_01.png',
+            '/assets/images/services/procurement_02.png',
+            '/assets/images/services/procurement_03.png',
+            '/assets/images/services/procurement_04.png',
+            '/assets/images/services/procurement_05.png',
+            '/assets/images/services/procurement_06.png',
+            '/assets/images/services/procurement_07.png',
+        ],
         'sections' => [
             ['our-procurement-capabilities', 'Strategic sourcing', 'Technical procurement without the complexity', 'We source equipment and materials against clear specifications, coordinating suppliers, quality and delivery through one accountable channel.', 'truck', [
                 ['Electrical equipment', 'Switchgear, cables, protection and installation materials.'],
@@ -173,6 +182,15 @@ $modernServiceContent = [
     'ict-solutions' => [
         'image' => '/assets/images/services/ict.webp',
         'alt' => 'ICT professionals working beside server and network monitoring systems',
+        'images' => [
+            '/assets/images/services/ict_01.png',
+            '/assets/images/services/ict_02.png',
+            '/assets/images/services/ict_03.png',
+            '/assets/images/services/ict_04.png',
+            '/assets/images/services/ict_05.png',
+            '/assets/images/services/ict_06.png',
+            '/assets/images/services/ict_07.png',
+        ],
         'sections' => [
             ['our-ict-capabilities', 'Digital foundation', 'Technology that works for the way your business operates', 'We connect infrastructure, systems and user support into practical solutions that are secure, maintainable and ready to scale.', 'server', [
                 ['Networks & systems', 'Reliable connectivity, configuration and operational support.'],
@@ -218,6 +236,15 @@ $modernServiceContent = [
     'agro-food-processing' => [
         'image' => '/assets/images/services/agro.webp',
         'alt' => 'Agro quality professionals inspecting produce in a food processing facility',
+        'images' => [
+            '/assets/images/services/agro_01.png',
+            '/assets/images/services/agro_02.png',
+            '/assets/images/services/agro_03.png',
+            '/assets/images/services/agro_04.png',
+            '/assets/images/services/agro_05.png',
+            '/assets/images/services/agro_06.png',
+            '/assets/images/services/agro_07.png',
+        ],
         'sections' => [
             ['our-agro-capabilities', 'Value-chain support', 'From producer networks to dependable buyer supply', 'We coordinate sourcing, aggregation and buyer requirements to create clearer, more reliable agricultural supply connections.', 'leaf', [
                 ['Product supply', 'Structured sourcing against quantity and quality needs.'],

@@ -5,8 +5,29 @@ $site = $site ?? [];
 $brandName = (string) ($site['name'] ?? 'Desnky Global Resources Ltd');
 ?>
 <header
-    x-data="{ mobileOpen: false, servicesOpen: false }"
-    @keydown.escape.window="mobileOpen = false; servicesOpen = false"
+    x-data="{
+        mobileOpen: false,
+        servicesOpen: false,
+        servicesCloseTimer: null,
+        openServices() {
+            window.clearTimeout(this.servicesCloseTimer);
+            this.servicesCloseTimer = null;
+            this.servicesOpen = true;
+        },
+        closeServices() {
+            window.clearTimeout(this.servicesCloseTimer);
+            this.servicesCloseTimer = null;
+            this.servicesOpen = false;
+        },
+        scheduleServicesClose() {
+            window.clearTimeout(this.servicesCloseTimer);
+            this.servicesCloseTimer = window.setTimeout(() => {
+                this.servicesOpen = false;
+                this.servicesCloseTimer = null;
+            }, 180);
+        }
+    }"
+    @keydown.escape.window="mobileOpen = false; closeServices()"
     x-effect="document.body.style.overflow = mobileOpen ? 'hidden' : ''"
     class="<?php echo $isHomeHeader
         ? 'site-header site-header--home site-header--transparent top-0 z-header border-b'

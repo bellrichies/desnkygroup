@@ -336,6 +336,25 @@ class BlogPostRepository extends BaseRepository
         return true;
     }
 
+    /**
+     * @param array<int, int> $ids
+     */
+    public function softDeleteMany(array $ids): int
+    {
+        if ($ids === []) {
+            return 0;
+        }
+
+        $placeholders = implode(', ', array_fill(0, count($ids), '?'));
+
+        return $this->connection->update(
+            "UPDATE blog_posts
+             SET deleted_at = NOW()
+             WHERE deleted_at IS NULL AND id IN ({$placeholders})",
+            $ids
+        );
+    }
+
     public function restore(int $id): bool
     {
         $this->connection->update('UPDATE blog_posts SET deleted_at = NULL WHERE id = ?', [$id]);

@@ -299,6 +299,27 @@ class BlogService extends BaseService
     }
 
     /**
+     * @param array<int, mixed> $ids
+     */
+    public function bulkDeletePosts(array $ids): int
+    {
+        $postIds = array_values(array_unique(array_filter(array_map('intval', $ids), static fn (int $id): bool => $id > 0)));
+
+        if ($postIds === []) {
+            throw new InvalidArgumentException('Select at least one post to delete.');
+        }
+
+        if (count($postIds) > 100) {
+            throw new InvalidArgumentException('No more than 100 posts can be deleted at once.');
+        }
+
+        $deleted = $this->posts->softDeleteMany($postIds);
+        $this->flushBlogCache();
+
+        return $deleted;
+    }
+
+    /**
      * @return array<int, array<string, mixed>>
      */
     public function categories(bool $includeInactive = true): array

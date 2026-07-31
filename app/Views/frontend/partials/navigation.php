@@ -31,12 +31,18 @@ $whatsapp = (string) ($site['whatsapp'] ?? '2340000000000');
     <?php foreach ($items as $item) : ?>
         <?php $isActive = $active === $item['key']; ?>
         <?php if ($item['key'] === 'services') : ?>
-            <div class="relative" @mouseenter="servicesOpen = true" @mouseleave="servicesOpen = false">
+            <div
+                class="relative"
+                @mouseenter="openServices()"
+                @mouseleave="scheduleServicesClose()"
+                @focusin="openServices()"
+                @focusout="if (!$el.contains($event.relatedTarget)) scheduleServicesClose()"
+            >
                 <a
                     href="/services"
                     class="site-header__nav-link nav-link inline-flex items-center gap-1 <?php echo $isActive ? 'nav-link-active' : ''; ?>"
                     @click="servicesOpen = !servicesOpen"
-                    @keydown.escape="servicesOpen = false"
+                    @keydown.escape.stop="closeServices(); $el.focus()"
                     :aria-expanded="servicesOpen.toString()"
                     aria-haspopup="true"
                     <?php echo $isActive ? 'aria-current="page"' : ''; ?>

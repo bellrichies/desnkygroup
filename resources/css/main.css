@@ -1227,6 +1227,16 @@
     @apply absolute left-1/2 top-full z-dropdown mt-3 w-[min(56rem,calc(100vw-2rem))] -translate-x-1/2 rounded-lg border border-gray-200 bg-white p-6 shadow-lg;
   }
 
+  /* Extend the panel's hover target through its visual top offset. */
+  .mega-panel::before {
+    content: "";
+    position: absolute;
+    right: 0;
+    bottom: 100%;
+    left: 0;
+    height: 0.75rem;
+  }
+
   .mega-item {
     @apply flex items-start gap-3 rounded-md p-3 transition-colors hover:bg-desnky-surface focus:outline-none focus-visible:ring-2 focus-visible:ring-desnky-primary;
   }
