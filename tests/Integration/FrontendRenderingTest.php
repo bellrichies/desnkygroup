@@ -42,6 +42,14 @@ class FrontendRenderingTest extends TestCase
         $this->assertStringContainsString('<meta name="viewport"', $html);
         $this->assertStringContainsString('application/ld+json', $html);
         $this->assertStringContainsString('Integrated Energy, Engineering, Procurement', $html);
+        $this->assertMatchesRegularExpression(
+            '~href="/assets/css/main\.css\?v=\d+"~',
+            $html
+        );
+        $this->assertMatchesRegularExpression(
+            '~src="/assets/js/ajax-handler\.js\?v=\d+"~',
+            $html
+        );
         $this->assertImagesHaveAltText($html);
     }
 
