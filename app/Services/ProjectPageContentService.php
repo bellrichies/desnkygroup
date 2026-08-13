@@ -248,6 +248,11 @@ class ProjectPageContentService
             'image' => (string) ($page['featured_image'] ?? ''),
             'schema' => [
                 SeoHelper::organizationSchema(),
+                SeoHelper::collectionPageSchema(
+                    (string) ($page['meta_title'] ?: $page['title']),
+                    (string) ($page['meta_description'] ?: $page['excerpt'] ?: ''),
+                    $baseUrl . '/projects'
+                ),
                 SeoHelper::breadcrumbSchema([
                     'Home' => $baseUrl . '/',
                     'Projects' => $baseUrl . '/projects',
@@ -279,6 +284,7 @@ class ProjectPageContentService
                     'description' => $project['summary'],
                     'image' => $project['image'],
                     'provider' => SeoHelper::organizationSchema(),
+                    'url' => $baseUrl . '/projects/' . $slug,
                 ],
                 SeoHelper::breadcrumbSchema([
                     'Home' => $baseUrl . '/',

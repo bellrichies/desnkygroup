@@ -100,7 +100,7 @@ class ShopPageContentService
             'cart' => $sections['cart'] ?? [],
             'items' => $items,
             'totals' => $this->totals($items),
-            'seo' => $this->pageSeo($page, '/shop/cart'),
+            'seo' => $this->pageSeo($page, '/shop/cart', 'noindex, follow'),
         ];
     }
 
@@ -120,7 +120,7 @@ class ShopPageContentService
             'checkout' => $sections['checkout'] ?? [],
             'items' => $items,
             'totals' => $this->totals($items),
-            'seo' => $this->pageSeo($page, '/shop/checkout'),
+            'seo' => $this->pageSeo($page, '/shop/checkout', 'noindex, follow'),
         ];
     }
 
@@ -320,18 +320,21 @@ class ShopPageContentService
      * @param array<string, mixed> $page
      * @return array<string, mixed>
      */
-    private function pageSeo(array $page, string $path): array
+    private function pageSeo(array $page, string $path, string $robots = 'index, follow'): array
     {
         $baseUrl = $this->baseUrl();
+        $description = (string) ($page['meta_description'] ?: $page['excerpt'] ?: '');
 
         return [
             'title' => (string) ($page['meta_title'] ?: $page['title']),
-            'description' => (string) ($page['meta_description'] ?: $page['excerpt'] ?: ''),
+            'description' => $description,
             'keywords' => (string) ($page['meta_keywords'] ?: ''),
             'canonical' => $baseUrl . $path,
             'image' => (string) ($page['featured_image'] ?? ''),
+            'robots' => $robots,
             'schema' => [
                 SeoHelper::organizationSchema(),
+                SeoHelper::collectionPageSchema((string) ($page['meta_title'] ?: $page['title']), $description, $baseUrl . $path),
                 SeoHelper::breadcrumbSchema([
                     'Home' => $baseUrl . '/',
                     'Shop' => $baseUrl . '/shop',
@@ -355,8 +358,10 @@ class ShopPageContentService
             'description' => 'Browse ' . strtolower($name) . ' available through Desnky Global Resources Ltd.',
             'keywords' => strtolower($name) . ', Desnky shop, Nigeria business supplies',
             'canonical' => $baseUrl . '/shop/category/' . $slug,
+            'image' => (string) \App\Config::get('seo.default_image', ''),
             'schema' => [
                 SeoHelper::organizationSchema(),
+                SeoHelper::collectionPageSchema($name . ' | Desnky Shop', 'Browse ' . strtolower($name) . ' available through Desnky Global Resources Ltd.', $baseUrl . '/shop/category/' . $slug),
                 SeoHelper::breadcrumbSchema([
                     'Home' => $baseUrl . '/',
                     'Shop' => $baseUrl . '/shop',

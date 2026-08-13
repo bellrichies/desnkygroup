@@ -2,7 +2,7 @@
 
 ## Reliable Agricultural Sourcing, Processing and Market-Linkage Services
 
-At **DESNKY Global Resources Limited**, we provide practical agro solutions that connect producers, processors, distributors, institutional buyers, retailers, and commercial users across local agricultural value chains.
+At DESNKY Agro product and food processing, we provide practical agro solutions that connect producers, processors, distributors, institutional buyers, retailers, and commercial users across local agricultural value chains.
 
 Our services cover agro product sourcing, quality-focused inspection, food processing support, supply coordination, market linkage, buyer matching, logistics planning, and marketplace facilitation.
 

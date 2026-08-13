@@ -52,6 +52,11 @@ class ShopController extends BaseController
                 'title' => 'Product Not Found',
                 'content' => '<p>The requested product could not be found.</p>',
                 'active' => 'shop',
+                'seo' => [
+                    'title' => 'Product Not Found | Desnky Shop',
+                    'description' => 'The requested Desnky Global Resources shop product could not be found.',
+                    'robots' => 'noindex, follow',
+                ],
             ]);
         }
 

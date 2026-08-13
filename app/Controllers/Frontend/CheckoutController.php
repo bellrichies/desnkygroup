@@ -2,6 +2,7 @@
 
 namespace App\Controllers\Frontend;
 
+use App\Config;
 use App\Controllers\BaseController;
 use App\Repositories\OrderRepository;
 use App\Repositories\ProductRepository;
@@ -122,6 +123,12 @@ class CheckoutController extends BaseController
             'title' => 'Order Confirmation',
             'active' => 'shop',
             'order' => $order,
+            'seo' => [
+                'title' => 'Order Confirmation | Desnky Shop',
+                'description' => 'Review your Desnky Global Resources shop order confirmation and next delivery steps.',
+                'canonical' => rtrim((string) Config::get('seo.base_url', 'https://www.desnkygroup.com'), '/') . '/shop/order-confirmation/' . rawurlencode((string) $order['order_number']),
+                'robots' => 'noindex, nofollow',
+            ],
         ]);
     }
 
@@ -178,6 +185,12 @@ class CheckoutController extends BaseController
             'reference' => $reference,
             'order' => $order,
             'searched' => $reference !== '',
+            'seo' => [
+                'title' => 'Track Your Desnky Shop Order',
+                'description' => 'Track a Desnky Global Resources shop order by entering your order reference.',
+                'canonical' => rtrim((string) Config::get('seo.base_url', 'https://www.desnkygroup.com'), '/') . '/track-order',
+                'robots' => 'noindex, follow',
+            ],
         ]);
     }
 

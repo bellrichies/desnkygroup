@@ -74,7 +74,7 @@ foreach (($site['social'] ?? []) as $key => $href) {
                     <li><a href="/services/engineering" class="hover:text-white">Engineering Services</a></li>
                     <li><a href="/services/energy-solutions" class="hover:text-white">Energy Solutions</a></li>
                     <li><a href="/services/procurement" class="hover:text-white">Procurement Services</a></li>
-                    <li><a href="/services/hse-safety" class="hover:text-white">Safety / HSE Services</a></li>
+                    <li><a href="/services/hse-safety" class="hover:text-white">Fire Safety / HSE Services</a></li>
                     <li><a href="/services/ict-solutions" class="hover:text-white">ICT Solutions</a></li>
                     <li><a href="/services/agro-food-processing" class="hover:text-white">Agro Products &amp; Food</a></li>
                 </ul>

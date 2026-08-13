@@ -21,8 +21,11 @@
     ?>
     <meta name="csrf-token" content="<?php echo htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8'); ?>">
     <script>document.documentElement.classList.remove('no-js');document.documentElement.classList.add('js');</script>
-    <link rel="icon" type="image/png" href="<?php echo $assetUrl('/assets/images/favicon.png'); ?>">
-    <link rel="apple-touch-icon" href="<?php echo $assetUrl('/assets/images/favicon.png'); ?>">
+    <link rel="icon" href="/favicon.ico" sizes="any">
+    <link rel="icon" type="image/png" sizes="48x48" href="https://www.desnkygroup.com/favicon-48x48.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192x192.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
     <?php echo $this->partial('frontend/partials/seo-meta', [
         'seo' => $seo ?? [],
         'title' => $title ?? 'Desnky Global Resources Ltd',

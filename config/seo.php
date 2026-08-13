@@ -8,6 +8,9 @@ return [
     'default_keywords' => 'engineering company in Nigeria, energy services Nigeria, procurement company Lagos, HSE services Nigeria, ICT solutions Nigeria, agro products Nigeria',
     'default_image' => 'https://www.desnkygroup.com/assets/images/og-default.webp',
     'logo' => 'https://www.desnkygroup.com/assets/images/logo.png',
+    'logo_width' => 500,
+    'logo_height' => 500,
+    'favicon' => 'https://www.desnkygroup.com/favicon-48x48.png',
     'address' => [
         'street' => env('SEO_ADDRESS_STREET', 'Lagos, Nigeria'),
         'locality' => env('SEO_ADDRESS_LOCALITY', 'Lagos'),

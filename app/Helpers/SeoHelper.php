@@ -101,12 +101,13 @@ class SeoHelper
             (string) Config::get('seo.default_description', '')
         );
         $keywords = self::value($seo, 'keywords', (string) Config::get('seo.default_keywords', ''));
-        $canonical = self::value($seo, 'canonical', self::currentUrl());
+        $canonical = self::absoluteUrl(self::value($seo, 'canonical', self::currentUrl()));
         $image = self::value(
             $seo,
             'image',
             (string) Config::get('seo.default_image', '')
         );
+        $image = self::absoluteUrl($image !== '' ? $image : (string) Config::get('seo.default_image', ''));
         $type = self::value($seo, 'type', 'website');
         $schema = self::normalizeSchemas($seo['schema'] ?? [self::organizationSchema(), self::websiteSchema()]);
         $siteName = (string) Config::get('seo.site_name', 'Desnky Global Resources Ltd');
@@ -123,10 +124,13 @@ class SeoHelper
             '<meta property="og:type" content="' . self::escape($type) . '">',
             '<meta property="og:url" content="' . self::escape($canonical) . '">',
             '<meta property="og:image" content="' . self::escape($image) . '">',
+            '<meta property="og:image:alt" content="' . self::escape((string) ($seo['image_alt'] ?? $title)) . '">',
+            '<meta property="og:locale" content="en_NG">',
             '<meta name="twitter:card" content="summary_large_image">',
             '<meta name="twitter:title" content="' . self::escape($title) . '">',
             '<meta name="twitter:description" content="' . self::escape($description) . '">',
             '<meta name="twitter:image" content="' . self::escape($image) . '">',
+            '<meta name="twitter:image:alt" content="' . self::escape((string) ($seo['image_alt'] ?? $title)) . '">',
         ];
 
         $googleVerification = (string) Config::get('seo.analytics.google_site_verification', '');
@@ -152,12 +156,16 @@ class SeoHelper
      */
     public static function organizationSchema(): array
     {
+        $logo = self::logoImageObject();
+
         return [
             '@context' => 'https://schema.org',
             '@type' => 'Organization',
+            '@id' => self::baseUrl() . '/#organization',
             'name' => 'Desnky Global Resources Ltd',
             'url' => self::baseUrl(),
-            'logo' => (string) Config::get('seo.logo', ''),
+            'logo' => $logo,
+            'image' => $logo,
             'email' => (string) Config::get('seo.contact.email', 'info@desnkygroup.com'),
             'telephone' => (string) Config::get('seo.contact.phone', '+234'),
             'address' => [
@@ -170,12 +178,12 @@ class SeoHelper
             'areaServed' => 'Nigeria',
             'sameAs' => (array) Config::get('seo.social_profiles', []),
             'knowsAbout' => [
-                'Engineering services',
-                'Energy solutions',
-                'Procurement',
-                'HSE and safety',
-                'ICT solutions',
-                'Agro products and food processing',
+                'Industrial engineering services in Nigeria',
+                'Renewable energy and power solutions',
+                'Procurement and supply chain management',
+                'HSE consulting and workplace safety',
+                'ICT infrastructure and business technology',
+                'Agro-allied products and food processing',
             ],
         ];
     }
@@ -188,9 +196,13 @@ class SeoHelper
         return [
             '@context' => 'https://schema.org',
             '@type' => 'WebSite',
+            '@id' => self::baseUrl() . '/#website',
             'name' => (string) Config::get('seo.site_name', 'Desnky Global Resources Ltd'),
             'url' => self::baseUrl(),
             'inLanguage' => 'en-NG',
+            'publisher' => [
+                '@id' => self::baseUrl() . '/#organization',
+            ],
         ];
     }
 
@@ -234,6 +246,22 @@ class SeoHelper
             'areaServed' => 'Nigeria',
             'serviceType' => $service['category'] ?? $service['title'] ?? 'Corporate services',
             'url' => self::baseUrl() . '/services/' . ($service['slug'] ?? ''),
+            'image' => self::absoluteUrl((string) ($service['image'] ?? Config::get('seo.default_image', ''))),
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public static function collectionPageSchema(string $name, string $description, string $url): array
+    {
+        return [
+            '@context' => 'https://schema.org',
+            '@type' => 'CollectionPage',
+            'name' => $name,
+            'description' => $description,
+            'url' => $url,
+            'isPartOf' => self::websiteSchema(),
         ];
     }
 
@@ -251,7 +279,7 @@ class SeoHelper
             'name' => $product['name'] ?? '',
             'description' => $product['description'] ?? '',
             'sku' => $product['sku'] ?? '',
-            'image' => $product['image'] ?? '',
+            'image' => self::absoluteUrl((string) ($product['image'] ?? Config::get('seo.default_image', ''))),
             'offers' => [
                 '@type' => 'Offer',
                 'priceCurrency' => 'NGN',
@@ -367,12 +395,46 @@ class SeoHelper
 
     private static function currentUrl(): string
     {
-        return rtrim(self::baseUrl(), '/') . ($_SERVER['REQUEST_URI'] ?? '/');
+        $path = parse_url((string) ($_SERVER['REQUEST_URI'] ?? '/'), PHP_URL_PATH);
+
+        return rtrim(self::baseUrl(), '/') . ($path ?: '/');
     }
 
     private static function baseUrl(): string
     {
         return rtrim((string) Config::get('seo.base_url', 'https://www.desnkygroup.com'), '/');
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private static function logoImageObject(): array
+    {
+        $logoUrl = self::absoluteUrl((string) Config::get('seo.logo', '/assets/images/logo.png'));
+
+        return [
+            '@type' => 'ImageObject',
+            '@id' => self::baseUrl() . '/#logo',
+            'url' => $logoUrl,
+            'contentUrl' => $logoUrl,
+            'caption' => (string) Config::get('seo.site_name', 'Desnky Global Resources Ltd') . ' logo',
+            'width' => (int) Config::get('seo.logo_width', 500),
+            'height' => (int) Config::get('seo.logo_height', 500),
+        ];
+    }
+
+    private static function absoluteUrl(string $url): string
+    {
+        $url = trim($url);
+        if ($url === '') {
+            return '';
+        }
+
+        if (preg_match('#^https?://#i', $url) === 1) {
+            return $url;
+        }
+
+        return self::baseUrl() . '/' . ltrim($url, '/');
     }
 
     private static function escape(string $value): string

@@ -59,10 +59,6 @@ class SitemapService extends BaseService
             $entries[] = $this->entry('/blog/category/' . $slug, '0.55', 'weekly');
         }
 
-        foreach ($this->blogTagSlugs() as $slug) {
-            $entries[] = $this->entry('/blog/tag/' . $slug, '0.45', 'weekly');
-        }
-
         return $this->uniqueEntries($entries);
     }
 
@@ -216,23 +212,6 @@ class SitemapService extends BaseService
     {
         try {
             $rows = (new BlogTaxonomyRepository(DatabaseFactory::make()))->categories(false);
-
-            return array_values(array_filter(array_map(
-                static fn (array $row): string => (int) ($row['post_count'] ?? 0) > 0 ? (string) ($row['slug'] ?? '') : '',
-                $rows
-            )));
-        } catch (Throwable) {
-            return [];
-        }
-    }
-
-    /**
-     * @return array<int, string>
-     */
-    private function blogTagSlugs(): array
-    {
-        try {
-            $rows = (new BlogTaxonomyRepository(DatabaseFactory::make()))->tags();
 
             return array_values(array_filter(array_map(
                 static fn (array $row): string => (int) ($row['post_count'] ?? 0) > 0 ? (string) ($row['slug'] ?? '') : '',

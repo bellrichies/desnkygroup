@@ -4,6 +4,7 @@
     # Keep the project-root deployment compatible with shared hosting while
     # avoiding repeated "public/public/..." rewrites on internal redirects.
     RewriteRule ^$ public/index.php [QSA,L]
+    RewriteRule ^(favicon\.ico|favicon-[0-9]+x[0-9]+\.png|apple-touch-icon\.png|android-chrome-512x512\.png|sitemap\.xml|sitemap\.xml\.gz|robots\.txt|ads\.txt)$ public/$1 [QSA,L]
     RewriteCond %{REQUEST_URI} !^/public(?:/|$)
     RewriteRule ^(.+)$ public/$1 [QSA,L]
 </IfModule>

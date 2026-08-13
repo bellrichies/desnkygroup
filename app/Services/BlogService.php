@@ -107,7 +107,7 @@ class BlogService extends BaseService
                 'total_pages' => $totalPages,
             ],
             'adPlacements' => $this->ads->enabledForContext('listing'),
-            'seo' => $this->listingSeo($contextTitle, $contextDescription, $query),
+            'seo' => $this->listingSeo($contextTitle, $contextDescription, $query, $categorySlug, $tagSlug),
         ];
     }
 
@@ -772,19 +772,38 @@ class BlogService extends BaseService
     /**
      * @return array<string, mixed>
      */
-    private function listingSeo(string $title, string $description, string $query): array
+    private function listingSeo(string $title, string $description, string $query, string $categorySlug, string $tagSlug): array
     {
-        $canonicalPath = $query === '' ? '/blog' : '/blog/search';
+        $canonicalPath = '/blog';
+        $robots = 'index, follow';
+        $keywords = 'Desnky blog, engineering insights Nigeria, procurement updates, HSE guidance, ICT business solutions';
+
+        if ($categorySlug !== '') {
+            $canonicalPath = '/blog/category/' . $categorySlug;
+            $keywords = strtolower($title) . ', Desnky insights, Nigeria business services';
+        }
+
+        if ($tagSlug !== '') {
+            $canonicalPath = '/blog/tag/' . $tagSlug;
+            $keywords = strtolower(ltrim($title, '#')) . ', Desnky blog topics, Nigeria industry insights';
+        }
+
+        if ($query !== '') {
+            $canonicalPath = '/blog/search';
+            $robots = 'noindex, follow';
+        }
 
         return [
             'title' => $title . ' | Desnky Blog',
             'description' => $description,
+            'keywords' => $keywords,
             'canonical' => $this->baseUrl() . $canonicalPath,
             'type' => 'website',
-            'robots' => $query === '' ? 'index, follow' : 'noindex, follow',
+            'robots' => $robots,
             'schema' => [
                 SeoHelper::organizationSchema(),
                 SeoHelper::websiteSchema(),
+                SeoHelper::collectionPageSchema($title . ' | Desnky Blog', $description, $this->baseUrl() . $canonicalPath),
                 SeoHelper::breadcrumbSchema([
                     'Home' => $this->baseUrl() . '/',
                     'Blog' => $this->baseUrl() . '/blog',

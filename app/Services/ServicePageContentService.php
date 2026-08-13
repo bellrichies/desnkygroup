@@ -275,6 +275,11 @@ class ServicePageContentService
             'image'       => (string) ($page['featured_image'] ?? ''),
             'schema'      => [
                 SeoHelper::organizationSchema(),
+                SeoHelper::collectionPageSchema(
+                    (string) ($page['meta_title'] ?: $page['title']),
+                    (string) ($page['meta_description'] ?: $page['excerpt'] ?: ''),
+                    "{$base}/services"
+                ),
                 SeoHelper::breadcrumbSchema([
                     'Home'     => "{$base}/",
                     'Services' => "{$base}/services",
@@ -324,6 +329,7 @@ class ServicePageContentService
             'canonical'   => $service['canonical_url'] ?: "{$base}/services/{$slug}",
             'image'       => $service['og_image'] ?: $service['image'],
             'schema'      => [
+                SeoHelper::organizationSchema(),
                 SeoHelper::serviceSchema($service),
                 SeoHelper::breadcrumbSchema([
                     'Home'           => "{$base}/",

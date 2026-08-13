@@ -10,6 +10,11 @@
  */
 
 // Public Routes
+$router->get('/sitemap.xml', 'Frontend\SeoAssetController@sitemap');
+$router->get('/sitemap.xml.gz', 'Frontend\SeoAssetController@sitemapGzip');
+$router->get('/robots.txt', 'Frontend\SeoAssetController@robots');
+$router->get('/ads.txt', 'Frontend\SeoAssetController@ads');
+
 $router->get('/', 'Frontend\HomeController@index');
 $router->get('/services', 'Frontend\ServiceController@index');
 $router->get('/services/{slug}', 'Frontend\ServiceController@show');
