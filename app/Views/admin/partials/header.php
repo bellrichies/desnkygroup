@@ -3,11 +3,17 @@
         <div class="flex min-w-0 items-center gap-3">
             <button
                 type="button"
-                class="inline-flex h-10 w-10 items-center justify-center rounded border border-gray-300 text-gray-700 lg:hidden"
+                class="admin-menu-toggle inline-flex h-11 w-11 items-center justify-center rounded border border-gray-300 text-gray-700 lg:hidden"
                 @click="sidebarOpen = true"
-                aria-label="Open sidebar"
+                :aria-expanded="sidebarOpen.toString()"
+                aria-controls="admin-mobile-navigation"
+                aria-label="Open navigation menu"
             >
-                <span class="block h-0.5 w-5 bg-current"></span>
+                <span aria-hidden="true" class="grid gap-1">
+                    <span class="block h-0.5 w-5 bg-current"></span>
+                    <span class="block h-0.5 w-5 bg-current"></span>
+                    <span class="block h-0.5 w-5 bg-current"></span>
+                </span>
             </button>
             <h1 class="truncate text-xl font-semibold text-gray-950">
                 <?php echo $this->escape((string) $title); ?>

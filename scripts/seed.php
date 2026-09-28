@@ -172,7 +172,7 @@ $homePage = [
     'slug' => 'home',
     'content' => 'CMS-managed home page assembled from page sections, services, projects, clients and public site settings.',
     'excerpt' => 'Integrated energy, engineering, procurement, safety, ICT and agro solutions for organizations in Nigeria.',
-    'meta_title' => 'Desnky Global Resources Ltd | Integrated Nigerian Services',
+    'meta_title' => 'Desnky Global Resources Ltd',
     'meta_description' => 'Desnky Global Resources Ltd delivers energy, engineering, procurement, HSE, ICT and agro solutions for businesses in Nigeria.',
     'meta_keywords' => 'engineering company in Nigeria, energy services Nigeria, procurement company Lagos, HSE services Nigeria, ICT solutions Nigeria, agro products Nigeria',
     'featured_image' => 'https://images.unsplash.com/photo-1504917595217-d4dc5ebe6122?auto=format&fit=crop&w=1800&q=80',
@@ -387,7 +387,7 @@ $aboutSections = [
         'overview',
         'A multi-sector partner focused on dependable execution',
         [
-            'eyebrow' => 'Company profile',
+            'eyebrow' => 'About us',
             'paragraphs' => [
                 'Desnky Global Resources Ltd is a Nigerian corporate services company helping public and private organizations move critical work from requirement to delivery. Our engagements span technical support, procurement coordination, HSE readiness, ICT enablement and agro-related supply needs.',
                 'The company is structured around practical problem solving: clarify the requirement, coordinate the right resources, communicate progress clearly and close each engagement with attention to documentation, quality and safety.',
@@ -771,7 +771,7 @@ $servicePageSections = [
     ],
     [
         'listing',
-        'Service Directory',
+        'Our Services',
         [
             'filters_label' => 'Service categories',
             'all_services_label' => 'All Services',

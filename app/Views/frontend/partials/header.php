@@ -29,6 +29,7 @@ $brandName = (string) ($site['name'] ?? 'Desnky Global Resources Ltd');
     }"
     @keydown.escape.window="mobileOpen = false; closeServices()"
     x-effect="document.body.style.overflow = mobileOpen ? 'hidden' : ''"
+    :class="{ 'site-header--nav-open': mobileOpen }"
     class="<?php echo $isHomeHeader
         ? 'site-header site-header--home site-header--transparent top-0 z-header border-b'
         : 'site-header sticky top-0 z-header border-b border-gray-200 bg-white/95 backdrop-blur'; ?>"

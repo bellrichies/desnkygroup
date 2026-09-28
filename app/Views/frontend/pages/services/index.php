@@ -25,7 +25,6 @@ $process = [
 <section class="section-band">
     <div class="container-page">
         <div class="mb-10 max-w-3xl" data-reveal>
-            <p class="eyebrow">Services</p>
             <h1 class="mt-3 section-heading"><?php echo $this->escape((string) ($listing['heading'] ?? $hero['heading'] ?? $title ?? 'Services')); ?></h1>
             <?php if ($introText !== '') : ?>
                 <p class="section-lead"><?php echo $this->escape($introText); ?></p>

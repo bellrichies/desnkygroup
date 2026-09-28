@@ -54,6 +54,8 @@ $primaryCategoryId = (int) ($post['primary_category_id'] ?? 0);
                     <div class="flex flex-wrap items-center justify-between gap-3">
                         <span class="text-sm font-semibold text-gray-700">Structured HTML content <span class="text-red-600">*</span></span>
                         <div class="flex flex-wrap gap-2" aria-label="Editor shortcuts">
+                            <button type="button" class="rounded border border-gray-300 px-2 py-1 text-xs font-semibold text-gray-700 hover:bg-gray-50" data-editor-inline="strong">Bold</button>
+                            <button type="button" class="rounded border border-gray-300 px-2 py-1 text-xs font-semibold text-gray-700 hover:bg-gray-50" data-editor-link>Link</button>
                             <?php foreach (['h2' => 'H2', 'h3' => 'H3', 'p' => 'P', 'ul' => 'UL', 'blockquote' => 'Quote', 'pre' => 'Code'] as $tag => $label) : ?>
                                 <button type="button" class="rounded border border-gray-300 px-2 py-1 text-xs font-semibold text-gray-700 hover:bg-gray-50" data-editor-wrap="<?php echo $this->escape($tag); ?>"><?php echo $label; ?></button>
                             <?php endforeach; ?>
@@ -222,15 +224,78 @@ $primaryCategoryId = (int) ($post['primary_category_id'] ?? 0);
         slugEdited = slugInput.value !== '';
     });
 
+    function selectedRange() {
+        return {
+            start: contentInput.selectionStart,
+            end: contentInput.selectionEnd,
+            text: contentInput.value.substring(contentInput.selectionStart, contentInput.selectionEnd)
+        };
+    }
+
+    function insertAtSelection(value, start, end) {
+        contentInput.setRangeText(value, start, end, 'end');
+        contentInput.focus();
+    }
+
+    function normalizeUrl(value) {
+        value = value.trim();
+        if (value === '' || value.startsWith('/') || value.startsWith('#') || /^[a-z][a-z0-9+.-]*:/i.test(value)) {
+            return value;
+        }
+
+        return 'https://' + value;
+    }
+
+    function isAllowedEditorUrl(value) {
+        return value.startsWith('/')
+            || value.startsWith('#')
+            || /^(https?:\/\/|mailto:|tel:)/i.test(value);
+    }
+
+    function escapeHtml(value) {
+        return value
+            .replace(/&/g, '&amp;')
+            .replace(/"/g, '&quot;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;');
+    }
+
+    document.querySelectorAll('[data-editor-inline]').forEach(function (button) {
+        button.addEventListener('click', function () {
+            const range = selectedRange();
+            const tag = button.dataset.editorInline;
+            const selected = range.text || 'Bold text';
+
+            insertAtSelection('<' + tag + '>' + selected + '</' + tag + '>', range.start, range.end);
+        });
+    });
+
+    document.querySelector('[data-editor-link]').addEventListener('click', function () {
+        const range = selectedRange();
+        const selected = range.text || 'Link text';
+        const url = normalizeUrl(window.prompt('Enter the link URL', 'https://') || '');
+
+        if (url === '') {
+            contentInput.focus();
+            return;
+        }
+
+        if (!isAllowedEditorUrl(url)) {
+            window.alert('Use http, https, mailto, tel, /internal-path, or #anchor links.');
+            contentInput.focus();
+            return;
+        }
+
+        insertAtSelection('<a href="' + escapeHtml(url) + '">' + selected + '</a>', range.start, range.end);
+    });
+
     document.querySelectorAll('[data-editor-wrap]').forEach(function (button) {
         button.addEventListener('click', function () {
             const tag = button.dataset.editorWrap;
-            const start = contentInput.selectionStart;
-            const end = contentInput.selectionEnd;
-            const selected = contentInput.value.substring(start, end) || (tag === 'ul' ? '<li>List item</li>' : 'Content');
+            const range = selectedRange();
+            const selected = range.text || (tag === 'ul' ? '<li>List item</li>' : 'Content');
             const wrapper = tag === 'pre' ? '<pre><code>' + selected + '</code></pre>' : '<' + tag + '>' + selected + '</' + tag + '>';
-            contentInput.setRangeText(wrapper, start, end, 'end');
-            contentInput.focus();
+            insertAtSelection(wrapper, range.start, range.end);
         });
     });
 })();

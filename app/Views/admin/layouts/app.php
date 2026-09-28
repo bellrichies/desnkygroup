@@ -11,7 +11,12 @@
     <?php if (str_starts_with($_SERVER['REQUEST_URI'] ?? '', '/admin/login')) : ?>
         <?php echo $content ?? ''; ?>
     <?php else : ?>
-        <div class="min-h-screen lg:flex" x-data="{ sidebarOpen: false }">
+        <div
+            class="min-h-screen lg:flex"
+            x-data="{ sidebarOpen: false }"
+            x-effect="document.body.classList.toggle('admin-nav-open', sidebarOpen)"
+            @keydown.escape.window="sidebarOpen = false"
+        >
             <?php echo $this->partial('admin/partials/sidebar', ['user' => $user ?? null]); ?>
 
             <div class="flex min-h-screen flex-1 flex-col lg:pl-72">
@@ -51,7 +56,7 @@
             </div>
         </div>
 
-        <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+        <script defer src="/assets/js/lib/alpine.min.js"></script>
     <?php endif; ?>
 </body>
 </html>

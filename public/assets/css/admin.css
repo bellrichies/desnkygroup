@@ -47,6 +47,14 @@ body.admin-body ::selection {
     color: #172554;
 }
 
+[x-cloak] {
+    display: none !important;
+}
+
+body.admin-nav-open {
+    overflow: hidden;
+}
+
 /* Shell */
 .admin-body > .min-h-screen > aside,
 .admin-body aside[aria-label="Admin navigation"] {
@@ -104,6 +112,18 @@ body.admin-body ::selection {
     box-shadow: 0 0 0 4px rgb(255 255 255 / 14%);
 }
 
+.admin-sidebar {
+    will-change: transform;
+}
+
+.admin-sidebar__close {
+    transition: background-color .16s ease, color .16s ease, border-color .16s ease;
+}
+
+.admin-sidebar-backdrop {
+    will-change: opacity;
+}
+
 .admin-body header {
     min-height: 72px;
     border-color: rgb(203 213 225 / 70%) !important;
@@ -114,6 +134,11 @@ body.admin-body ::selection {
 
 .admin-body header > div {
     height: 72px !important;
+}
+
+.admin-menu-toggle {
+    background: #fff;
+    box-shadow: 0 1px 2px rgb(15 23 42 / 5%);
 }
 
 .admin-main {
@@ -605,6 +630,36 @@ body.admin-body ::selection {
 }
 
 @media (max-width: 1023px) {
+    .admin-body aside[aria-label="Admin navigation"] {
+        border-radius: 0 18px 18px 0;
+        box-shadow: 24px 0 70px rgb(2 8 23 / 30%);
+    }
+
+    .admin-body aside[aria-label="Admin navigation"] > div > div:first-child {
+        min-height: 76px;
+        padding-inline: 1rem !important;
+    }
+
+    .admin-body aside[aria-label="Admin navigation"] nav {
+        padding: 1rem .85rem 1.5rem !important;
+    }
+
+    .admin-body aside[aria-label="Admin navigation"] nav > div {
+        border-bottom: 1px solid rgb(255 255 255 / 7%);
+        padding-bottom: .95rem;
+    }
+
+    .admin-body aside[aria-label="Admin navigation"] nav > div:last-child {
+        border-bottom: 0;
+        padding-bottom: 0;
+    }
+
+    .admin-body aside[aria-label="Admin navigation"] nav a {
+        min-height: 48px;
+        padding: .72rem .85rem !important;
+        font-size: .94rem !important;
+    }
+
     .admin-main form.grid > aside {
         position: static;
     }
